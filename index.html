@@ -45,11 +45,26 @@
   white-space: nowrap; font-size: 9px; color: #f5edee; letter-spacing: .15em;
   text-shadow: 0 1px 10px #000;
 }
-.glb-live .detail-panel {
-  width: min(26%, 325px); left: 5%; top: 50%; transform: translateY(-47%);
-  text-shadow: 0 2px 20px #000;
+.stage:not([data-state="gallery"]) .detail-panel {
+  width: min(88%, 480px); left: 50%; top: auto;
+  bottom: max(65px, 8svh); transform: translateX(-50%);
+  text-align: center; text-shadow: 0 2px 15px #000;
 }
-.glb-live .detail-panel h2 { font-size: clamp(42px, 6vw, 90px); }
+.detail-panel h2 { font-size: clamp(40px, 5.4vw, 74px); white-space: normal; }
+.detail-panel .catalogue { margin-bottom: 8px; }
+.detail-panel .scent-desc { max-width: 370px; margin: 0 auto 10px; }
+.detail-panel .notes {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+  max-width: 440px; margin: 10px auto 0;
+}
+.detail-panel .notes div { display: grid; gap: 3px; padding: 6px 0 0; }
+.detail-panel .notes dd { text-align: center; }
+.detail-panel .price { margin: 10px 0; }
+.detail-panel .product-actions, .detail-panel .details-sub { justify-content: center; }
+.detail-panel .details-sub { margin-top: 12px; }
+.detail-frame { left: 24%; top: 7%; width: 52%; height: 55%; }
+.hero-product { top: 8%; bottom: 40%; }
+.side-quote { display: none; }
 .glb-live .gallery-intro { left: 4.5%; bottom: 12%; max-width: 25%; }
 .glb-live .gallery-intro h1 { font-size: clamp(31px, 3.45vw, 61px); }
 .glb-live .gallery-intro p,
@@ -60,12 +75,10 @@
               linear-gradient(180deg, rgba(5,4,8,.6), transparent 20%);
 }
 .glb-live .stage:not([data-state="gallery"])::after {
-  background: linear-gradient(90deg, rgba(5,4,8,.96), rgba(5,4,8,.68) 24%, transparent 49%),
-              linear-gradient(0deg, rgba(5,4,8,.9), transparent 20%),
-              linear-gradient(180deg, rgba(5,4,8,.59), transparent 18%);
+  background: linear-gradient(0deg, #08070b 16%, rgba(8,7,11,.86) 30%, transparent 49%),
+              linear-gradient(180deg, rgba(5,4,8,.58), transparent 18%);
 }
 @media (max-width: 900px) and (min-width: 661px) {
-  .glb-live .detail-panel { width: 29%; }
   .glb-live .gallery-bay.rose { left: 22%; }
   .glb-live .gallery-bay.galet { left: 56%; }
 }
@@ -78,20 +91,19 @@
   .glb-live .gallery-bay .bay-caption { bottom: 8%; font-size: 8px; }
   .glb-live .gallery-intro { left: 6%; top: auto; bottom: 15%; max-width: 88%; }
   .glb-live .gallery-intro h1 { font-size: clamp(36px, 10.9vw, 55px); }
-  .glb-live .detail-panel {
-    left: 6%; width: 88%; top: auto; bottom: max(68px, 9svh); transform: none;
+  .stage:not([data-state="gallery"]) .detail-panel {
+    width: min(88%, 410px); bottom: max(calc(76px + env(safe-area-inset-bottom)), 10svh);
+    transform: translateX(-50%) !important;
   }
-  .glb-live .detail-panel h2 { margin-top: 6px; font-size: clamp(35px, 9vw, 54px); }
-  .glb-live .detail-panel .scent-desc { display: block; margin: 5px 0 9px; }
-  .glb-live .detail-panel .notes { margin: 7px 0; }
-  .glb-live .detail-panel .details-sub { display: none; }
+  .detail-panel h2 { margin: 4px 0 7px; font-size: clamp(44px, 12vw, 64px); }
+  .detail-panel .scent-desc { display: block; margin: 0 auto 8px; }
+  .detail-panel .details-sub, .detail-panel .notes { display: none; }
+  .detail-frame { left: 8%; top: 13%; width: 84%; height: 41%; }
+  .hero-product { top: 14%; bottom: 50%; }
   .glb-live .stage:not([data-state="gallery"])::after {
-    background: linear-gradient(0deg, #08070b 22%, rgba(8,7,11,.78) 30%, transparent 45%),
-                linear-gradient(180deg, rgba(5,4,8,.6), transparent 20%);
+    background: linear-gradient(0deg, #08070b 24%, rgba(8,7,11,.84) 37%, transparent 50%),
+                linear-gradient(180deg, rgba(5,4,8,.72), transparent 18%);
   }
-}
-@media (max-width: 660px) and (max-height: 700px) {
-  .glb-live .detail-panel .notes { display: none; }
 }
 </style>
 </head>
@@ -151,6 +163,6 @@ $('#inspectBtn').onclick=open3D;$('#closeViewer').onclick=close3D;viewer.addEven
 renderBag();updateScroll();window.addEventListener('load',()=>setTimeout(()=>$('#loader').classList.add('out'),450));setTimeout(()=>$('#loader').classList.add('out'),1800);
 })();
 </script>
-<script type="module" src="showroom-webgl.js?v=2"></script>
+<script type="module" src="showroom-webgl.js?v=4"></script>
 </body>
 </html>

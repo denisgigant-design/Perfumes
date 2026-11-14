@@ -11,6 +11,6 @@ The bag is a local demo. It saves quantities on the device and does not process 
 ## Models and renderer
 
 - Rose Lune uses a reworked [Grab3D Perfume Bottle](https://grab3d.com/models/props/perfume-bottle/). The source is CC0. The ATELIER version uses pink crystal and perfume, an obsidian cap, and a new rose-gold collar.
-- Galet is an original smooth mesh with a rounded rectangular glass flacon, green perfume, and a polished ivory cap. Its printed label is drawn as a texture in the showroom.
-- To rebuild both GLBs, download the stock Grab3D GLB and run `blender -b --python build-bottles.py -- /path/to/perfume-bottle.glb .` with Blender 4.3.
+- Galet uses the supplied Higgsfield Tripo model, simplified for mobile with its original texture maps. The showroom turns the original label toward the camera and gives Galet a stronger fill during its close-up. The older procedural Galet model is kept in the source files.
+- To rebuild the original GLBs, download the stock Grab3D GLB and run `blender -b --python build-bottles.py -- /path/to/perfume-bottle.glb .` with Blender 4.3.
 - The bundled renderer uses Three.js r170, its GLTFLoader, and RoomEnvironment. Its MIT license is included in `LICENSE-three.txt`.
