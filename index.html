@@ -37,8 +37,8 @@
 .glb-live .gallery-bay img,
 .glb-live .gallery-bay .bay-light { display: none; }
 .glb-live .gallery-bay { width: 22%; height: 76%; top: 13%; overflow: visible; }
-.glb-live .gallery-bay.rose { left: 25%; }
-.glb-live .gallery-bay.galet { left: 53%; }
+.glb-live .gallery-bay.rose { left: 28%; }
+.glb-live .gallery-bay.galet { left: 50%; }
 .glb-live .gallery-bay .bay-n { display: none; }
 .glb-live .gallery-bay .bay-caption {
   display: block; position: absolute; left: 50%; bottom: 4%; transform: translateX(-50%);
@@ -86,7 +86,7 @@
   .glb-live .detail-panel .notes { margin: 7px 0; }
   .glb-live .detail-panel .details-sub { display: none; }
   .glb-live .stage:not([data-state="gallery"])::after {
-    background: linear-gradient(0deg, #08070b 25%, rgba(8,7,11,.88) 35%, transparent 58%),
+    background: linear-gradient(0deg, #08070b 22%, rgba(8,7,11,.78) 30%, transparent 45%),
                 linear-gradient(180deg, rgba(5,4,8,.6), transparent 20%);
   }
 }
@@ -151,6 +151,6 @@ $('#inspectBtn').onclick=open3D;$('#closeViewer').onclick=close3D;viewer.addEven
 renderBag();updateScroll();window.addEventListener('load',()=>setTimeout(()=>$('#loader').classList.add('out'),450));setTimeout(()=>$('#loader').classList.add('out'),1800);
 })();
 </script>
-<script type="module" src="showroom-webgl.js"></script>
+<script type="module" src="showroom-webgl.js?v=2"></script>
 </body>
 </html>

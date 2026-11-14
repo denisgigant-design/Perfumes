@@ -2,8 +2,8 @@ import {
   ACESFilmicToneMapping, AmbientLight, Box3, BoxGeometry, CanvasTexture, Color,
   DoubleSide, Group, MathUtils, Mesh, MeshBasicMaterial, MeshStandardMaterial,
   PerspectiveCamera, PlaneGeometry, PMREMGenerator, Scene, SpotLight, SRGBColorSpace,
-  Vector3, WebGLRenderer, GLTFLoader, RoomEnvironment
-} from './three-showroom.js';
+  Vector3, WebGLRenderer, GLTFLoader, RoomEnvironment, Reflector
+} from './three-showroom.js?v=2';
 
 const stage = document.querySelector('#stage');
 const mount = document.querySelector('#showroom3d');
@@ -65,6 +65,9 @@ const contact = makeTexture(128, 128, (ctx, w) => {
 const mineral = new MeshStandardMaterial({map: stone, color: '#aaa2ad', roughness: .87});
 const inside = new MeshStandardMaterial({map: stone, color: '#d6cbd4', roughness: .79});
 const casing = new MeshStandardMaterial({map: stone, color: '#504952', metalness: .19, roughness: .5});
+const polishedStone = new MeshStandardMaterial({
+  map: stone, color: '#c5b9c9', metalness: .22, roughness: .32
+});
 const trim = new MeshStandardMaterial({color: '#282225', metalness: .57, roughness: .37});
 const ledge = new MeshStandardMaterial({map: stone, color: '#8c8187', metalness: .15, roughness: .55});
 
@@ -82,6 +85,8 @@ const backZ = -2.52;
 const frontZ = .02;
 const centerZ = (backZ + frontZ) / 2;
 const depth = frontZ - backZ;
+const wallReflectors = [];
+const lampWhite = new Color('#fff4ed');
 const products = [
   {key: 'rose', file: 'rose-lune.glb', x: -1.60, tone: '#ffb0ce', height: 2.79},
   {key: 'galet', file: 'galet.glb', x: 1.60, tone: '#e6f8d3', height: 2.77}
@@ -95,13 +100,66 @@ box(cabinet, casing, [.68, 5.2, .46], [0, 0, .11]);
 box(cabinet, trim, [40, .016, .06], [0, -2.50, .61]);
 box(cabinet, mineral, [60, .18, 26], [0, -3.08, 4]);
 
+// Sample the neighbouring surfaces through a mirrored camera, then blend the
+// blurred highlights into the stone instead of replacing its texture.
+function addSideReflection(group, sign) {
+  const wall = new Reflector(new PlaneGeometry(depth - .10, bayHeight - .17), {
+    color: 0x8e7f91, clipBias: .003, textureWidth: 384, textureHeight: 384, multisample: 0
+  });
+  wall.rotation.y = -sign * Math.PI / 2;
+  wall.position.set(sign * (bayWidth / 2 - .102), -.02, centerZ - .015);
+  wall.material.transparent = true;
+  wall.material.depthWrite = false;
+  wall.material.uniforms.strength = {value: 0};
+  wall.material.fragmentShader = wall.material.fragmentShader
+    .replace('uniform vec3 color;', 'uniform vec3 color; uniform float strength;')
+    .replace('vec4 base = texture2DProj( tDiffuse, vUv );', `
+      vec2 uv = vUv.xy / vUv.w;
+      vec2 spread = vec2(.009, .006);
+      vec4 base = texture2D(tDiffuse, uv) * .34
+        + (texture2D(tDiffuse, uv + spread) + texture2D(tDiffuse, uv - spread)
+        + texture2D(tDiffuse, uv + spread * vec2(1., -1.))
+        + texture2D(tDiffuse, uv + spread * vec2(-1., 1.))) * .165;
+      float highlight = max(max(base.r, base.g), base.b);
+    `)
+    .replace('blendOverlay( base.rgb, color ), 1.0',
+      'blendOverlay( base.rgb, color ), strength * smoothstep(.014, .43, highlight)');
+
+  const renderReflection = wall.onBeforeRender.bind(wall);
+  wall.onBeforeRender = (renderer, scene, activeCamera) => {
+    if (activeCamera !== camera || renderer.getRenderTarget()) return;
+    const others = wallReflectors.filter(panel => panel !== wall && panel.visible);
+    for (const panel of others) panel.visible = false;
+    try {
+      renderReflection(renderer, scene, activeCamera);
+    } finally {
+      for (const panel of others) panel.visible = true;
+    }
+  };
+  wall.visible = false;
+  wallReflectors.push(wall);
+  group.add(wall);
+  return wall;
+}
+
+const lampHalo = makeTexture(256, 128, (ctx, width, height) => {
+  ctx.translate(width / 2, height / 2);
+  ctx.scale(width / 2, height / 2);
+  const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+  gradient.addColorStop(0, 'rgba(255,255,255,.74)');
+  gradient.addColorStop(.45, 'rgba(255,255,255,.29)');
+  gradient.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(-1, -1, 2, 2);
+});
+
 function addBay(product) {
   const group = new Group();
   group.position.x = product.x;
   cabinet.add(group);
   box(group, inside, [bayWidth, bayHeight, .15], [0, 0, backZ]);
-  box(group, mineral, [.20, bayHeight, depth], [-bayWidth / 2, 0, centerZ]);
-  box(group, mineral, [.20, bayHeight, depth], [bayWidth / 2, 0, centerZ]);
+  box(group, polishedStone, [.20, bayHeight, depth], [-bayWidth / 2, 0, centerZ]);
+  box(group, polishedStone, [.20, bayHeight, depth], [bayWidth / 2, 0, centerZ]);
   box(group, mineral, [bayWidth, .16, depth], [0, bayHeight / 2, centerZ]);
   box(group, ledge, [bayWidth, .16, depth], [0, shelfY - .08, centerZ]);
   for (const sign of [-1, 1]) {
@@ -129,13 +187,20 @@ function addBay(product) {
   wallGlow.position.set(0, 0, backZ + .082);
   group.add(wallGlow);
 
-  const light = new SpotLight(product.tone, 21, 9, .61, .77, 2);
-  light.position.set(0, 2.28, -.65);
-  light.target.position.set(0, -1.9, -1.50);
+  const light = new SpotLight(product.tone, 31, 7.3, .78, .63, 2);
+  light.position.set(0, 2.20, -.42);
+  light.target.position.set(0, -1.7, -1.55);
   group.add(light, light.target);
   const bulb = new MeshBasicMaterial({color: product.tone, toneMapped: false});
-  box(group, trim, [.72, .065, .26], [0, 2.32, -.65]);
-  box(group, bulb, [.52, .026, .16], [0, 2.274, -.65]);
+  box(group, trim, [.94, .095, .42], [0, 2.289, -.41]);
+  box(group, bulb, [.75, .046, .28], [0, 2.224, -.41]);
+  const bloomMat = new MeshBasicMaterial({
+    map: lampHalo, color: product.tone, transparent: true, depthWrite: false, toneMapped: false
+  });
+  const lampBloom = new Mesh(new PlaneGeometry(1.09, .38), bloomMat);
+  lampBloom.position.set(0, 2.216, -.239);
+  group.add(lampBloom);
+  const sides = [-1, 1].map(sign => addSideReflection(group, sign));
   const shadow = new Mesh(
     new PlaneGeometry(2.12, 1.39),
     new MeshBasicMaterial({map: contact, transparent: true, depthWrite: false})
@@ -154,7 +219,7 @@ function addBay(product) {
   const anchor = new Group();
   anchor.position.set(0, shelfY + .012, -1.24);
   group.add(anchor);
-  Object.assign(product, {group, anchor, light, glowMat, bulb, cover});
+  Object.assign(product, {group, anchor, light, glowMat, bulb, bloomMat, sides, cover});
 }
 
 products.forEach(addBay);
@@ -218,11 +283,11 @@ closeup.background = new Color('#121119');
 const closeupCamera = new PerspectiveCamera(34, 1, .07, 35);
 const inspection = new Group();
 closeup.add(inspection);
-let renderer, modalBottle, inspected = false, zoom = 6.7;
+let renderer, modalBottle, inspected = false, reflectiveWalls = false, zoom = 6.7;
 const pointers = new Map();
 let width = 0, height = 0, needsRender = true, settled = false;
 let startedAt = 0, checkpoint, destination;
-const shot = {x: 0, y: 0, z: 13.7, rose: 0, galet: 0};
+const shot = {x: 0, y: 0, z: 14.4, shift: 0, rose: 0, galet: 0};
 const angle = Math.tan(MathUtils.degToRad(camera.fov / 2));
 
 function frameTarget() {
@@ -230,18 +295,17 @@ function frameTarget() {
   const aspect = Math.max(.2, mount.clientWidth / Math.max(1, mount.clientHeight));
   const mobile = matchMedia('(max-width: 660px)').matches;
   const compact = mount.clientHeight < 700;
-  const focusHeight = mobile ? (compact ? .48 : .54) : .86;
-  const closeDistance = Math.max(bayHeight / (2 * angle * focusHeight) + backZ + 1.08,
-    1.6 / (angle * aspect * (mobile ? .91 : .72)) - 1.24);
-  const galleryDistance = Math.max(mobile ? 8.9 : 11.6, 3.45 / (angle * aspect * (mobile ? .94 : .78)));
-  const z = selected ? closeDistance : galleryDistance;
-  const halfWidth = z * angle * aspect;
-  const halfHeight = z * angle;
-  const frameY = mobile ? (selected ? .34 : .42) : (selected ? .51 : .49);
+  const focusHeight = mobile ? (compact ? .65 : .71) : 1.08;
+  const distanceForHeight = bayHeight / (2 * angle * focusHeight) + backZ + .95;
+  const distanceForWidth = 1.13 / (angle * aspect * (mobile ? .87 : .70)) - .62;
+  const galleryDistance = Math.max(14.0, 3.55 / (angle * aspect * (mobile ? .86 : .73)));
+  const z = selected ? Math.max(distanceForHeight, distanceForWidth) : galleryDistance;
+  const frameY = mobile ? (selected ? .31 : .43) : (selected ? .36 : .50);
   return {
-    x: (selected?.x ?? 0) - halfWidth * (selected && !mobile ? .29 : 0),
-    y: -.02 + (frameY * 2 - 1) * halfHeight,
+    x: selected?.x ?? 0,
+    y: (frameY * 2 - 1) * z * angle,
     z,
+    shift: selected && !mobile ? -.32 : 0,
     rose: selected?.key === 'rose' ? 1 : 0,
     galet: selected?.key === 'galet' ? 1 : 0
   };
@@ -280,17 +344,26 @@ function render(time) {
     return;
   }
   if (settled) return;
-  const elapsed = reducedMotion.matches ? 1 : Math.min(1, (time - startedAt) / 1120);
+  const elapsed = reducedMotion.matches ? 1 : MathUtils.clamp((time - startedAt) / 1050, 0, 1);
   const eased = elapsed < .5 ? 4 * elapsed ** 3 : 1 - (-2 * elapsed + 2) ** 3 / 2;
   for (const key of Object.keys(shot)) shot[key] = MathUtils.lerp(checkpoint[key], destination[key], eased);
   camera.position.set(shot.x, shot.y, shot.z);
+  camera.filmOffset = shot.shift * angle * camera.aspect * camera.getFilmWidth();
+  camera.updateProjectionMatrix();
   const activeLight = shot.rose + shot.galet;
   for (const product of products) {
     const emphasis = shot[product.key];
     const fade = Math.max(0, activeLight - emphasis);
-    product.light.intensity = (24 + emphasis * 44) * (1 - fade * .96);
-    product.glowMat.opacity = (.30 + emphasis * .34) * (1 - fade * .985);
-    product.bulb.color.set(product.tone).multiplyScalar(1 - fade * .94);
+    const power = 1 - fade;
+    product.light.intensity = (33 + emphasis * 119) * power;
+    product.glowMat.opacity = (.34 + emphasis * .30) * power;
+    product.bloomMat.opacity = (.65 + emphasis * .35) * power;
+    product.bulb.color.set(product.tone).lerp(lampWhite, .36 + emphasis * .55);
+    product.bulb.color.multiplyScalar((.88 + emphasis * .38) * power);
+    for (const side of product.sides) {
+      side.visible = reflectiveWalls && emphasis > .13 && fade < .45;
+      side.material.uniforms.strength.value = emphasis * .64;
+    }
     product.anchor.visible = fade < .83;
     product.group.visible = fade < .996;
     product.cover.visible = fade > .001;
@@ -373,6 +446,7 @@ function fallback(error) {
 async function start() {
   try {
     renderer = new WebGLRenderer({antialias: true, powerPreference: 'high-performance'});
+    reflectiveWalls = renderer.extensions.has('EXT_color_buffer_float');
     renderer.setPixelRatio(Math.min(devicePixelRatio, innerWidth <= 660 ? 1.25 : 1.5));
     renderer.toneMapping = ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.33;
