@@ -117,7 +117,7 @@
   }
   function buffer(data,location,size){const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);gl.enableVertexAttribArray(location);gl.vertexAttribPointer(location,size,gl.FLOAT,false,0,0);}
   async function loadModel(key){
-    const response=await fetch('assets/'+(key==='rose'?'rose-lune':'galet')+'.glb');if(!response.ok)throw Error('GLB fetch: '+response.status);
+    const response=await fetch(key==='rose' ? 'rose-lune.glb' : 'galet.glb');if(!response.ok)throw Error('GLB fetch: '+response.status);
     const {json:j,bin}=parseGlb(await response.arrayBuffer());
     const textures=[];
     for(const image of (j.images||[])){
