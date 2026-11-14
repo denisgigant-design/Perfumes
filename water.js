@@ -23,13 +23,13 @@ const waterShader = {
     void main() {
       #include <logdepthbuf_fragment>
       vec2 p = vSurface.xz;
-      float a = sin(dot(p, vec2(4.6, 7.2)) + clock * 1.34);
-      float b = sin(dot(p, vec2(-8.1, 3.7)) - clock * 1.24 + a * 0.5);
-      float c = sin(dot(p, vec2(12.8, 8.2)) + clock * 1.98);
-      vec2 ripple = vec2(a + c * 0.16, b + c * 0.24);
+      float a = sin(dot(p, vec2(2.4, 7.8)) + clock * 2.2);
+      float b = sin(dot(p, vec2(-5.1, 6.7)) - clock * 1.48 + a * 0.72);
+      float c = sin(dot(p, vec2(8.9, 13.2)) + clock * 2.87);
+      vec2 ripple = vec2(a * 0.6 + c * 0.22, b + c * 0.37);
       vec3 eye = normalize(cameraPosition - vSurface);
       float grazing = pow(1.0 - clamp(eye.y, 0.0, 1.0), 3.0);
-      vec2 uv = vUv.xy / vUv.w + ripple * (0.0105 + grazing * 0.006);
+      vec2 uv = vUv.xy / vUv.w + ripple * (0.0165 + grazing * 0.014);
       vec2 edge = min(uv, 1.0 - uv);
       float valid = smoothstep(0.0, 0.076, min(edge.x, edge.y));
       vec3 mirrored = texture2D(tDiffuse, clamp(uv, 0.0, 1.0)).rgb * valid;
@@ -37,13 +37,14 @@ const waterShader = {
       float slope = smoothstep(0.56, 0.97, a * b * 0.66 + c * 0.24);
       for (int i = 0; i < 4; ++i) {
         vec2 q = p - pools[i].xy;
-        float drop = exp(-dot(q, q) * 0.28);
+        vec2 streak = vec2(q.x * 0.62, q.y * 0.92);
+        float drop = exp(-dot(streak, streak) * 0.24);
         float shine = pow(max(0.0, 0.5 + 0.5 * sin(14.0 * length(q) - clock * 1.6 + b)), 4.0);
-        glints += poolColors[i] * drop * pools[i].z * (0.014 + 0.075 * shine * slope);
+        glints += poolColors[i] * drop * pools[i].z * (0.019 + 0.128 * shine * slope);
       }
-      float fade = 1.0 - smoothstep(8.0, 21.0, length(p));
+      float fade = 1.0 - smoothstep(14.0, 34.0, length(p));
       vec3 surface = vec3(0.0018, 0.0028, 0.0041) + glints;
-      surface += mirrored * (0.39 + 0.42 * grazing);
+      surface += mirrored * (0.57 + 0.42 * grazing);
       gl_FragColor = vec4(surface * fade, 1.0);
       #include <tonemapping_fragment>
       #include <colorspace_fragment>
@@ -52,8 +53,8 @@ const waterShader = {
 };
 
 export function makeWater(renderer, compact) {
-  const size = compact ? 288 : 640;
-  const surface = new Reflector(new PlaneGeometry(44, 44), {
+  const size = compact ? 336 : 768;
+  const surface = new Reflector(new PlaneGeometry(72, 62), {
     textureWidth: size, textureHeight: size, multisample: 0, clipBias: 0.002, shader: waterShader
   });
   // UnsignedByteType keeps the reflection framebuffer available on mobile GPUs without float colour targets.

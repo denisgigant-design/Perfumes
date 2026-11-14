@@ -203,3 +203,52 @@
   .scene-nav .progresstrack button::before { width: 9px; }
   .scene-nav { gap: 6px; }
 }
+
+/* The selected fragrance has one clear block of details. */
+.stage[data-state]:not([data-state="gallery"]) .detail-panel {
+  width: min(90%, 640px);
+  max-width: 640px;
+  bottom: max(66px, 8.5svh);
+}
+.stage[data-state]:not([data-state="gallery"]) .detail-panel h2 {
+  font-size: clamp(37px, 7.5vw, 86px);
+  font-weight: 600;
+  letter-spacing: -.025em;
+  margin: 0 0 8px;
+}
+.detail-panel .scent-desc {
+  max-width: none;
+  margin: 0 auto 11px;
+  font-size: clamp(14px, 1.6vw, 19px);
+  color: #eee5da;
+}
+.detail-panel .detail-price {
+  display: inline-flex; align-items: center; gap: 12px;
+  min-height: 43px; margin: 0; padding: 0 16px;
+  color: #fdf6ec; background: #171619d9; border: 1px solid #ffffff38;
+  border-radius: 100px; font: 500 clamp(15px, 1.9vw, 20px)/1 sans-serif;
+}
+.detail-price:hover { background: #312b2e; }
+.detail-price span:last-child { color: #e3ceac; font-size: 16px; }
+.detail-inspect {
+  position: absolute; right: clamp(16px, 4vw, 60px); top: max(98px, 13svh);
+  z-index: 5; min-width: 44px; min-height: 44px;
+}
+.stage[data-state="gallery"] .detail-inspect { visibility: hidden; }
+.glb-live .stage:not([data-state="gallery"]) .product-drag { top: 11%; height: 50%; }
+@media (max-width: 660px) {
+  .stage[data-state]:not([data-state="gallery"]) .detail-panel {
+    bottom: max(69px, 10svh); width: 92%;
+  }
+  .stage[data-state]:not([data-state="gallery"]) .detail-panel h2 {
+    font-size: clamp(36px, 9.4vw, 61px);
+  }
+  .detail-inspect { top: max(108px, 16svh); }
+  .glb-live .stage:not([data-state="gallery"]) .product-drag { top: 16%; height: 44%; }
+}
+@media (max-height: 610px) {
+  .stage[data-state]:not([data-state="gallery"]) .detail-panel { bottom: 51px; }
+  .stage[data-state]:not([data-state="gallery"]) .detail-panel h2 {
+    font-size: clamp(33px, 7vw, 54px);
+  }
+}

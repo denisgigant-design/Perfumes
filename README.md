@@ -1,8 +1,10 @@
 # ATELIER — 3D perfume showroom
 
-A four-fragrance showroom for **Galet**, **Rose Lune**, **Sillage Bleu**, and **Ambre Doré**. Scrolling turns the camera through a continuous full orbit around the collection. The four checkpoints move along the same path. Tapping a bottle opens its close-up in place and starts a 360° spin. Scroll to resume the orbit from where you left it, or drag the bottle to rotate it in the close-up.
+The showroom features **Galet**, **Rose Lune**, **Sillage Bleu**, and **Ambre Doré**. Scroll to fly between four camera checkpoints. The platforms are fixed and each bottle gently floats and tilts. Tapping a bottle takes you into its brighter close-up and plays its own 360° turn. Drag to rotate it or open the separate 3D viewer.
 
-An animated water shader distorts a planar reflection of the bottles and raised platforms. Tapping a product increases its hidden key and coloured rim lights, along with the corresponding water highlights. The platforms have four subtly different profiles and a fine bump texture. The background uses the darkened Seedance studio plate and [Side Rays from React Bits](https://reactbits.dev/c/backgrounds/side-rays). Phone-sized views use a bounded pixel ratio and a smaller, throttled reflection pass to keep the main bottle render sharp.
+The updated GLBs contain high-resolution labels, and Sillage Bleu uses a transmissive glass cap. The browser shader uses the liquid mesh to estimate an optical volume with colour absorption and a moving liquid line. The water shader stretches and distorts a planar scene reflection, with moving highlights beneath the overhead spotlights. Mobile rendering gives the main canvas a higher pixel budget than the water reflection pass.
+
+The background combines a darkened Seedance studio plate with [Side Rays from React Bits](https://reactbits.dev/c/backgrounds/side-rays). Both the rays and the scene lighting respond to pointer movement.
 
 ## Run locally
 
