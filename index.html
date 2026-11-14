@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#090a0d">
-<meta name="description" content="A cinematic three-fragrance virtual showroom, with a moving studio backdrop, cinematic lighting, and interactive 3D perfume bottles.">
+<meta name="description" content="A cinematic four-fragrance virtual showroom, with a moving studio backdrop, cinematic lighting, and interactive 3D perfume bottles.">
 <title>ATELIER — Scent, Unveiled</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -106,7 +106,7 @@
   }
 }
 </style>
-<link rel="stylesheet" href="campaign.css?v=4">
+<link rel="stylesheet" href="campaign.css?v=5">
 </head>
 <body>
 <div class="intro-loader" id="loader" aria-hidden="true"><div class="loader-mark">ATELIER</div><div class="load-rule"></div></div>
@@ -121,6 +121,7 @@
   <button class="gallery-bay rose" data-go="rose" aria-label="Discover Rose Lune perfume"><span class="image-plinth" aria-hidden="true"></span><img src="rose-lune-smoked.png" alt="Rose Lune smoked plum glass bottle with champagne atomizer"><span class="bay-caption">Rose Lune ↗</span></button>
   <button class="gallery-bay galet" data-go="galet" aria-label="Discover Galet perfume"><span class="image-plinth" aria-hidden="true"></span><img src="galet-smoked.png" alt="Galet green-tinted rectangular perfume bottle"><span class="bay-caption">Galet ↗</span></button>
   <button class="gallery-bay bleu" data-go="bleu" aria-label="Discover Sillage Bleu perfume"><span class="image-plinth" aria-hidden="true"></span><img src="sillage-bleu-smoked.png" alt="Sillage Bleu tall cobalt glass perfume bottle"><span class="bay-caption">Sillage Bleu ↗</span></button>
+  <button class="gallery-bay ambre" data-go="ambre" aria-label="Discover Ambre Doré perfume"><span class="image-plinth" aria-hidden="true"></span><img src="ambre-dore.png" alt="Ambre Doré yellow-gold perfume bottle with a transparent cap"><span class="bay-caption">Ambre Doré ↗</span></button>
  </div>
  <div class="gallery-intro"><h1>The art of scent.</h1></div>
  <div class="detail" id="detail" inert aria-live="polite">
@@ -132,13 +133,23 @@
    <dl class="notes"><div><dt>Top</dt><dd id="topNote">Pink pepper, lychee</dd></div><div><dt>Heart</dt><dd id="heartNote">Damask rose, peony</dd></div><div><dt>Base</dt><dd id="baseNote">White musk, cashmere wood</dd></div></dl>
    <div class="price"><span id="price">€185</span> <small> &nbsp; EXTRAIT · 100 ML</small></div>
    <div class="product-actions"><button class="add-btn" id="addBtn">ADD TO BAG &nbsp; ↗</button><button class="inspect-btn" id="inspectBtn">⟳ &nbsp; Explore in 3D</button></div>
-   <div class="details-sub"><button type="button" data-go="gallery">← &nbsp; BACK TO COLLECTION</button><span id="detailNum">02 / 03</span></div>
+   <div class="details-sub"><button type="button" data-go="gallery">← &nbsp; BACK TO COLLECTION</button><span id="detailNum">02 / 04</span></div>
   </div>
   <div class="hero-product" id="heroProduct"><img src="rose-lune-smoked.png" id="heroImage" alt="Selected perfume bottle"></div>
  </div>
  <div class="product-drag" id="product-drag" aria-hidden="true"></div>
- <div class="tiny-vertical" aria-label="Jump to a scene"><button data-go="gallery" class="active" aria-label="Collection"><i></i></button><button data-go="rose" aria-label="Rose Lune"><i></i></button><button data-go="galet" aria-label="Galet"><i></i></button></div>
- <div class="stage-footer"><div class="scroll-prompt"><span class="scroll-icon"></span><span id="scrollText">Scroll to discover</span></div><div class="scene-nav"><div class="progresstrack"><span data-progress-for="galet"></span><span data-progress-for="rose"></span><span data-progress-for="bleu"></span></div><button id="prevBtn" aria-label="Previous fragrance">←</button><span class="number" id="numberText">00 / 03</span><button id="nextBtn" aria-label="Next fragrance">→</button></div></div>
+ <div class="stage-footer">
+  <div class="scroll-prompt"><span class="scroll-icon" aria-hidden="true"></span><span id="scrollText">Scroll to orbit</span></div>
+  <div class="scene-nav">
+   <div class="progresstrack" aria-label="Orbit checkpoints">
+    <button type="button" data-checkpoint="galet" aria-label="Orbit checkpoint Galet"></button>
+    <button type="button" data-checkpoint="rose" aria-label="Orbit checkpoint Rose Lune"></button>
+    <button type="button" data-checkpoint="ambre" aria-label="Orbit checkpoint Ambre Doré"></button>
+    <button type="button" data-checkpoint="bleu" aria-label="Orbit checkpoint Sillage Bleu"></button>
+   </div>
+   <button id="prevBtn" aria-label="Previous fragrance">←</button><span class="number" id="numberText">01 / 04</span><button id="nextBtn" aria-label="Next fragrance">→</button>
+  </div>
+ </div>
  </div>
 </section>
 <section class="ending"><div class="eyebrow">A study in feeling</div><h2>Some things are<br><i>better felt.</i></h2><p>Explore every note, catch the light against the glass, and find the fragrance that stays with you long after the moment ends.</p><button id="returnBtn">Return to the collection &nbsp; ↗</button><div class="copyright"><span>© ATELIER — A CONCEPT SHOWROOM</span><span>CRAFTED FOR AN IMMERSIVE WEB EXPERIENCE</span></div></section>
@@ -150,16 +161,21 @@
 'use strict';
 const DATA = {
   galet: {name:'Galet', html:'Galet', desc:'Fig leaf, soft greens and white woods settle into a quiet, luminous trail.',
-    top:'Fig leaf, bergamot', heart:'Green tea, mastic', base:'White woods, vetiver', price:175, img:'galet-smoked.png', num:'01 / 03'},
+    top:'Fig leaf, bergamot', heart:'Green tea, mastic', base:'White woods, vetiver', price:175, img:'galet-smoked.png', num:'01 / 04'},
   rose: {name:'Rose Lune', html:'Rose <em>Lune</em>', desc:'Pink pepper, lychee and velvet rose over a whisper of cashmere wood.',
-    top:'Pink pepper, lychee', heart:'Damask rose, peony', base:'White musk, cashmere wood', price:185, img:'rose-lune-smoked.png', num:'02 / 03'},
+    top:'Pink pepper, lychee', heart:'Damask rose, peony', base:'White musk, cashmere wood', price:185, img:'rose-lune-smoked.png', num:'02 / 04'},
   bleu: {name:'Sillage Bleu', html:'Sillage <em>Bleu</em>', desc:'Bergamot and marine iris give way to blue cedar and cool amber.',
-    top:'Bergamot, juniper', heart:'Marine iris, clary sage', base:'Blue cedar, amber', price:195, img:'sillage-bleu-smoked.png', num:'03 / 03'}
+    top:'Bergamot, juniper', heart:'Marine iris, clary sage', base:'Blue cedar, amber', price:195, img:'sillage-bleu-smoked.png', num:'03 / 04'},
+  ambre: {name:'Ambre Doré', html:'Ambre <em>Doré</em>', desc:'Mandarin and saffron open onto golden resin, sandalwood and tonka.',
+    top:'Mandarin, saffron', heart:'Labdanum, amber', base:'Sandalwood, tonka', price:195, img:'ambre-dore.png', num:'04 / 04'}
 };
 const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
-const scenes=['gallery', ...Object.keys(DATA)];
-const positions={gallery:0, galet:.32, rose:.63, bleu:.94};
-const stage=$('#stage'), track=$('#experience'), motion=matchMedia('(prefers-reduced-motion: reduce)');let state='gallery', selected='rose';
+const positions={galet:0, rose:.24, ambre:.52, bleu:.80};
+const orbitOrder=Object.keys(positions);
+const productOrder=Object.keys(DATA);
+const stage=$('#stage'), track=$('#experience'), motion=matchMedia('(prefers-reduced-motion: reduce)');
+let state='gallery', selected='galet', checkpoint='galet', focusScroll=0;
+
 const bag=Object.fromEntries(Object.keys(DATA).map(key=>[key,0]));
 try {
  const saved=JSON.parse(localStorage.getItem('atelier-demo-bag')||'{}');
@@ -201,32 +217,54 @@ function setState(s){
   $('#heroProduct').className='hero-product '+s;
   $('#inspectBtn').setAttribute('aria-label','Inspect '+d.name+' in 3D');
  }
- $('#numberText').textContent=inGallery?'00 / 03':DATA[s].num;
- $('#scrollText').textContent=inGallery?'Scroll to discover':s==='bleu'?'Return to collection':'Scroll for '+DATA[scenes[scenes.indexOf(s)+1]].name;
- $$('[data-progress-for]').forEach(node=>node.classList.toggle('active',node.dataset.progressFor===s));
+ $('#numberText').textContent=DATA[inGallery?checkpoint:s].num;
+ $('#scrollText').textContent=inGallery?'Scroll to orbit':'Scroll to resume orbit';
  $('#collectionBtn').classList.toggle('active',inGallery);
  $('#discoverBtn').classList.toggle('active',!inGallery);
 }
 function go(s, spin=false){
- const extent=Math.max(1,track.offsetHeight-stage.clientHeight);
- const top=track.getBoundingClientRect().top+window.scrollY+extent*positions[s];
+ if(s==='gallery'){
+  setState('gallery');
+  if(track.getBoundingClientRect().bottom<stage.clientHeight)
+   window.scrollTo({top:track.getBoundingClientRect().top+window.scrollY,behavior:'instant'});
+  updateScroll();
+  return;
+ }
+ focusScroll=window.scrollY;
+ setState(s);
  if(spin)window.Perfume3D?.spin(s);
- window.scrollTo({top,behavior:'instant'});
  updateScroll();
 }
+function orbitTo(key){
+ const extent=Math.max(1,track.offsetHeight-stage.clientHeight);
+ setState('gallery');
+ const progress=key==='galet'&&Number(stage.dataset.progress)>.65?1:positions[key];
+ const top=track.getBoundingClientRect().top+window.scrollY+extent*progress;
+ window.scrollTo({top,behavior:motion.matches?'instant':'smooth'});
+ if(motion.matches)updateScroll();
+}
 function step(delta){
- const i=Math.max(0,scenes.indexOf(state)+delta)%scenes.length;
- go(scenes[i]);
+ const list=state==='gallery'?orbitOrder:productOrder;
+ const i=(list.indexOf(state==='gallery'?checkpoint:state)+delta+list.length)%list.length;
+ if(state==='gallery')orbitTo(list[i]);
+ else go(list[i],true);
 }
 function updateScroll(){
  const extent=Math.max(1,track.offsetHeight-stage.clientHeight);
  const p=Math.max(0,Math.min(1,-track.getBoundingClientRect().top/extent));
  stage.dataset.progress=String(p);
- setState(p<.16?'gallery':p<.49?'galet':p<.80?'rose':'bleu');
+ if(state!=='gallery'&&Math.abs(window.scrollY-focusScroll)>18)setState('gallery');
+ // The last sector returns the camera to its starting angle.
+ checkpoint=p<.13||p>=.91?'galet':p<.38?'rose':p<.66?'ambre':'bleu';
+ stage.dataset.checkpoint=checkpoint;
+ const active=state==='gallery'?checkpoint:state;
+ $('#numberText').textContent=DATA[active].num;
+ $$('[data-checkpoint]').forEach(node=>node.setAttribute('aria-pressed',String(node.dataset.checkpoint===active)));
  window.dispatchEvent(new Event('perfume-progress'));
 }
 let ticking=false;window.addEventListener('scroll',()=>{if(ticking)return;ticking=true;requestAnimationFrame(()=>{ticking=false;updateScroll()})},{passive:true});window.addEventListener('resize',updateScroll);
-$$('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go,b.classList.contains('gallery-bay'))));$('#homeBtn').onclick=()=>go('gallery');$('#collectionBtn').onclick=()=>go('gallery');$('#discoverBtn').onclick=()=>go('galet');$('#returnBtn').onclick=()=>go('gallery');$('#prevBtn').onclick=()=>step(-1);$('#nextBtn').onclick=()=>step(1);$('#addBtn').onclick=()=>{bag[selected]++;saveBag();renderBag();$('#bagShade').classList.add('show')};$('#bagBtn').onclick=()=>{$('#bagShade').classList.add('show');renderBag()};$('#closeBag').onclick=()=>$('#bagShade').classList.remove('show');$('#bagShade').onclick=e=>{if(e.target===$('#bagShade'))$('#bagShade').classList.remove('show')};
+$$('[data-checkpoint]').forEach(b=>b.onclick=()=>orbitTo(b.dataset.checkpoint));
+$$('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go,b.classList.contains('gallery-bay'))));$('#homeBtn').onclick=()=>go('gallery');$('#collectionBtn').onclick=()=>go('gallery');$('#discoverBtn').onclick=()=>go(checkpoint,true);$('#returnBtn').onclick=()=>go('gallery');$('#prevBtn').onclick=()=>step(-1);$('#nextBtn').onclick=()=>step(1);$('#addBtn').onclick=()=>{bag[selected]++;saveBag();renderBag();$('#bagShade').classList.add('show')};$('#bagBtn').onclick=()=>{$('#bagShade').classList.add('show');renderBag()};$('#closeBag').onclick=()=>$('#bagShade').classList.remove('show');$('#bagShade').onclick=e=>{if(e.target===$('#bagShade'))$('#bagShade').classList.remove('show')};
 const viewer=$('#viewerShade');function close3D(){viewer.classList.remove('show');window.Perfume3D?.stop?.()}function open3D(){const d=DATA[selected];viewer.classList.add('show');$('#viewerWindow').className='viewer-window '+selected;$('#viewerName').textContent=d.name;$('#viewerFallbackImg').src=d.img;$('#viewerFallback').hidden=true;if(window.Perfume3D)window.Perfume3D.open(selected).catch(()=>{$('#viewerFallback').hidden=false});else $('#viewerFallback').hidden=false}
 $('#spinBottle').onclick=()=>window.Perfume3D?.spin(selected);$('#inspectBtn').onclick=open3D;$('#closeViewer').onclick=close3D;viewer.addEventListener('click',e=>{if(e.target===viewer)close3D()});window.addEventListener('keydown',e=>{if(e.key==='Escape'){close3D();$('#bagShade').classList.remove('show')}if(viewer.classList.contains('show'))return;if(e.key==='ArrowRight')step(1);if(e.key==='ArrowLeft')step(-1)});
 const film=$('#studio-film');
@@ -243,7 +281,7 @@ motion.addEventListener('change',syncFilm);
 renderBag();updateScroll();window.addEventListener('load',()=>setTimeout(()=>$('#loader').classList.add('out'),450));setTimeout(()=>$('#loader').classList.add('out'),1800);
 })();
 </script>
-<script type="module" src="SideRays.js?v=2"></script>
-<script type="module" src="showroom-webgl.js?v=8"></script>
+<script type="module" src="SideRays.js?v=3"></script>
+<script type="module" src="showroom-webgl.js?v=9"></script>
 </body>
 </html>

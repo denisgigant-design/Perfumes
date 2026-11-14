@@ -166,3 +166,40 @@
   .stage:not([data-state="gallery"]) .detail-panel { bottom: 49px; }
   .stage:not([data-state="gallery"]) .detail-panel h2 { font-size: clamp(33px, 4.2vw, 50px); }
 }
+
+/* The black studio plate sits above the water horizon. */
+.experience { height: 540vh; }
+.stage, .glb-live .stage { background: #000; }
+.stage[data-state] .studio-film {
+  filter: brightness(.38) saturate(.85);
+  opacity: .59;
+  mask-image: linear-gradient(#000 0%, #000 39%, #0000 76%);
+}
+.stage[data-state]:not([data-state="gallery"]) .studio-film { filter: brightness(.43) saturate(.94); }
+.stage[data-state="ambre"] { --accent: #ffc068; }
+.stage[data-state="ambre"] .studio-film { transform: scale(1.15); }
+.stage[data-state="gallery"] .studio-rays { opacity: .71; }
+.gallery-bay.ambre, .glb-live .gallery-bay.ambre { left: 54%; top: 26%; width: 23%; height: 31%; }
+.gallery-bay.ambre img { width: 60%; }
+.glb-live .stage[data-state="gallery"] .gallery-intro { bottom: max(8.5%, 57px); }
+.glb-live .stage[data-state="gallery"] .gallery-intro h1 {
+  font-size: clamp(38px, 5.9vw, 87px);
+  text-shadow: 0 2px 24px #000;
+}
+.scene-nav .progresstrack { gap: 2px; align-items: center; }
+.scene-nav .progresstrack button {
+  width: 24px; height: 37px; background: none; border: 0; border-radius: 4px; backdrop-filter: none;
+}
+.progresstrack button::before { content: ""; width: 15px; height: 2px; background: #666; }
+.progresstrack button[aria-pressed="true"]::before { background: var(--accent, #fff); }
+.viewer-window.ambre { background: radial-gradient(ellipse at 48% 32%,#352717,#08070b 62%); }
+@media (max-width: 660px) {
+  .gallery-bay.ambre, .glb-live .gallery-bay.ambre { left: 50%; top: 27%; width: 30%; height: 23%; }
+  .gallery-bay.ambre img { width: 73%; }
+  .gallery-bay.rose { top: 42%; }
+  .gallery-bay.bleu { top: 41%; }
+  .gallery-bay.galet { top: 52%; }
+  .scene-nav .progresstrack button { width: 16px; }
+  .scene-nav .progresstrack button::before { width: 9px; }
+  .scene-nav { gap: 6px; }
+}

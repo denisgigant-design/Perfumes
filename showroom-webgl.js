@@ -1,3 +1,4 @@
+import {makeWater} from './water.js?v=1';
 import {
   ACESFilmicToneMapping, AmbientLight, Box3, CanvasTexture, Color, DoubleSide, GLTFLoader,
   Group, MathUtils, Mesh, MeshBasicMaterial, MeshStandardMaterial, PerspectiveCamera,
@@ -17,19 +18,27 @@ const inspection = new Group();
 closeup.add(inspection);
 
 const products = [
-  {key: 'galet', file: 'galet-crystal.glb', x: .03, y: -.52, z: 1.35, height: 2.7,
-    tone: '#b2b590', glass: '#e1e1d0', absorption: '#737b55', liquid: '#686b4b', distance: .63, thickness: .014, rest: -.13},
-  {key: 'rose', file: 'rose-lune-smoked.glb', x: -2.03, y: .20, z: -1.4, height: 2.60,
-    tone: '#c69a9e', glass: '#c5a9ae', absorption: '#63404b', liquid: '#80545c', distance: .58, thickness: .028, rest: .10},
-  {key: 'bleu', file: 'sillage-bleu.glb', x: 2.19, y: .05, z: -2.65, height: 3.18,
-    tone: '#8299ac', glass: '#c5cdd8', absorption: '#475b77', liquid: '#485165', distance: .65, thickness: .014, rest: -.17}
+  {key: 'galet', file: 'galet-crystal.glb', x: -.16, y: -.53, z: 1.90, height: 2.61,
+    tone: '#b6dc78', glass: '#e1e7d1', absorption: '#738445', liquid: '#6a763e',
+    distance: .71, thickness: .014, rest: -.12, shape: [1.1, .95, 2.0]},
+  {key: 'rose', file: 'rose-lune-smoked.glb', x: -2.24, y: -.03, z: .15, height: 2.61,
+    tone: '#e28ca2', glass: '#c8aab3', absorption: '#774052', liquid: '#87515f',
+    distance: .66, thickness: .021, rest: .11, shape: [1.02, .89, 2.65]},
+  {key: 'bleu', file: 'sillage-bleu.glb', x: 2.17, y: -.04, z: .40, height: 3.14,
+    tone: '#709ff2', glass: '#c2cfe4', absorption: '#415e87', liquid: '#435776',
+    distance: .70, thickness: .014, rest: -.15, shape: [.94, 1.13, 2.4]},
+  {key: 'ambre', file: 'ambre-dore.glb', x: .39, y: .56, z: -2.14, height: 2.75,
+    tone: '#ffc068', glass: '#f1cd95', absorption: '#bb772d', liquid: '#b48544',
+    distance: 1.03, thickness: .019, rest: .11, shape: [1.0, 1.04, 3.05]}
 ];
 const angle = Math.tan(MathUtils.degToRad(camera.fov / 2));
 const pointerStates = new Map();
 const lightingPointer = {x: 0, y: 0, targetX: 0, targetY: 0};
 const manualTurn = {x: 0, y: 0};
 const projected = new Vector3();
-let renderer, studioReflection, modalBottle;
+const worldPoint = new Vector3();
+const fullTurn = Math.PI * 2;
+let renderer, studioReflection, modalBottle, water;
 let width = 0, height = 0, zoom = 6.7, previousTime = 0, openedAt = 0;
 let shot = null, lastProduct = 'gallery';
 let dragDistance = 0;
@@ -108,12 +117,12 @@ function satinBump() {
 
 const satinMap = satinBump();
 
-function plinth(radius, height) {
+function plinth(radius, height, [scaleX, scaleZ, exponent]) {
   const profile = [
     [.001, 0], [radius - .06, 0], [radius - .026, -.016], [radius, -.055],
-    [radius, -.094], [radius * .985, -.108], [radius * .978, -height + .065],
-    [radius * .956, -height + .028], [radius * .923, -height],
-    [radius * .85, -height - .017], [.001, -height - .017]
+    [radius, -.097], [radius * .973, -.13], [radius * .939, -height * .34],
+    [radius * .89, -height * .84], [radius * .87, -height],
+    [radius * .81, -height - .017], [.001, -height - .017]
   ];
   const segments = 96;
   const geometry = new PlaneGeometry(1, 1, segments, profile.length - 1);
@@ -123,8 +132,10 @@ function plinth(radius, height) {
     for (let col = 0; col <= segments; col++) {
       const theta = col / segments * Math.PI * 2;
       const index = row * (segments + 1) + col;
-      const x = r * Math.cos(theta);
-      const z = -r * Math.sin(theta);
+      const u = Math.cos(theta);
+      const v = Math.sin(theta);
+      const x = r * Math.sign(u) * Math.pow(Math.abs(u), 2 / exponent) * scaleX;
+      const z = -r * Math.sign(v) * Math.pow(Math.abs(v), 2 / exponent) * scaleZ;
       vertices.setXYZ(index, x, y, z);
       geometry.attributes.uv.setXY(index, x / (radius * 2) + .5, z / (radius * 2) + .5);
     }
@@ -136,16 +147,17 @@ function plinth(radius, height) {
   geometry.addGroup(stride * 2, stride * 2, 1);
   geometry.addGroup(stride * 4, stride * 6, 2);
   const base = new Mesh(geometry, [
-    new MeshStandardMaterial({color: '#3c383b', metalness: .47, roughness: .32,
-      bumpMap: satinMap, bumpScale: .018}),
+    new MeshStandardMaterial({color: '#39373a', metalness: .39, roughness: .34,
+      bumpMap: satinMap, bumpScale: .032}),
     new MeshStandardMaterial({color: '#c6ad90', metalness: .77, roughness: .235}),
-    new MeshStandardMaterial({color: '#29282d', metalness: .56, roughness: .39,
-      bumpMap: satinMap, bumpScale: .013})
+    new MeshStandardMaterial({color: '#1e2227', metalness: .48, roughness: .38,
+      bumpMap: satinMap, bumpScale: .028})
   ]);
   const shadow = new Mesh(new PlaneGeometry(radius * 1.9, radius * 1.7),
     new MeshBasicMaterial({map: shadowMap, transparent: true, depthWrite: false}));
   shadow.rotateX(-Math.PI / 2);
   shadow.position.y = .006;
+  shadow.scale.set(scaleX, scaleZ, 1);
   const platform = new Group();
   platform.add(base, shadow);
   return platform;
@@ -198,6 +210,15 @@ async function loadBottle(product, loader) {
             diffuseColor.rgb *= 1.0 - 0.09 * meniscus;
           `);
       };
+    } else if (/clear cap crystal/i.test(material.name)) {
+      material.color.set('#fff8e8');
+      material.attenuationColor = new Color('#fff0d5');
+      material.attenuationDistance = 2.2;
+      material.transmission = .988;
+      material.thickness = .022;
+      material.ior = 1.49;
+      material.roughness = .050;
+      material.envMapIntensity = 1.25;
     } else if (/crystal/i.test(material.name)) {
       material.color.set(product.glass);
       material.attenuationColor = new Color(product.absorption);
@@ -228,7 +249,7 @@ async function loadBottle(product, loader) {
   pivot.position.y = product.height / 2 + .035;
   pivot.add(bottle);
   const radius = product.key === 'galet' ? 1.32 : 1.17;
-  group.add(plinth(radius, product.key === 'galet' ? .42 : .36), pivot);
+  group.add(plinth(radius, product.y + 1.28, product.shape), pivot);
   product.refraction = addRefraction(group, product.tone, radius);
   product.keyLight = addSpot(group, {
     color: '#fff3e9', intensity: 74, position: [-.95, 5.65, 2.8], look: [0, .98, 0]
@@ -243,35 +264,31 @@ async function loadBottle(product, loader) {
   Object.assign(product, {group, pivot, bottle});
 }
 
-function galleryFrame(aspect) {
+function galleryFrame(aspect, progress) {
+  const narrow = aspect < .82;
+  const radius = Math.max(10.7, (narrow ? 3.72 : 3.45) / (angle * aspect));
   return {
-    x: .03, y: aspect < .9 ? .38 : .58,
-    z: Math.max(10.9, 2.91 / (angle * aspect)),
-    galet: 0, rose: 0, bleu: 0
+    yaw: .12 - (reducedMotion.matches ? 0 : progress * fullTurn),
+    radius, elevation: radius * (narrow ? .33 : .39),
+    aimX: .03, aimY: narrow ? .82 : .86, aimZ: .06, focus: 0
   };
 }
 
 function closeFrame(product, aspect) {
-  const narrow = aspect < .9;
-  const distance = Math.max(product.height / (2 * angle * (narrow ? .39 : .42)),
-    1.37 / (angle * aspect));
+  const narrow = aspect < .90;
+  const radius = Math.max(product.height / (2 * angle * (narrow ? .38 : .42)),
+    1.36 / (angle * aspect));
   return {
-    x: product.x, y: product.y + product.height / 2 - (narrow ? .37 : .41) * distance * angle,
-    z: product.z + distance,
-    galet: Number(product.key === 'galet'), rose: Number(product.key === 'rose'),
-    bleu: Number(product.key === 'bleu')
+    yaw: .24, radius, elevation: radius * .34,
+    aimX: product.x, aimY: product.y + product.height * .20,
+    aimZ: product.z, focus: 1
   };
 }
 
 function frame() {
-  const aspect = camera.aspect;
+  const selected = products.find(product => product.key === stage.dataset.state);
   const progress = Number(stage.dataset.progress || 0);
-  const frames = [galleryFrame(aspect), ...products.map(product => closeFrame(product, aspect))];
-  const index = progress < .36 ? 0 : progress < .67 ? 1 : 2;
-  const ranges = [[.035,.28],[.38,.60],[.68,.91]];
-  const weight = MathUtils.smoothstep(progress, ...ranges[index]);
-  return Object.fromEntries(Object.keys(frames[index]).map(key =>
-    [key, MathUtils.lerp(frames[index][key], frames[index + 1][key], weight)]));
+  return selected ? closeFrame(selected, camera.aspect) : galleryFrame(camera.aspect, progress);
 }
 
 function spin(key) {
@@ -301,6 +318,10 @@ function resize() {
   const active = modalBottle ? closeupCamera : camera;
   active.aspect = width / height;
   active.updateProjectionMatrix();
+  const compact = width <= 700;
+  const pixelBudget = compact ? 1_050_000 : 2_150_000;
+  const ratio = Math.min(devicePixelRatio || 1, compact ? 1.65 : 1.75, Math.sqrt(pixelBudget / (width * height)));
+  renderer.setPixelRatio(ratio);
   renderer.setSize(width, height, false);
 }
 
@@ -308,22 +329,24 @@ function updateHits() {
   camera.updateMatrixWorld();
   for (const product of products) {
     if (!product.button) continue;
-    projected.set(product.x, product.y + product.height * .48, product.z).project(camera);
-    const distance = camera.position.z - product.z;
+    worldPoint.set(product.x, product.y + product.height * .5, product.z);
+    const distance = camera.position.distanceTo(worldPoint);
+    projected.copy(worldPoint).project(camera);
     product.button.style.left = ((projected.x + 1) * 50) + '%';
     product.button.style.top = ((1 - projected.y) * 50) + '%';
-    const halfWidth = product.key === 'bleu' ? .66 : .95;
-    const hitWidth = Math.min(camera.aspect < .82 ? width * .32 : 245,
+    const halfWidth = product.key === 'bleu' ? .66 : .93;
+    const hitWidth = Math.min(camera.aspect < .82 ? width * .31 : 245,
       width * halfWidth / (distance * angle * camera.aspect));
     product.button.style.width = hitWidth + 'px';
-    product.button.style.height = (height * (product.height + .55) / (2 * angle * distance)) + 'px';
+    product.button.style.height = (height * (product.height + .18) / (2 * angle * distance)) + 'px';
+    product.button.style.zIndex = String(Math.max(0, Math.round(95 - distance * 3)));
   }
 }
 
 function render(time) {
   if (document.hidden) return;
   if (!modalBottle && stage.getBoundingClientRect().bottom <= 0) return;
-  if (previousTime && time - previousTime < 28 && stage.dataset.state === 'gallery') return;
+  if (previousTime && time - previousTime < 27 && stage.dataset.state === 'gallery') return;
   resize();
   const dt = previousTime ? Math.min((time - previousTime) / 1000, .05) : .016;
   previousTime = time;
@@ -332,7 +355,7 @@ function render(time) {
     const demo = pointerStates.size || reducedMotion.matches ? 0 : Math.sin(t * 2.1) * .14;
     inspection.rotation.set(manualTurn.x, manualTurn.y + demo, 0);
     const distance = zoom * Math.max(1, .62 / closeupCamera.aspect);
-    closeupCamera.position.set(0, .06, distance);
+    closeupCamera.position.set(.32, distance * .26, distance);
     closeupCamera.lookAt(0, 0, 0);
     renderer.render(closeup, closeupCamera);
     return;
@@ -346,40 +369,46 @@ function render(time) {
   }
   const next = frame();
   shot ??= {...next};
+  const yawDelta = MathUtils.euclideanModulo(next.yaw - shot.yaw + Math.PI, fullTurn) - Math.PI;
+  next.yaw = shot.yaw + yawDelta;
   for (const key of Object.keys(shot)) {
-    shot[key] = reducedMotion.matches ? next[key] : MathUtils.damp(shot[key], next[key], 6.0, dt);
+    shot[key] = reducedMotion.matches ? next[key] : MathUtils.damp(shot[key], next[key], 6.5, dt);
   }
-  camera.position.set(shot.x, shot.y, shot.z);
-  const strongest = Math.max(shot.rose, shot.galet, shot.bleu);
+  camera.position.set(shot.aimX + Math.sin(shot.yaw) * shot.radius, shot.aimY + shot.elevation,
+    shot.aimZ + Math.cos(shot.yaw) * shot.radius);
+  camera.lookAt(shot.aimX, shot.aimY, shot.aimZ);
   const seconds = time / 1000;
   const reach = reducedMotion.matches ? 0 : 1;
   lightingPointer.x = MathUtils.damp(lightingPointer.x, lightingPointer.targetX * reach, 3.8, dt);
   lightingPointer.y = MathUtils.damp(lightingPointer.y, lightingPointer.targetY * reach, 3.8, dt);
   for (const [index, product] of products.entries()) {
-    const emphasis = shot[product.key];
     const selected = current === product.key;
+    const emphasis = selected ? shot.focus : 0;
     const phase = seconds * (.73 + index * .095) + index * 1.72;
     const still = reducedMotion.matches || (selected && pointerStates.size > 0);
     const idleYaw = still ? 0 : Math.sin(phase) * .19;
     const idleRock = still ? 0 : Math.sin(phase * .91 + .8) * .018;
     const turn = product.rest + spinAngle(product, time) + idleYaw + (selected ? manualTurn.y : 0);
     product.pivot.rotation.set((selected ? manualTurn.x : 0) + idleRock, turn, idleRock * .68);
-    const otherFocus = Math.max(0, strongest - emphasis);
-    const direction = product.x < shot.x ? -1 : 1;
-    product.group.position.x = product.x + direction * otherFocus * 1.9;
-    product.group.position.y = product.y - otherFocus * (camera.aspect < .9 ? .32 : .93);
-    product.group.position.z = product.z - otherFocus * .55;
-    const secondary = 1 - otherFocus * .78;
-    product.keyLight.intensity = (106 + emphasis * 67) * secondary;
+    const otherFocus = selected ? 0 : shot.focus;
+    const secondary = 1 - otherFocus * .84;
+    product.keyLight.intensity = (105 + emphasis * 105) * secondary;
     product.keyLight.position.x = -.95 + lightingPointer.x * .95;
     product.keyLight.position.z = 2.8 + lightingPointer.y * .36;
-    product.rimLight.intensity = (31 + emphasis * 33) * secondary;
+    product.rimLight.intensity = (38 + emphasis * 72) * secondary;
     product.edgeLight.intensity = (22 + emphasis * 23) * secondary;
     product.refraction.rotation.z = turn * .91;
     product.refraction.position.x = Math.sin(turn) * .15 + lightingPointer.x * .085;
     product.refraction.position.z = .26 + Math.cos(turn * 2) * .08;
-    product.refraction.material.opacity = (.39 + emphasis * .16) * secondary * (.88 + .12 * Math.cos(turn * 2));
+    product.refraction.material.opacity = (.51 + emphasis * .29) * secondary * (.88 + .12 * Math.cos(turn * 2));
+    if (water) {
+      const {pools, poolColors} = water.material.uniforms;
+      pools.value[index].set(product.x + lightingPointer.x * .22,
+        product.z + lightingPointer.y * .16, (.62 + emphasis * 1.72) * secondary);
+      poolColors.value[index].set(product.tone);
+    }
   }
+  if (water) water.material.uniforms.clock.value = reducedMotion.matches ? 0 : seconds;
   if (current === 'gallery') updateHits();
   renderer.render(scene, camera);
 }
@@ -449,12 +478,14 @@ function fallback(error) {
   if (modalBottle) document.querySelector('#viewerFallback').hidden = false;
   stop();
   stage.removeEventListener('pointermove', trackLighting);
+  stage.removeEventListener('pointerdown', trackLighting);
   stage.removeEventListener('pointerup', releaseLighting);
   stage.removeEventListener('pointerleave', centerLighting);
   stage.removeEventListener('pointercancel', centerLighting);
   renderer?.setAnimationLoop(null);
   renderer?.domElement.remove();
   studioReflection?.dispose();
+  water?.dispose();
   renderer?.dispose();
   delete window.Perfume3D;
 }
@@ -492,10 +523,9 @@ function releaseLighting(event) {
 async function start() {
   try {
     renderer = new WebGLRenderer({alpha: true, antialias: true, powerPreference: 'high-performance'});
-    renderer.setPixelRatio(Math.min(devicePixelRatio, innerWidth <= 660 ? 1.25 : 1.5));
     renderer.toneMapping = ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.07;
-    renderer.transmissionResolutionScale = innerWidth <= 660 ? .68 : .85;
+    renderer.transmissionResolutionScale = innerWidth <= 700 ? .63 : .82;
     const studio = new RoomEnvironment();
     reflectionPanels(studio);
     const pmrem = new PMREMGenerator(renderer);
@@ -508,6 +538,8 @@ async function start() {
     scene.add(new AmbientLight('#ebedf8', .26));
     closeup.add(new AmbientLight('#f3eefa', .32));
     addSpot(closeup, {color: '#fff4e7', intensity: 70, position: [3, 4, 4], look: [0, 0, 0]});
+    water = makeWater(renderer, innerWidth <= 700);
+    scene.add(water);
     const loader = new GLTFLoader();
     await Promise.all(products.map(product => loadBottle(product, loader)));
     for (const product of products) product.button = document.querySelector('.gallery-bay.' + product.key);
@@ -520,6 +552,7 @@ async function start() {
     controls(dragArea, false);
     mount.appendChild(renderer.domElement);
     stage.addEventListener('pointermove', trackLighting, {passive: true});
+    stage.addEventListener('pointerdown', trackLighting, {passive: true});
     stage.addEventListener('pointerup', releaseLighting);
     stage.addEventListener('pointerleave', centerLighting);
     stage.addEventListener('pointercancel', centerLighting);

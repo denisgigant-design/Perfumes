@@ -1,8 +1,8 @@
 # ATELIER — 3D perfume showroom
 
-A static, three-fragrance showroom for **Galet**, **Rose Lune** and **Sillage Bleu**. The collection begins with Galet in the foreground. Scrolling moves through Galet, Rose Lune and Sillage Bleu. Tapping a bottle takes you into its close-up and plays one 360° rotation. The bottles gently move at idle and can be dragged to look around them in the close-up. The separate 3D viewer supports drag, pinch and wheel zoom.
+A four-fragrance showroom for **Galet**, **Rose Lune**, **Sillage Bleu**, and **Ambre Doré**. Scrolling turns the camera through a continuous full orbit around the collection. The four checkpoints move along the same path. Tapping a bottle opens its close-up in place and starts a 360° spin. Scroll to resume the orbit from where you left it, or drag the bottle to rotate it in the close-up.
 
-The background layers [Side Rays from React Bits](https://reactbits.dev/c/backgrounds/side-rays) over the silent Seedance 2.5 studio loop. The shader is adapted for the site's existing standalone JavaScript setup and follows pointer movement and the active fragrance. The bottle key lights and colour on the platform react to the same pointer movement. The React Bits license is included in `LICENSE-react-bits.txt`. The fixtures are outside the camera frame. The coloured patterns on the platform are animated caustic approximations tied to the rotation of each bottle. The materials use a separate inner liquid mesh under a transmissive glass shell. The site respects the device's reduced-motion preference.
+An animated water shader distorts a planar reflection of the bottles and raised platforms. Tapping a product increases its hidden key and coloured rim lights, along with the corresponding water highlights. The platforms have four subtly different profiles and a fine bump texture. The background uses the darkened Seedance studio plate and [Side Rays from React Bits](https://reactbits.dev/c/backgrounds/side-rays). Phone-sized views use a bounded pixel ratio and a smaller, throttled reflection pass to keep the main bottle render sharp.
 
 ## Run locally
 
@@ -12,6 +12,6 @@ The bag is a local demo. It saves quantities on the device and does not process 
 
 ## Models and renderer
 
-- Rose Lune uses the assembled perfume bottle extracted from the supplied OBJ. The web GLB has separate glass, liquid, atomizer and label meshes. Materials were authored for the site because the OBJ's companion MTL was absent.
+- Rose Lune uses the assembled perfume bottle extracted from the supplied OBJ. The web GLB has separate glass, liquid, atomizer and label meshes. Ambre Doré uses the supplied bottle geometry with a clear cap, amber glass, and gold hardware. The original OBJ referenced a separate MTL file, so its finishes were recreated from the requested colours.
 - Galet uses a custom crystal model based on the supplied green bottle. It has a separate liquid mesh, a pearlescent cap and the printed Galet label. Sillage Bleu is a custom tall cobalt glass GLB with a fluted cap, a separate liquid mesh and its own label artwork.
 - The bundled renderer uses Three.js r170, its GLTFLoader, and RoomEnvironment. Its MIT license is included in `LICENSE-three.txt`.

@@ -191,10 +191,11 @@ const link = gl => {
 };
 
 const themes = {
-  gallery: ['#ddc5a5', '#afbdcc', .64],
-  galet: ['#e4d4b7', '#b4bc99', .66],
-  rose: ['#e4c9b8', '#c49ca5', .70],
-  bleu: ['#d0dbe7', '#93a5bf', .76]
+  gallery: ['#ddba8f', '#94a9ca', .59],
+  galet: ['#e7c487', '#b6dc78', .66],
+  rose: ['#ebbaa0', '#e28ca2', .70],
+  bleu: ['#c0d5f8', '#709ff2', .76],
+  ambre: ['#ffe0a7', '#ffc068', .67]
 };
 
 export function mountSideRays(canvas) {
@@ -250,7 +251,7 @@ export function mountSideRays(canvas) {
       canvas.height = Math.max(1, Math.round(h * scale));
       dirty = false;
     }
-    const selected = stage.dataset.state;
+    const selected = stage.dataset.state === 'gallery' ? stage.dataset.checkpoint ?? 'gallery' : stage.dataset.state;
     if (state !== selected) {
       state = selected;
       const theme = themes[state] ?? themes.gallery;
@@ -286,7 +287,7 @@ export function mountSideRays(canvas) {
     gl.uniform3f(u.uColorA, ...colorA);
     gl.uniform3f(u.uColorB, ...colorB);
     gl.uniform1f(u.uBlend, blend);
-    gl.uniform1f(u.uIntensity, 1.46);
+    gl.uniform1f(u.uIntensity, stage.dataset.state === 'gallery' ? 1.08 : 1.51);
     gl.uniform1f(u.uSpread, .51);
     gl.uniform1f(u.uDensity, 5.8);
     gl.uniform1f(u.uSharpness, .58);
@@ -334,6 +335,7 @@ export function mountSideRays(canvas) {
   });
   viewport.observe(stage);
   stage.addEventListener('pointermove', move, {passive: true});
+  stage.addEventListener('pointerdown', move, {passive: true});
   stage.addEventListener('pointerleave', leave);
   stage.addEventListener('pointerup', release);
   stage.addEventListener('pointercancel', leave);
