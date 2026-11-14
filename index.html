@@ -106,7 +106,7 @@
   }
 }
 </style>
-<link rel="stylesheet" href="campaign.css?v=2">
+<link rel="stylesheet" href="campaign.css?v=4">
 </head>
 <body>
 <div class="intro-loader" id="loader" aria-hidden="true"><div class="loader-mark">ATELIER</div><div class="load-rule"></div></div>
@@ -115,11 +115,12 @@
 <section class="experience" id="experience" aria-label="Interactive perfume showroom">
  <div class="stage" id="stage" data-state="gallery">
  <video class="studio-film" id="studio-film" poster="studio-trio.jpg" muted loop playsinline preload="none" aria-hidden="true"></video>
+ <canvas class="studio-rays" id="side-rays" aria-hidden="true"></canvas>
  <div id="showroom3d" aria-hidden="true"></div>
  <div class="gallery" id="gallery">
-  <button class="gallery-bay rose" data-go="rose" aria-label="Discover Rose Lune perfume"><span class="image-plinth" aria-hidden="true"></span><img src="rose-lune.png" alt="Rose Lune pink perfume bottle with glossy black spherical cap"><span class="bay-caption">Rose Lune ↗</span></button>
-  <button class="gallery-bay galet" data-go="galet" aria-label="Discover Galet perfume"><span class="image-plinth" aria-hidden="true"></span><img src="galet.png" alt="Galet green-tinted rectangular perfume bottle"><span class="bay-caption">Galet ↗</span></button>
-  <button class="gallery-bay bleu" data-go="bleu" aria-label="Discover Sillage Bleu perfume"><span class="image-plinth" aria-hidden="true"></span><img src="sillage-bleu.png" alt="Sillage Bleu tall cobalt glass perfume bottle"><span class="bay-caption">Sillage Bleu ↗</span></button>
+  <button class="gallery-bay rose" data-go="rose" aria-label="Discover Rose Lune perfume"><span class="image-plinth" aria-hidden="true"></span><img src="rose-lune-smoked.png" alt="Rose Lune smoked plum glass bottle with champagne atomizer"><span class="bay-caption">Rose Lune ↗</span></button>
+  <button class="gallery-bay galet" data-go="galet" aria-label="Discover Galet perfume"><span class="image-plinth" aria-hidden="true"></span><img src="galet-smoked.png" alt="Galet green-tinted rectangular perfume bottle"><span class="bay-caption">Galet ↗</span></button>
+  <button class="gallery-bay bleu" data-go="bleu" aria-label="Discover Sillage Bleu perfume"><span class="image-plinth" aria-hidden="true"></span><img src="sillage-bleu-smoked.png" alt="Sillage Bleu tall cobalt glass perfume bottle"><span class="bay-caption">Sillage Bleu ↗</span></button>
  </div>
  <div class="gallery-intro"><h1>The art of scent.</h1></div>
  <div class="detail" id="detail" inert aria-live="polite">
@@ -133,7 +134,7 @@
    <div class="product-actions"><button class="add-btn" id="addBtn">ADD TO BAG &nbsp; ↗</button><button class="inspect-btn" id="inspectBtn">⟳ &nbsp; Explore in 3D</button></div>
    <div class="details-sub"><button type="button" data-go="gallery">← &nbsp; BACK TO COLLECTION</button><span id="detailNum">02 / 03</span></div>
   </div>
-  <div class="hero-product" id="heroProduct"><img src="rose-lune.png" id="heroImage" alt="Selected perfume bottle"></div>
+  <div class="hero-product" id="heroProduct"><img src="rose-lune-smoked.png" id="heroImage" alt="Selected perfume bottle"></div>
  </div>
  <div class="product-drag" id="product-drag" aria-hidden="true"></div>
  <div class="tiny-vertical" aria-label="Jump to a scene"><button data-go="gallery" class="active" aria-label="Collection"><i></i></button><button data-go="rose" aria-label="Rose Lune"><i></i></button><button data-go="galet" aria-label="Galet"><i></i></button></div>
@@ -143,17 +144,17 @@
 <section class="ending"><div class="eyebrow">A study in feeling</div><h2>Some things are<br><i>better felt.</i></h2><p>Explore every note, catch the light against the glass, and find the fragrance that stays with you long after the moment ends.</p><button id="returnBtn">Return to the collection &nbsp; ↗</button><div class="copyright"><span>© ATELIER — A CONCEPT SHOWROOM</span><span>CRAFTED FOR AN IMMERSIVE WEB EXPERIENCE</span></div></section>
 </main>
 <div class="shade" id="bagShade" role="dialog" aria-modal="true" aria-label="Your bag"><div class="side-drawer"><div class="drawer-head"><h2>Your bag</h2><button class="close" id="closeBag" aria-label="Close bag">×</button></div><div class="bag-list" id="bagList"></div><div class="total"><span>Subtotal</span><span id="bagTotal">€0</span></div><p class="demo-note">This is an interactive concept demonstration. Products and prices are illustrative; checkout and payment are not connected.</p></div></div>
-<div class="viewer-shade" id="viewerShade" role="dialog" aria-modal="true" aria-label="Interactive 3D perfume model"><div class="viewer-window" id="viewerWindow"><div class="viewer-head"><div class="eyebrow">Interactive object study — move to rotate</div><h2 id="viewerName">Rose Lune</h2></div><div id="three-canvas"></div><div id="viewerFallback" class="viewer-fallback" hidden><img id="viewerFallbackImg" src="rose-lune.png" alt="Selected perfume"><p>3D rendering could not load on this connection. The transparent product artwork remains available.</p></div><div class="viewer-caption">DRAG TO ROTATE &nbsp; / &nbsp; PINCH OR SCROLL TO ZOOM</div><button class="viewer-close" id="closeViewer" aria-label="Close 3D model">×</button></div></div>
+<div class="viewer-shade" id="viewerShade" role="dialog" aria-modal="true" aria-label="Interactive 3D perfume model"><div class="viewer-window" id="viewerWindow"><div class="viewer-head"><div class="eyebrow">Interactive object study — move to rotate</div><h2 id="viewerName">Rose Lune</h2></div><div id="three-canvas"></div><div id="viewerFallback" class="viewer-fallback" hidden><img id="viewerFallbackImg" src="rose-lune-smoked.png" alt="Selected perfume"><p>3D rendering could not load on this connection. The transparent product artwork remains available.</p></div><div class="viewer-caption">DRAG TO ROTATE &nbsp; / &nbsp; PINCH OR SCROLL TO ZOOM</div><button class="viewer-close" id="closeViewer" aria-label="Close 3D model">×</button></div></div>
 <script>
 (function(){
 'use strict';
 const DATA = {
   galet: {name:'Galet', html:'Galet', desc:'Fig leaf, soft greens and white woods settle into a quiet, luminous trail.',
-    top:'Fig leaf, bergamot', heart:'Green tea, mastic', base:'White woods, vetiver', price:175, img:'galet.png', num:'01 / 03'},
+    top:'Fig leaf, bergamot', heart:'Green tea, mastic', base:'White woods, vetiver', price:175, img:'galet-smoked.png', num:'01 / 03'},
   rose: {name:'Rose Lune', html:'Rose <em>Lune</em>', desc:'Pink pepper, lychee and velvet rose over a whisper of cashmere wood.',
-    top:'Pink pepper, lychee', heart:'Damask rose, peony', base:'White musk, cashmere wood', price:185, img:'rose-lune.png', num:'02 / 03'},
+    top:'Pink pepper, lychee', heart:'Damask rose, peony', base:'White musk, cashmere wood', price:185, img:'rose-lune-smoked.png', num:'02 / 03'},
   bleu: {name:'Sillage Bleu', html:'Sillage <em>Bleu</em>', desc:'Bergamot and marine iris give way to blue cedar and cool amber.',
-    top:'Bergamot, juniper', heart:'Marine iris, clary sage', base:'Blue cedar, amber', price:195, img:'sillage-bleu.png', num:'03 / 03'}
+    top:'Bergamot, juniper', heart:'Marine iris, clary sage', base:'Blue cedar, amber', price:195, img:'sillage-bleu-smoked.png', num:'03 / 03'}
 };
 const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
 const scenes=['gallery', ...Object.keys(DATA)];
@@ -242,6 +243,7 @@ motion.addEventListener('change',syncFilm);
 renderBag();updateScroll();window.addEventListener('load',()=>setTimeout(()=>$('#loader').classList.add('out'),450));setTimeout(()=>$('#loader').classList.add('out'),1800);
 })();
 </script>
-<script type="module" src="showroom-webgl.js?v=6"></script>
+<script type="module" src="SideRays.js?v=2"></script>
+<script type="module" src="showroom-webgl.js?v=8"></script>
 </body>
 </html>

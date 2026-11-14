@@ -1,5 +1,5 @@
 import {
-  ACESFilmicToneMapping, AmbientLight, Box3, CanvasTexture, DoubleSide, GLTFLoader,
+  ACESFilmicToneMapping, AmbientLight, Box3, CanvasTexture, Color, DoubleSide, GLTFLoader,
   Group, MathUtils, Mesh, MeshBasicMaterial, MeshStandardMaterial, PerspectiveCamera,
   PlaneGeometry, PMREMGenerator, RoomEnvironment, Scene, SpotLight, Vector3, WebGLRenderer
 } from './three-showroom.js?v=2';
@@ -17,12 +17,16 @@ const inspection = new Group();
 closeup.add(inspection);
 
 const products = [
-  {key: 'galet', file: 'galet-crystal.glb', x: .03, y: -.52, z: 1.35, height: 2.7, tone: '#a8ef55', rest: -.13},
-  {key: 'rose', file: 'rose-lune.glb', x: -2.03, y: .20, z: -1.4, height: 2.60, tone: '#ff6b9f', rest: .18},
-  {key: 'bleu', file: 'sillage-bleu.glb', x: 2.19, y: .05, z: -2.65, height: 3.18, tone: '#4e81ff', rest: -.17}
+  {key: 'galet', file: 'galet-crystal.glb', x: .03, y: -.52, z: 1.35, height: 2.7,
+    tone: '#b2b590', glass: '#e1e1d0', absorption: '#737b55', liquid: '#686b4b', distance: .63, thickness: .014, rest: -.13},
+  {key: 'rose', file: 'rose-lune-smoked.glb', x: -2.03, y: .20, z: -1.4, height: 2.60,
+    tone: '#c69a9e', glass: '#c5a9ae', absorption: '#63404b', liquid: '#80545c', distance: .58, thickness: .028, rest: .10},
+  {key: 'bleu', file: 'sillage-bleu.glb', x: 2.19, y: .05, z: -2.65, height: 3.18,
+    tone: '#8299ac', glass: '#c5cdd8', absorption: '#475b77', liquid: '#485165', distance: .65, thickness: .014, rest: -.17}
 ];
 const angle = Math.tan(MathUtils.degToRad(camera.fov / 2));
 const pointerStates = new Map();
+const lightingPointer = {x: 0, y: 0, targetX: 0, targetY: 0};
 const manualTurn = {x: 0, y: 0};
 const projected = new Vector3();
 let renderer, studioReflection, modalBottle;
@@ -86,10 +90,30 @@ function addRefraction(group, color, radius) {
   return groundLight;
 }
 
+function satinBump() {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  const texture = ctx.createImageData(128, 128);
+  let state = 37;
+  for (let i = 0; i < texture.data.length; i += 4) {
+    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+    const grain = 111 + (state >>> 27);
+    texture.data[i] = texture.data[i + 1] = texture.data[i + 2] = grain;
+    texture.data[i + 3] = 255;
+  }
+  ctx.putImageData(texture, 0, 0);
+  return new CanvasTexture(canvas);
+}
+
+const satinMap = satinBump();
+
 function plinth(radius, height) {
   const profile = [
-    [.001, 0], [radius - .025, 0], [radius, -.025],
-    [radius * .96, -height + .024], [radius * .94, -height], [.001, -height]
+    [.001, 0], [radius - .06, 0], [radius - .026, -.016], [radius, -.055],
+    [radius, -.094], [radius * .985, -.108], [radius * .978, -height + .065],
+    [radius * .956, -height + .028], [radius * .923, -height],
+    [radius * .85, -height - .017], [.001, -height - .017]
   ];
   const segments = 96;
   const geometry = new PlaneGeometry(1, 1, segments, profile.length - 1);
@@ -98,18 +122,25 @@ function plinth(radius, height) {
     const [r, y] = profile[row];
     for (let col = 0; col <= segments; col++) {
       const theta = col / segments * Math.PI * 2;
-      vertices.setXYZ(row * (segments + 1) + col, r * Math.cos(theta), y, -r * Math.sin(theta));
+      const index = row * (segments + 1) + col;
+      const x = r * Math.cos(theta);
+      const z = -r * Math.sin(theta);
+      vertices.setXYZ(index, x, y, z);
+      geometry.attributes.uv.setXY(index, x / (radius * 2) + .5, z / (radius * 2) + .5);
     }
   }
   geometry.computeVertexNormals();
   geometry.clearGroups();
   const stride = segments * 6;
-  geometry.addGroup(0, stride, 0);
-  geometry.addGroup(stride, stride, 1);
-  geometry.addGroup(stride * 2, stride * 3, 0);
+  geometry.addGroup(0, stride * 2, 0);
+  geometry.addGroup(stride * 2, stride * 2, 1);
+  geometry.addGroup(stride * 4, stride * 6, 2);
   const base = new Mesh(geometry, [
-    new MeshStandardMaterial({color: '#36302e', metalness: .63, roughness: .33}),
-    new MeshStandardMaterial({color: '#b49b7a', metalness: .78, roughness: .26})
+    new MeshStandardMaterial({color: '#3c383b', metalness: .47, roughness: .32,
+      bumpMap: satinMap, bumpScale: .018}),
+    new MeshStandardMaterial({color: '#c6ad90', metalness: .77, roughness: .235}),
+    new MeshStandardMaterial({color: '#29282d', metalness: .56, roughness: .39,
+      bumpMap: satinMap, bumpScale: .013})
   ]);
   const shadow = new Mesh(new PlaneGeometry(radius * 1.9, radius * 1.7),
     new MeshBasicMaterial({map: shadowMap, transparent: true, depthWrite: false}));
@@ -135,25 +166,59 @@ async function loadBottle(product, loader) {
   const bounds = new Box3().setFromObject(bottle);
   const scale = product.height / (bounds.max.y - bounds.min.y);
   const center = bounds.getCenter(new Vector3());
-  const xScale = product.key === 'rose' ? scale * .87 : scale;
-  bottle.position.set(-center.x * xScale, -center.y * scale, -center.z * scale);
-  bottle.scale.set(xScale, scale, scale);
+  bottle.position.copy(center).multiplyScalar(-scale);
+  bottle.scale.setScalar(scale);
   bottle.traverse(mesh => {
     if (!mesh.isMesh) return;
     const material = mesh.material;
-    if (/eau de parfum/.test(material.name)) {
-      if (product.key === 'rose') {
-        material.color.set('#ee478e');
-        material.transmission = 0;
-        material.roughness = .24;
-      }
+    if (/eau de parfum/i.test(material.name)) {
+      // Keep the inner mesh in the opaque transmission pass so the glass can refract it.
+      mesh.geometry.computeBoundingBox();
+      const surface = mesh.geometry.boundingBox;
+      material.color.set(product.liquid);
+      material.transmission = 0;
+      material.roughness = .15;
+      material.metalness = 0;
       material.emissive.copy(material.color);
-      material.emissiveIntensity = .18;
-    }
-    if (/crystal/i.test(material.name)) {
-      if (product.key === 'rose') material.color.set('#ffb2ce');
-      material.envMapIntensity = 1.36;
+      material.emissiveIntensity = 0;
+      material.clearcoat = .23;
+      material.clearcoatRoughness = .12;
+      material.onBeforeCompile = shader => {
+        shader.uniforms.liquidBottom = {value: surface.min.y};
+        shader.uniforms.liquidDepth = {value: Math.max(surface.max.y - surface.min.y, 1e-5)};
+        shader.vertexShader = shader.vertexShader
+          .replace('#include <common>', '#include <common>\nvarying float bottleHeight;')
+          .replace('#include <begin_vertex>', '#include <begin_vertex>\nbottleHeight = position.y;');
+        shader.fragmentShader = shader.fragmentShader
+          .replace('#include <common>', '#include <common>\nvarying float bottleHeight; uniform float liquidBottom; uniform float liquidDepth;')
+          .replace('#include <color_fragment>', `#include <color_fragment>
+            float fill = clamp((bottleHeight - liquidBottom) / liquidDepth, 0.0, 1.0);
+            float meniscus = smoothstep(0.97, 0.996, fill);
+            diffuseColor.rgb *= mix(0.68, 1.04, smoothstep(0.02, 0.92, fill));
+            diffuseColor.rgb *= 1.0 - 0.09 * meniscus;
+          `);
+      };
+    } else if (/crystal/i.test(material.name)) {
+      material.color.set(product.glass);
+      material.attenuationColor = new Color(product.absorption);
+      material.attenuationDistance = product.distance;
+      material.transmission = .962;
+      material.thickness = product.thickness;
+      material.ior = 1.47;
+      material.roughness = .10;
+      material.clearcoat = .16;
+      material.clearcoatRoughness = .063;
+      material.envMapIntensity = 1.07;
       material.side = DoubleSide;
+    } else if (/atomizer tube/i.test(material.name)) {
+      // Leave a muted highlight on the dip tube in the solid pass refracted by the shell.
+      material.transmission = 0;
+      material.color.set('#64605d');
+      material.roughness = .31;
+    } else if (/pearl|lacquer|cap/i.test(material.name)) {
+      material.bumpMap = satinMap;
+      material.bumpScale = .00013;
+      material.envMapIntensity = .83;
     }
   });
 
@@ -163,13 +228,16 @@ async function loadBottle(product, loader) {
   pivot.position.y = product.height / 2 + .035;
   pivot.add(bottle);
   const radius = product.key === 'galet' ? 1.32 : 1.17;
-  group.add(plinth(radius, product.key === 'galet' ? .25 : .20), pivot);
+  group.add(plinth(radius, product.key === 'galet' ? .42 : .36), pivot);
   product.refraction = addRefraction(group, product.tone, radius);
   product.keyLight = addSpot(group, {
     color: '#fff3e9', intensity: 74, position: [-.95, 5.65, 2.8], look: [0, .98, 0]
   });
   product.rimLight = addSpot(group, {
     color: product.tone, intensity: 50, position: [1.15, 4.3, -1.9], look: [0, 1.2, 0]
+  });
+  product.edgeLight = addSpot(group, {
+    color: '#fff2e8', intensity: 18, position: [-1.65, 1.90, -2.45], look: [0, 1.08, 0], spread: .34
   });
   scene.add(group);
   Object.assign(product, {group, pivot, bottle});
@@ -185,10 +253,10 @@ function galleryFrame(aspect) {
 
 function closeFrame(product, aspect) {
   const narrow = aspect < .9;
-  const distance = Math.max(product.height / (2 * angle * (narrow ? .39 : .43)),
+  const distance = Math.max(product.height / (2 * angle * (narrow ? .39 : .42)),
     1.37 / (angle * aspect));
   return {
-    x: product.x, y: product.y + product.height / 2 - (narrow ? .37 : .28) * distance * angle,
+    x: product.x, y: product.y + product.height / 2 - (narrow ? .37 : .41) * distance * angle,
     z: product.z + distance,
     galet: Number(product.key === 'galet'), rose: Number(product.key === 'rose'),
     bleu: Number(product.key === 'bleu')
@@ -284,6 +352,9 @@ function render(time) {
   camera.position.set(shot.x, shot.y, shot.z);
   const strongest = Math.max(shot.rose, shot.galet, shot.bleu);
   const seconds = time / 1000;
+  const reach = reducedMotion.matches ? 0 : 1;
+  lightingPointer.x = MathUtils.damp(lightingPointer.x, lightingPointer.targetX * reach, 3.8, dt);
+  lightingPointer.y = MathUtils.damp(lightingPointer.y, lightingPointer.targetY * reach, 3.8, dt);
   for (const [index, product] of products.entries()) {
     const emphasis = shot[product.key];
     const selected = current === product.key;
@@ -296,14 +367,18 @@ function render(time) {
     const otherFocus = Math.max(0, strongest - emphasis);
     const direction = product.x < shot.x ? -1 : 1;
     product.group.position.x = product.x + direction * otherFocus * 1.9;
-    product.group.position.y = product.y - otherFocus * .32;
+    product.group.position.y = product.y - otherFocus * (camera.aspect < .9 ? .32 : .93);
+    product.group.position.z = product.z - otherFocus * .55;
     const secondary = 1 - otherFocus * .78;
-    product.keyLight.intensity = (75 + emphasis * 59) * secondary;
-    product.rimLight.intensity = (55 + emphasis * 48) * secondary;
+    product.keyLight.intensity = (106 + emphasis * 67) * secondary;
+    product.keyLight.position.x = -.95 + lightingPointer.x * .95;
+    product.keyLight.position.z = 2.8 + lightingPointer.y * .36;
+    product.rimLight.intensity = (31 + emphasis * 33) * secondary;
+    product.edgeLight.intensity = (22 + emphasis * 23) * secondary;
     product.refraction.rotation.z = turn * .91;
-    product.refraction.position.x = Math.sin(turn) * .15;
+    product.refraction.position.x = Math.sin(turn) * .15 + lightingPointer.x * .085;
     product.refraction.position.z = .26 + Math.cos(turn * 2) * .08;
-    product.refraction.material.opacity = (.66 + emphasis * .2) * secondary * (.88 + .12 * Math.cos(turn * 2));
+    product.refraction.material.opacity = (.39 + emphasis * .16) * secondary * (.88 + .12 * Math.cos(turn * 2));
   }
   if (current === 'gallery') updateHits();
   renderer.render(scene, camera);
@@ -373,6 +448,10 @@ function fallback(error) {
   document.documentElement.classList.remove('glb-live');
   if (modalBottle) document.querySelector('#viewerFallback').hidden = false;
   stop();
+  stage.removeEventListener('pointermove', trackLighting);
+  stage.removeEventListener('pointerup', releaseLighting);
+  stage.removeEventListener('pointerleave', centerLighting);
+  stage.removeEventListener('pointercancel', centerLighting);
   renderer?.setAnimationLoop(null);
   renderer?.domElement.remove();
   studioReflection?.dispose();
@@ -380,23 +459,54 @@ function fallback(error) {
   delete window.Perfume3D;
 }
 
+function reflectionPanels(environment) {
+  const panels = [
+    {size: [1.45, 5.1], position: [-4.6, 1.4, 2.5], color: '#fff4e9', energy: 2.7},
+    {size: [.71, 4.1], position: [4.2, .65, 2.35], color: '#f2f4ff', energy: 2.2},
+    {size: [3.2, 1.0], position: [.25, 4.25, .6], color: '#fff5ec', energy: 2.75}
+  ];
+  for (const {size, position, color, energy} of panels) {
+    const light = new Mesh(new PlaneGeometry(...size),
+      new MeshBasicMaterial({color: new Color(color).multiplyScalar(energy), toneMapped: false}));
+    light.position.set(...position);
+    light.lookAt(0, 0, 0);
+    environment.add(light);
+  }
+}
+
+function trackLighting(event) {
+  const rect = stage.getBoundingClientRect();
+  if (rect.width <= 0 || rect.height <= 0) return;
+  lightingPointer.targetX = MathUtils.clamp((event.clientX - rect.left) / rect.width * 2 - 1, -1, 1);
+  lightingPointer.targetY = MathUtils.clamp((event.clientY - rect.top) / rect.height * 2 - 1, -1, 1);
+}
+
+function centerLighting() {
+  lightingPointer.targetX = lightingPointer.targetY = 0;
+}
+
+function releaseLighting(event) {
+  if (event.pointerType !== 'mouse') centerLighting();
+}
+
 async function start() {
   try {
     renderer = new WebGLRenderer({alpha: true, antialias: true, powerPreference: 'high-performance'});
     renderer.setPixelRatio(Math.min(devicePixelRatio, innerWidth <= 660 ? 1.25 : 1.5));
     renderer.toneMapping = ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.21;
-    renderer.transmissionResolutionScale = .65;
+    renderer.toneMappingExposure = 1.07;
+    renderer.transmissionResolutionScale = innerWidth <= 660 ? .68 : .85;
     const studio = new RoomEnvironment();
+    reflectionPanels(studio);
     const pmrem = new PMREMGenerator(renderer);
-    studioReflection = pmrem.fromScene(studio, .035);
+    studioReflection = pmrem.fromScene(studio, .016);
     pmrem.dispose();
     studio.dispose();
     scene.environment = closeup.environment = studioReflection.texture;
-    scene.environmentIntensity = .72;
-    closeup.environmentIntensity = 1.05;
-    scene.add(new AmbientLight('#e9e0d5', .72));
-    closeup.add(new AmbientLight('#fff1dc', .88));
+    scene.environmentIntensity = .67;
+    closeup.environmentIntensity = 1.17;
+    scene.add(new AmbientLight('#ebedf8', .26));
+    closeup.add(new AmbientLight('#f3eefa', .32));
     addSpot(closeup, {color: '#fff4e7', intensity: 70, position: [3, 4, 4], look: [0, 0, 0]});
     const loader = new GLTFLoader();
     await Promise.all(products.map(product => loadBottle(product, loader)));
@@ -409,6 +519,10 @@ async function start() {
     controls(renderer.domElement, true);
     controls(dragArea, false);
     mount.appendChild(renderer.domElement);
+    stage.addEventListener('pointermove', trackLighting, {passive: true});
+    stage.addEventListener('pointerup', releaseLighting);
+    stage.addEventListener('pointerleave', centerLighting);
+    stage.addEventListener('pointercancel', centerLighting);
     document.documentElement.classList.add('glb-live');
     window.Perfume3D = {open, stop, spin};
     renderer.setAnimationLoop(render);

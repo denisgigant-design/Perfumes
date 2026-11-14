@@ -97,12 +97,12 @@
 .experience { height: 460vh; }
 .stage[data-state="bleu"] { --accent: #9cb9ff; }
 .stage[data-state="bleu"] .studio-film {
-  transform: scale(1.19) translateX(-2%); filter: brightness(.80) saturate(.92);
+  transform: scale(1.19) translateX(-2%); filter: brightness(.79) saturate(.63);
 }
 .stage[data-state="galet"] .studio-film, .stage[data-state="rose"] .studio-film {
-  filter: brightness(.83) saturate(.92);
+  filter: brightness(.81) saturate(.59);
 }
-.studio-film { opacity: .94; filter: brightness(.9) saturate(.94); }
+.studio-film { opacity: .88; filter: brightness(.86) saturate(.59); }
 .gallery-bay.rose, .glb-live .gallery-bay.rose { left: 28%; top: 39%; }
 .gallery-bay.galet, .glb-live .gallery-bay.galet { left: 50%; top: 51%; }
 .gallery-bay.bleu, .glb-live .gallery-bay.bleu { left: 71%; top: 42%; }
@@ -125,4 +125,44 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .stage, .glb-live .stage { background-image: url("studio-trio.jpg"); }
+}
+
+/* Side Rays sits above the studio film and behind the transparent 3D canvas. */
+.studio-rays {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  mix-blend-mode: screen;
+  opacity: .88;
+}
+.stage[data-state]:not([data-state="gallery"]) .studio-rays { opacity: .92; }
+.stage[data-state]:not([data-state="gallery"])::after {
+  background: linear-gradient(180deg,#0b0909a6,transparent 17%,transparent 54%,#0b090a 97%);
+}
+@media (min-width: 661px) {
+  .stage:not([data-state="gallery"]) .detail-panel {
+    bottom: max(57px, 6.2svh);
+    width: min(85%, 550px);
+  }
+  .stage:not([data-state="gallery"]) .detail-panel h2 {
+    font-size: clamp(36px, 4.8vw, 65px);
+    margin-bottom: 8px;
+  }
+  .stage:not([data-state="gallery"]) .detail-panel .catalogue { margin-bottom: 5px; }
+  .stage:not([data-state="gallery"]) .detail-panel .notes { margin-top: 6px; }
+  .stage:not([data-state="gallery"]) .detail-panel .price { margin: 6px 0; }
+  .stage:not([data-state="gallery"]) .detail-panel .details-sub { margin-top: 6px; }
+  .stage:not([data-state="gallery"]) #spinBottle { margin-bottom: 4px; }
+  .stage:not([data-state="gallery"]) .stage-footer { bottom: 12px; }
+  .viewer-caption { left: auto; right: 33px; bottom: 22px; }
+  .viewer-close { top: auto; bottom: 51px; }
+}
+@media (min-width: 661px) and (max-height: 740px) {
+  .stage:not([data-state="gallery"]) .detail-panel .notes { display: none; }
+  .stage:not([data-state="gallery"]) .detail-panel { bottom: 49px; }
+  .stage:not([data-state="gallery"]) .detail-panel h2 { font-size: clamp(33px, 4.2vw, 50px); }
 }
