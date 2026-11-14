@@ -1,43 +1,16 @@
-# ATELIER — Real-time 3D perfume showroom
+# ATELIER — 3D perfume showroom
 
-A concept website based on the supplied luxury-fragrance showroom motion reference, featuring **two genuinely three-dimensional original GLB perfume bottles**, a separate shelving background, animated scene transitions and a drag-to-rotate inspection view. This is an independent demo, not an official perfume shop.
+A static showroom for Rose Lune and Galet. Choose a bottle in the collection or scroll between fragrances. Each flacon sits inside a physically recessed stone shelf. A perspective camera moves toward the chosen shelf as its overhead light brightens. The product details include an interactive viewer with drag rotation and pinch or wheel zoom.
 
-## Open the website
+## Run locally
 
-1. Extract `atelier-perfume-3d.zip`.
-2. Keep `index.html` and the `assets` folder together.
-3. Upload `index.html` and `assets/` to any static host (GitHub Pages, Netlify, etc.). **No build or npm install required.**
-4. For local desktop testing, from the extracted folder run `python -m http.server 8000` and open `http://localhost:8000`.
+Run `python3 -m http.server 8000` from the repository root and open http://localhost:8000. GitHub Pages serves the same root directly. No runtime build or package installation is needed. Browsers without WebGL 2 use the included bottle images.
 
-Opening the HTML directly as a `file://` URL may block loading GLBs in some browsers; serving it over HTTP or HTTPS is recommended.
+The bag is a local demo. It saves quantities on the device and does not process payments.
 
-## What was corrected
+## Models and renderer
 
-- Green perfume bottle rebuilt as a true faceted **3D model** with a rounded glass body, pale green liquid, metal collar, pearlescent cap, and a clean original textured label.
-- Pink perfume bottle also uses its own **original 3D mesh** with a rounded body and black spherical cap.
-- Both GLBs render **in the main collection and product close-up**, not only in a popup. The same actual model moves between scene positions and smoothly scales up.
-- In the interactive viewer, drag to rotate the GLB. Both models and their embedded label textures are included locally.
-- Uses a lightweight **native WebGL2 glTF/GLB renderer**, with approximated glass, polished-metal highlights, per-product colour lighting, and easing. It **does not depend on external Three.js/CDN scripts**. Google Fonts is the only optional external resource.
-- Separate dark shelving artwork remains behind the live 3D models; bottle PNGs are used *only if WebGL2 is unsupported / GLB load fails*, and as cart thumbnails.
-- Scroll-driven gallery → Rose Lune → Galet transitions, touch swipe, navigation controls, reduced-motion handling, and mobile layout.
-
-## Included files
-
-```
-index.html                          Homepage, interface, CSS & UI transitions
-assets/showroom-webgl.js           Native WebGL2 GLB loader, shaders & animation
-assets/rose-lune.glb               Original real 3D bottle, label embedded
-assets/galet.glb                   Original real 3D bottle, label embedded
-assets/rose-lune.png               2D fallback / cart thumbnail
-assets/galet.png                   2D fallback / cart thumbnail
-assets/rose-lune-label.png         Editable label artwork
-assets/galet-label.png             Editable label artwork
-assets/shelving.jpg                Separate 2D shelving backdrop
-RESEARCH.md                        Research ledger
-```
-
-## Important boundaries
-
-This is a **functional static concept**, not a completed production commerce system. Cart state is local only and payment processing is not connected. Model glass/reflections use realtime WebGL shader approximation rather than offline raytraced or pathtraced refraction. GLB models are procedurally authored originals (not externally licensed commercial perfume scans).
-
-JavaScript parsing and GLB container integrity were checked. The testing browser in this environment blocked opening even local pages, so the actual rendering appearance and interactions **could not be visually verified here**. Test the extracted site on the target device before publishing. If a device lacks WebGL2, it displays the fallback PNG assets.
+- Rose Lune uses a reworked [Grab3D Perfume Bottle](https://grab3d.com/models/props/perfume-bottle/). The source is CC0. The ATELIER version uses pink crystal and perfume, an obsidian cap, and a new rose-gold collar.
+- Galet is an original smooth mesh with a rounded rectangular glass flacon, green perfume, and a polished ivory cap. Its printed label is drawn as a texture in the showroom.
+- To rebuild both GLBs, download the stock Grab3D GLB and run `blender -b --python build-bottles.py -- /path/to/perfume-bottle.glb .` with Blender 4.3.
+- The bundled renderer uses Three.js r170, its GLTFLoader, and RoomEnvironment. Its MIT license is included in `LICENSE-three.txt`.

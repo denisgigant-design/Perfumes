@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#090a0d">
-<meta name="description" content="A cinematic two-fragrance virtual showroom, built with layered product photography, interactive 3D GLBs and scroll-driven transitions.">
+<meta name="description" content="A cinematic two-fragrance virtual showroom, with recessed stone displays, responsive lighting, and interactive 3D perfume bottles.">
 <title>ATELIER — Scent, Unveiled</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,14 +23,76 @@
 @media(max-width:660px){.nav{padding:20px 17px}.logo{font-size:13px;letter-spacing:.22em}.logo span{font-size:6px}.nav-center{top:77px;white-space:nowrap}.nav-center button{font-size:9px;padding:9px 15px}.nav-right button{font-size:9px;padding:7px}.experience{height:340vh}.stage{height:100svh;min-height:0;background-size:auto 100%;background-position:center}.stage:before{background:linear-gradient(to bottom,rgba(0,0,0,.45),transparent 23%,rgba(0,0,0,.22) 80%,rgba(0,0,0,.65))}.edge-stone{display:none}.gallery{background:radial-gradient(ellipse 70% 40% at 50% 30%,rgba(111,82,93,.10),transparent 87%)}.gallery-bay{top:24%;height:52%;width:44%;border:1px solid rgba(245,231,243,.17);background:linear-gradient(135deg,rgba(65,41,56,.50),rgba(10,10,13,.75));box-shadow:inset 0 0 65px rgba(0,0,0,.8),0 18px 22px rgba(0,0,0,.4)}.gallery-bay.rose{left:5%}.gallery-bay.galet{left:51%}.gallery-bay.galet{background:linear-gradient(135deg,rgba(48,80,65,.43),rgba(10,10,13,.78))}.gallery-bay img{width:94%;max-height:75%;transform:translateY(-17%) scale(.95)}.gallery-bay.galet img{width:93%}.gallery-bay .bay-caption{font-size:8px;letter-spacing:.12em;bottom:6%}.gallery-bay .bay-n{font-size:8px}.gallery-intro{left:6%;right:6%;top:142px;bottom:auto;max-width:350px;text-align:left}.gallery-intro h1{font-size:43px;margin:6px 0 6px}.gallery-intro p{font-size:10px}.gallery-intro button{display:none}.detail-frame{left:7%;top:26%;height:61%;width:86%;background:radial-gradient(ellipse at 50% 36%,rgba(214,113,146,.35),rgba(31,23,34,.35) 80%);border:1px solid rgba(255,255,255,.22)}.detail-panel{left:7%;top:126px;width:86%;max-width:450px;transform:translateY(0)!important}.stage:not([data-state="gallery"]) .detail-panel{transform:translateY(0)!important}.detail-panel .catalogue{font-size:8px;margin-bottom:4px}.detail-panel h2{font-size:clamp(49px,14vw,77px);margin:0 0 4px}.scent-desc{display:none}.notes{display:none}.price{font-size:12px;margin:4px 0 7px}.price small{font-size:9px}.product-actions{gap:14px}.add-btn{font-size:9px}.inspect-btn{font-size:8px;padding:8px 12px}.details-sub{display:none}.hero-product{top:26%;bottom:10%;inset-inline:0}.hero-product img{width:80%;height:76%}.hero-product.galet img{height:73%;width:78%}.side-quote{display:none}.aura{left:0;top:26%;width:100%;height:70%}.stage-footer{left:6%;right:6%;bottom:max(19px,env(safe-area-inset-bottom));z-index:10}.scroll-prompt{font-size:8px;letter-spacing:.11em}.scene-nav .number{min-width:52px;font-size:9px}.scene-nav button{width:35px;height:35px}.progresstrack span{width:23px}.tiny-vertical{display:none}.ending{padding:100px 20px 60px;min-height:55vh}.ending h2{font-size:55px}.copyright{flex-direction:column;gap:9px;margin-top:40px}.viewer-window{inset:0}.viewer-head{left:18px;top:25px}.viewer-caption{left:18px;bottom:30px}.viewer-head h2{font-size:45px}.viewer-close{right:16px;top:18px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 
-[hidden]{display:none!important}
-/* The glassware in the stage is the actual rotating GLB, not a product cut-out. */
-#live-three{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none;display:block}
-.glb-live .gallery-bay img,.glb-live .hero-product img{opacity:0!important}
-.glb-indicator{position:absolute;right:4.4%;top:12.5%;z-index:12;color:rgba(243,237,236,.63);font-size:8px;letter-spacing:.18em;pointer-events:none}
-#three-canvas #live-three{position:absolute;inset:0;width:100%;height:100%;pointer-events:auto;touch-action:none}
-#three-canvas{z-index:1}
-@media(max-width:660px){.glb-indicator{top:110px;right:6%;font-size:7px}.gallery-bay{overflow:hidden}.gallery-bay .bay-caption{z-index:7}}
+[hidden] { display: none !important; }
+#showroom3d { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+#showroom3d canvas, #three-canvas canvas { display: block; width: 100%; height: 100%; }
+#three-canvas canvas { touch-action: none; }
+.details-sub button { border: 0; padding: 0; background: transparent; color: inherit; font: inherit; letter-spacing: inherit; }
+.glb-live .stage { background-image: none; }
+.glb-live .edge-stone,
+.glb-live .detail-frame,
+.glb-live .hero-product,
+.glb-live .aura,
+.glb-live .side-quote,
+.glb-live .gallery-bay img,
+.glb-live .gallery-bay .bay-light { display: none; }
+.glb-live .gallery-bay { width: 22%; height: 76%; top: 13%; overflow: visible; }
+.glb-live .gallery-bay.rose { left: 25%; }
+.glb-live .gallery-bay.galet { left: 53%; }
+.glb-live .gallery-bay .bay-n { display: none; }
+.glb-live .gallery-bay .bay-caption {
+  display: block; position: absolute; left: 50%; bottom: 4%; transform: translateX(-50%);
+  white-space: nowrap; font-size: 9px; color: #f5edee; letter-spacing: .15em;
+  text-shadow: 0 1px 10px #000;
+}
+.glb-live .detail-panel {
+  width: min(26%, 325px); left: 5%; top: 50%; transform: translateY(-47%);
+  text-shadow: 0 2px 20px #000;
+}
+.glb-live .detail-panel h2 { font-size: clamp(42px, 6vw, 90px); }
+.glb-live .gallery-intro { left: 4.5%; bottom: 12%; max-width: 25%; }
+.glb-live .gallery-intro h1 { font-size: clamp(31px, 3.45vw, 61px); }
+.glb-live .gallery-intro p,
+.glb-live .gallery-intro > button { display: none; }
+.glb-live .stage::after {
+  content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background: linear-gradient(0deg, rgba(5,4,8,.88), transparent 22%),
+              linear-gradient(180deg, rgba(5,4,8,.6), transparent 20%);
+}
+.glb-live .stage:not([data-state="gallery"])::after {
+  background: linear-gradient(90deg, rgba(5,4,8,.96), rgba(5,4,8,.68) 24%, transparent 49%),
+              linear-gradient(0deg, rgba(5,4,8,.9), transparent 20%),
+              linear-gradient(180deg, rgba(5,4,8,.59), transparent 18%);
+}
+@media (max-width: 900px) and (min-width: 661px) {
+  .glb-live .detail-panel { width: 29%; }
+  .glb-live .gallery-bay.rose { left: 22%; }
+  .glb-live .gallery-bay.galet { left: 56%; }
+}
+@media (max-width: 660px) {
+  .glb-live .gallery-bay, .glb-live .gallery-bay.galet {
+    width: 43%; height: 43%; top: 22%; border: 0; background: transparent; box-shadow: none;
+  }
+  .glb-live .gallery-bay.rose { left: 7%; }
+  .glb-live .gallery-bay.galet { left: 50%; }
+  .glb-live .gallery-bay .bay-caption { bottom: 8%; font-size: 8px; }
+  .glb-live .gallery-intro { left: 6%; top: auto; bottom: 15%; max-width: 88%; }
+  .glb-live .gallery-intro h1 { font-size: clamp(36px, 10.9vw, 55px); }
+  .glb-live .detail-panel {
+    left: 6%; width: 88%; top: auto; bottom: max(68px, 9svh); transform: none;
+  }
+  .glb-live .detail-panel h2 { margin-top: 6px; font-size: clamp(35px, 9vw, 54px); }
+  .glb-live .detail-panel .scent-desc { display: block; margin: 5px 0 9px; }
+  .glb-live .detail-panel .notes { margin: 7px 0; }
+  .glb-live .detail-panel .details-sub { display: none; }
+  .glb-live .stage:not([data-state="gallery"])::after {
+    background: linear-gradient(0deg, #08070b 25%, rgba(8,7,11,.88) 35%, transparent 58%),
+                linear-gradient(180deg, rgba(5,4,8,.6), transparent 20%);
+  }
+}
+@media (max-width: 660px) and (max-height: 700px) {
+  .glb-live .detail-panel .notes { display: none; }
+}
 </style>
 </head>
 <body>
@@ -39,6 +101,7 @@
 <main>
 <section class="experience" id="experience" aria-label="Interactive perfume showroom">
  <div class="stage" id="stage" data-state="gallery">
+ <div id="showroom3d" aria-hidden="true"></div>
  <div class="edge-stone"></div>
  <div class="gallery" id="gallery">
   <button class="gallery-bay rose" data-go="rose" aria-label="Discover Rose Lune perfume"><span class="bay-light"></span><span class="bay-n">01 / 02</span><img src="rose-lune.png" alt="Rose Lune pink perfume bottle with glossy black spherical cap"><span class="bay-caption">Rose Lune &nbsp; — &nbsp; Discover ↗</span></button>
@@ -54,13 +117,13 @@
    <dl class="notes"><div><dt>Top</dt><dd id="topNote">Pink pepper, lychee</dd></div><div><dt>Heart</dt><dd id="heartNote">Damask rose, peony</dd></div><div><dt>Base</dt><dd id="baseNote">White musk, cashmere wood</dd></div></dl>
    <div class="price"><span id="price">€185</span> <small> &nbsp; EXTRAIT · 100 ML</small></div>
    <div class="product-actions"><button class="add-btn" id="addBtn">ADD TO BAG &nbsp; ↗</button><button class="inspect-btn" id="inspectBtn">⟳ &nbsp; Explore in 3D</button></div>
-   <div class="details-sub"><span>← &nbsp; BACK TO COLLECTION</span><span id="detailNum">01 / 02</span></div>
+   <div class="details-sub"><button type="button" data-go="gallery">← &nbsp; BACK TO COLLECTION</button><span id="detailNum">01 / 02</span></div>
   </div>
   <div class="hero-product" id="heroProduct"><img src="rose-lune.png" id="heroImage" alt="Selected perfume bottle"></div>
   <span class="side-quote">SCENT IS MEMORY MADE VISIBLE.</span>
  </div>
  <div class="tiny-vertical" aria-label="Jump to a scene"><button data-go="gallery" class="active" aria-label="Collection"><i></i></button><button data-go="rose" aria-label="Rose Lune"><i></i></button><button data-go="galet" aria-label="Galet"><i></i></button></div>
- <div class="glb-indicator" aria-live="polite">LOADING 3D MODELS</div><div class="stage-footer"><div class="scroll-prompt"><span class="scroll-icon"></span><span id="scrollText">Scroll to discover</span></div><div class="scene-nav"><div class="progresstrack"><span id="p1"></span><span id="p2"></span></div><button id="prevBtn" aria-label="Previous fragrance">←</button><span class="number" id="numberText">00 / 02</span><button id="nextBtn" aria-label="Next fragrance">→</button></div></div>
+ <div class="stage-footer"><div class="scroll-prompt"><span class="scroll-icon"></span><span id="scrollText">Scroll to discover</span></div><div class="scene-nav"><div class="progresstrack"><span id="p1"></span><span id="p2"></span></div><button id="prevBtn" aria-label="Previous fragrance">←</button><span class="number" id="numberText">00 / 02</span><button id="nextBtn" aria-label="Next fragrance">→</button></div></div>
  </div>
 </section>
 <section class="ending"><div class="eyebrow">A study in feeling</div><h2>Some things are<br><i>better felt.</i></h2><p>Explore every note, catch the light against the glass, and find the fragrance that stays with you long after the moment ends.</p><button id="returnBtn">Return to the collection &nbsp; ↗</button><div class="copyright"><span>© ATELIER — A CONCEPT SHOWROOM</span><span>CRAFTED FOR AN IMMERSIVE WEB EXPERIENCE</span></div></section>
@@ -72,14 +135,13 @@
 'use strict';
 const DATA={rose:{name:'Rose Lune',html:'Rose <em>Lune</em>',desc:'A moonlit bloom. Pink pepper, lychee and velvet rose over a whisper of cashmere wood.',top:'Pink pepper, lychee',heart:'Damask rose, peony',base:'White musk, cashmere wood',price:185,catalogue:'Nº01 — EXTRAIT DE PARFUM',img:'rose-lune.png',num:'01 / 02'},galet:{name:'Galet',html:'Galet',desc:'Cool mineral light in a bottle. Fig leaf, soft greens and white woods settle into a quiet, luminous trail.',top:'Fig leaf, green tea',heart:'White iris, mineral accord',base:'Vetiver, soft amber',price:175,catalogue:'Nº02 — EXTRAIT DE PARFUM',img:'galet.png',num:'02 / 02'}};
 const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
-const stage=$('#stage'), track=$('#experience');let state='gallery', selected='rose', suppress=false;
-const rm=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const stage=$('#stage'), track=$('#experience');let state='gallery', selected='rose';
 const bag={rose:0,galet:0};try{Object.assign(bag,JSON.parse(localStorage.getItem('atelier-demo-bag')||'{}'))}catch(e){}
 function saveBag(){try{localStorage.setItem('atelier-demo-bag',JSON.stringify(bag))}catch(e){}}
 function renderBag(){const count=bag.rose+bag.galet;$('#bagCount').textContent=count;$('#bagTotal').textContent=`€${bag.rose*185+bag.galet*175}`;$('#bagList').innerHTML=count?Object.keys(DATA).filter(k=>bag[k]).map(k=>`<div class="bag-line"><img src="${DATA[k].img}" alt=""><div><h3>${DATA[k].name}</h3><p>100 ml · €${DATA[k].price} · Qty ${bag[k]}</p><button data-remove="${k}">REMOVE ONE</button></div></div>`).join(''):'<p class="bag-empty">Your bag is empty.</p>';$$('[data-remove]').forEach(b=>b.onclick=()=>{bag[b.dataset.remove]=Math.max(0,bag[b.dataset.remove]-1);saveBag();renderBag()})}
 function setState(s){if(!['gallery','rose','galet'].includes(s))return;if(state===s)return;state=s;stage.dataset.state=s;window.dispatchEvent(new CustomEvent("perfume-scene-change",{detail:{state:s}}));if(s!=='gallery'){selected=s;const d=DATA[s];$('#catalogue').textContent=d.catalogue;$('#productName').innerHTML=d.html;$('#desc').textContent=d.desc;$('#topNote').textContent=d.top;$('#heartNote').textContent=d.heart;$('#baseNote').textContent=d.base;$('#price').textContent=`€${d.price}`;$('#detailNum').textContent=d.num;$('#heroImage').src=d.img;$('#heroImage').alt=d.name+' bottle';$('#heroProduct').className='hero-product '+s;$('#inspectBtn').setAttribute('aria-label','Inspect '+d.name+' in 3D');}$('#numberText').textContent=s==='gallery'?'00 / 02':DATA[s].num;$('#scrollText').textContent=s==='gallery'?'Scroll to discover':s==='rose'?'Continue to Galet':'Return to collection';$('#p1').classList.toggle('active',s==='rose');$('#p2').classList.toggle('active',s==='galet');$$('[data-go]').forEach(b=>b.classList.toggle('active',b.dataset.go===s));$('#collectionBtn').classList.toggle('active',s==='gallery');$('#discoverBtn').classList.toggle('active',s!=='gallery');}
 function position(s){const extent=Math.max(1,track.offsetHeight-innerHeight);return track.getBoundingClientRect().top+window.scrollY+extent*({gallery:0,rose:.4,galet:.78}[s]||0)}
-function go(s){window.scrollTo({top:position(s),behavior:rm?'instant':'smooth'});setState(s)}
+function go(s){window.scrollTo({top:position(s),behavior:'instant'});setState(s)}
 function updateScroll(){const total=Math.max(1,track.offsetHeight-innerHeight);const p=Math.max(0,Math.min(1,-track.getBoundingClientRect().top/total));const s=p<.25?'gallery':p<.61?'rose':'galet';setState(s);const offset=(p-.48)*10;stage.style.setProperty('--shift',offset+'px')}
 let ticking=false;window.addEventListener('scroll',()=>{if(ticking)return;ticking=true;requestAnimationFrame(()=>{ticking=false;updateScroll()})},{passive:true});window.addEventListener('resize',updateScroll);
 $$('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));$('#homeBtn').onclick=()=>go('gallery');$('#collectionBtn').onclick=()=>go('gallery');$('#discoverBtn').onclick=()=>go('rose');$('#returnBtn').onclick=()=>go('gallery');$('#prevBtn').onclick=()=>go(state==='galet'?'rose':'gallery');$('#nextBtn').onclick=()=>go(state==='gallery'?'rose':state==='rose'?'galet':'gallery');$('#addBtn').onclick=()=>{bag[selected]++;saveBag();renderBag();$('#bagShade').classList.add('show')};$('#bagBtn').onclick=()=>{$('#bagShade').classList.add('show');renderBag()};$('#closeBag').onclick=()=>$('#bagShade').classList.remove('show');$('#bagShade').onclick=e=>{if(e.target===$('#bagShade'))$('#bagShade').classList.remove('show')};
@@ -89,6 +151,6 @@ $('#inspectBtn').onclick=open3D;$('#closeViewer').onclick=close3D;viewer.addEven
 renderBag();updateScroll();window.addEventListener('load',()=>setTimeout(()=>$('#loader').classList.add('out'),450));setTimeout(()=>$('#loader').classList.add('out'),1800);
 })();
 </script>
-<script src="showroom-webgl.js" defer></script>
+<script type="module" src="showroom-webgl.js"></script>
 </body>
 </html>
