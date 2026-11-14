@@ -60,7 +60,7 @@
 .hero-product img, .hero-product.galet img { width: 75%; height: 85%; }
 #detail .drag-note { display: none; }
 .glb-live #detail .drag-note {
-  display: block; margin: 0 0 13px; letter-spacing: .17em;
+  display: block; margin: 0 auto 13px; padding: 5px 8px; border: 0; background: none; letter-spacing: .17em;
   text-transform: uppercase; color: #cabbaf; font-size: 8px;
 }
 .viewer-window, .viewer-window.galet {
@@ -85,11 +85,44 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .studio-film { display: none; }
-  .stage, .glb-live .stage { background-image: url("studio-poster.jpg"); background-size: cover; }
+  .stage, .glb-live .stage { background-image: url("studio-trio.jpg"); background-size: cover; }
 }
 
 @media (max-width: 660px) and (max-height: 690px) {
   .glb-live .stage:not([data-state="gallery"]) .detail-panel { bottom: max(58px, 8svh); }
   .detail-panel h2 { font-size: clamp(34px, 10vw, 49px); }
   .glb-live #detail .drag-note { margin-bottom: 8px; }
+}
+
+.experience { height: 460vh; }
+.stage[data-state="bleu"] { --accent: #9cb9ff; }
+.stage[data-state="bleu"] .studio-film {
+  transform: scale(1.19) translateX(-2%); filter: brightness(.80) saturate(.92);
+}
+.stage[data-state="galet"] .studio-film, .stage[data-state="rose"] .studio-film {
+  filter: brightness(.83) saturate(.92);
+}
+.studio-film { opacity: .94; filter: brightness(.9) saturate(.94); }
+.gallery-bay.rose, .glb-live .gallery-bay.rose { left: 28%; top: 39%; }
+.gallery-bay.galet, .glb-live .gallery-bay.galet { left: 50%; top: 51%; }
+.gallery-bay.bleu, .glb-live .gallery-bay.bleu { left: 71%; top: 42%; }
+.gallery-bay.bleu img { width: 53%; }
+.gallery-bay.galet { z-index: 1; }
+.gallery-bay .bay-caption, .glb-live .gallery-bay .bay-caption { bottom: -8%; }
+.viewer-window.bleu { background: radial-gradient(ellipse at 50% 32%, #1d315d, #111421 59%, #080b12); }
+.progresstrack span { width: 17px; }
+@media (max-width: 660px) {
+  .gallery-bay, .gallery-bay.galet, .glb-live .gallery-bay, .glb-live .gallery-bay.galet {
+    width: 31%; height: 33%;
+  }
+  .gallery-bay.rose, .glb-live .gallery-bay.rose { left: 18%; top: 42%; }
+  .gallery-bay.galet, .glb-live .gallery-bay.galet { left: 50%; top: 53%; }
+  .gallery-bay.bleu, .glb-live .gallery-bay.bleu { left: 81%; top: 40%; }
+  .gallery-bay .bay-caption, .glb-live .gallery-bay .bay-caption { font-size: 8px; letter-spacing: .08em; }
+  .gallery-bay.bleu img { width: 75%; }
+  .progresstrack span { width: 10px; }
+  .studio-film { width: 120%; left: -10%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stage, .glb-live .stage { background-image: url("studio-trio.jpg"); }
 }
