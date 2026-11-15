@@ -1,5 +1,5 @@
 import {
- ACESFilmicToneMapping, AmbientLight, Box3, CanvasTexture, Color, DoubleSide, GLTFLoader,
+ ACESFilmicToneMapping, AmbientLight, Box3, Color, GLTFLoader,
  Group, Mesh, MeshBasicMaterial, MeshStandardMaterial, PerspectiveCamera,
  PlaneGeometry, PMREMGenerator, RoomEnvironment, Scene, SpotLight,
  SRGBColorSpace, Vector3, WebGLRenderer
@@ -17,7 +17,7 @@ const ITEMS = [
 ];
 const D={w:1536,h:864,water:696}, M={w:864,h:1536,water:1273};
 const $=s=>document.querySelector(s);
-const el={surround:$('#surround'),world:$('#world'),viewport:$('#viewport'),image:$('#background'),tail:$('#waterContinuation'),glows:$('#nicheColors'),water:$('#waterSurface'),edges:$('#rockEdges'),fallbacks:$('#fallbacks'),hotspots:$('#hotspots'),three:$('#threeMount'),welcome:$('#welcome'),caption:$('#caption'),back:$('#back'),hint:$('#scrollHint'),status:$('#positionStatus')};
+const el={surround:$('#surround'),world:$('#world'),viewport:$('#viewport'),image:$('#background'),glows:$('#nicheColors'),water:$('#waterSurface'),fallbacks:$('#fallbacks'),hotspots:$('#hotspots'),three:$('#threeMount'),welcome:$('#welcome'),caption:$('#caption'),back:$('#back'),hint:$('#scrollHint'),status:$('#positionStatus')};
 const mql=matchMedia('(max-width:720px)'),reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const lerp=(a,b,t)=>a+(b-a)*t;
@@ -34,17 +34,24 @@ function viewAt(i){
  if(idx===0)return {cx:f.w/2,cy:f.h/2,zoom:1};
  const n=niche(ITEMS[idx-1]);
  // Slightly wider selected shots: entire recessed niche stays visible, with rock around it.
- const zoom=mobile()?1.92:1.56;
- return {cx:n.cx,cy:(n.top+n.low)*.5+(mobile() && idx>=3?90:0),zoom};
+ const zoom=mobile()?2.06:1.56;
+ const cy=(n.top+n.low)*.5+(mobile() && idx>=3?90:0);
+ if(mobile()){
+   const vw=innerWidth,vh=innerHeight,base=Math.min(vw/f.w,vh/f.h);
+   const halfX=vw/(2*base*zoom),halfY=vh/(2*base*zoom);
+   return {cx:clamp(n.cx,halfX,f.w-halfX),cy:clamp(cy,halfY,f.h-halfY),zoom};
+ }
+ return {cx:n.cx,cy,zoom};
 }
 function shotAt(progress){return viewAt(clamp(Math.round(progress),0,5))}
 function readScroll(){
+ if(mobile())return;
  const idx=clamp(Math.round(scrollY/Math.max(1,innerHeight)),0,5);
  if(idx!==state.progress){state.progress=idx;state.target=shotAt(idx);setSelected(idx?ITEMS[idx-1]:null,idx)}
 }
 function goTo(index){
  const idx=clamp(Math.round(index),0,5);
- window.scrollTo({top:idx*innerHeight,behavior:'instant'});
+ if(!mobile())window.scrollTo({top:idx*innerHeight,behavior:'instant'});
  state.progress=idx;state.target=shotAt(idx);
  setSelected(idx?ITEMS[idx-1]:null,idx);
 }
@@ -70,20 +77,8 @@ function setSelected(item,idx){if(state.selected===item?.key)return;
  for(const n of el.hotspots.children)n.setAttribute('aria-current',String(n.dataset.key===state.selected));
 }
 
-// The supplied rough-rock images remain intact. Add only tiny dark, broken edge
-// silhouettes on the straight niche lips; there is no second fake wall image.
-function brokenEdge(svg,side,x,top,bottom,seed){
- // Sparse chips rather than periodic sawteeth: the photographic stone remains visible.
- let s=seed;const rand=()=>{s=(Math.imul(s,1664525)+1013904223)>>>0;return s/4294967296};
- const inset=side==='left'?1:-1;
- for(let j=0;j<16;j++){
-  const y=top+rand()*(bottom-top-34),length=9+rand()*30,depth=2+rand()*6;
-  const d=`M ${x} ${y.toFixed(1)} L ${(x+inset*depth*.32).toFixed(1)} ${(y+length*.21).toFixed(1)} L ${(x+inset*depth).toFixed(1)} ${(y+length*.46).toFixed(1)} L ${(x+inset*depth*.68).toFixed(1)} ${(y+length*.77).toFixed(1)} L ${x} ${(y+length).toFixed(1)} Z`;
-  const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d',d);path.setAttribute('fill','#07090a');path.setAttribute('fill-opacity',String(.45+rand()*.25));svg.append(path)
- }
-}
-function buildWorld(){const f=metrics();el.world.style.width=f.w+'px';el.world.style.height=f.h+'px';el.image.onload=()=>{state.imagesReady=true;state.waterLast=0;state.three?.updateBackground?.()};el.image.src=mobile()?'scene-mobile.png':'scene-desktop.png';el.surround.src=mobile()?'surround-mobile.jpg':'surround-desktop.jpg';el.tail.src=mobile()?'water-continuation-mobile.png':'water-continuation-desktop.png';el.tail.style.top=f.h+'px';el.tail.style.width=f.w+'px';if(el.image.complete && el.image.naturalWidth)state.imagesReady=true;
- el.glows.replaceChildren();el.fallbacks.replaceChildren();el.hotspots.replaceChildren();el.edges.replaceChildren();el.edges.setAttribute('viewBox',`0 0 ${f.w} ${f.h}`);el.edges.setAttribute('width',f.w);el.edges.setAttribute('height',f.h);
+function buildWorld(){const f=metrics();el.world.style.width=f.w+'px';el.world.style.height=f.h+'px';el.image.onload=()=>{state.imagesReady=true;state.waterLast=0};el.image.src=mobile()?'scene-mobile.png':'scene-desktop.png';el.surround.src=mobile()?'surround-mobile.jpg':'surround-desktop.jpg';if(el.image.complete && el.image.naturalWidth)state.imagesReady=true;
+ el.glows.replaceChildren();el.fallbacks.replaceChildren();el.hotspots.replaceChildren();
  for(let i=0;i<ITEMS.length;i++){const p=ITEMS[i],n=niche(p);
   const glow=document.createElement('div');glow.className='niche-light';glow.dataset.key=p.key;
   Object.entries({'--x':n.cx+'px','--y':n.top+'px','--w':n.width+'px','--h':(n.low-n.top)+'px','--tint':`rgba(${hexRgb(p.color).join(',')},.70)`}).forEach(([k,v])=>glow.style.setProperty(k,v));el.glows.append(glow);
@@ -153,40 +148,9 @@ async function createWebGL(){let renderer;
  catch(error){console.warn('WebGL unavailable; restored bottle image fallbacks active',error);return null}
  const scene=new Scene(),camera=new PerspectiveCamera(32,1,.05,70);camera.position.z=12;
  scene.environmentIntensity=1.03;scene.add(new AmbientLight('#b8c3d2',.34));
- // The actual supplied rock image is rendered on a full-frustum plane BEHIND
- // the original GLBs. Physical glass can thus transmit/refract the rock texture.
- // It is not a separate photo-based product scene; the camera remains continuous.
- // One backdrop texture inside WebGL: coloured bounced light is blended into the
- // photographed rock BEFORE the refractive bottle surfaces render. There is no
- // second rectangular photograph pasted over the GLBs.
- const bgCanvas=document.createElement('canvas');
- const bgCtx=bgCanvas.getContext('2d');
- const bgTex=new CanvasTexture(bgCanvas);bgTex.colorSpace=SRGBColorSpace;
- const bgPlane=new Mesh(new PlaneGeometry(1,1),new MeshBasicMaterial({map:bgTex,toneMapped:false,depthWrite:false}));
- bgPlane.position.z=-3.5;bgPlane.renderOrder=-100;scene.add(bgPlane);
- let lastBackdrop=0,shade=ITEMS.map(()=>.12);
- function drawIntegratedBackdrop(now=0){
-   if(!el.image.complete||!el.image.naturalWidth)return;
-   const f=metrics();if(bgCanvas.width!==f.w||bgCanvas.height!==f.h){bgCanvas.width=f.w;bgCanvas.height=f.h;}
-   bgCtx.clearRect(0,0,f.w,f.h);bgCtx.drawImage(el.image,0,0,f.w,f.h);
-   bgCtx.save();bgCtx.globalCompositeOperation='screen';
-   ITEMS.forEach((p,i)=>{
-     const goal=state.selected===p.key?.92:.13;
-     shade[i]+=(goal-shade[i])*.17;
-     const n=niche(p),[r,g,b]=hexRgb(p.color);
-     // A bounded back-wall bounce that illuminates the stone, not the foreground bottle.
-     const grad=bgCtx.createRadialGradient(n.cx,n.top+n.height*.60,8,n.cx,n.top+n.height*.56,n.width*.95);
-     grad.addColorStop(0,`rgba(${r},${g},${b},${(shade[i]*.38).toFixed(3)})`);
-     grad.addColorStop(.52,`rgba(${r},${g},${b},${(shade[i]*.18).toFixed(3)})`);
-     grad.addColorStop(1,'rgba(0,0,0,0)');
-     bgCtx.fillStyle=grad;bgCtx.fillRect(n.cx-n.width,n.top,n.width*2,n.low-n.top);
-   });bgCtx.restore();bgTex.needsUpdate=true;
- }
- function updateBackground(){if(!el.image.complete||!el.image.naturalWidth)return;
-   drawIntegratedBackdrop();
-   const visibleHeight=2*Math.tan(camera.fov*Math.PI/360)*(camera.position.z-bgPlane.position.z);
-   bgPlane.scale.set(visibleHeight*camera.aspect,visibleHeight,1);
- }
+ // The photograph is a DOM layer that always remains visible behind the
+ // transparent WebGL bottle canvas. Never draw another rectangular wall plane
+ // inside WebGL: that opaque plane caused the black screen on mobile.
 
  let pmrem;try{const room=new RoomEnvironment();studioPanels(room);pmrem=new PMREMGenerator(renderer);const env=pmrem.fromScene(room,.011);scene.environment=env.texture;pmrem.dispose();room.dispose()}catch(err){console.warn('Studio reflections unavailable',err)}
  const s={models:new Map(),spins:new Map(),manualYaw:new Map(),loaded:new Set(),width:0,height:0,renderer,scene,camera};
@@ -198,7 +162,7 @@ async function createWebGL(){let renderer;
   bleu:{absorption:'#3479dc',liquid:'#1554be',distance:1.04}
  };
  const sizeF=()=>2*Math.tan(32*Math.PI/360)*12;
- function resize(){const {w,h}=metrics();if(w!==s.width||h!==s.height){s.width=w;s.height=h;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();updateBackground()}const f=metrics(),worldH=sizeF(),worldW=worldH*camera.aspect;
+ function resize(){const {w,h}=metrics();if(w!==s.width||h!==s.height){s.width=w;s.height=h;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}const f=metrics(),worldH=sizeF(),worldW=worldH*camera.aspect;
   for(const p of ITEMS){const val=s.models.get(p.key);if(!val)continue;const n=niche(p),height=n.height/f.h*worldH,baseX=(n.cx/f.w-.5)*worldW,baseY=(.5-n.bottom/f.h)*worldH;const scale=height/val.originalHeight;
    val.pivot.position.set(baseX,baseY+height/2,.15);val.body.position.set(0,-height/2,0);val.body.scale.setScalar(scale);
    val.light.position.set(baseX+.3,baseY+height+1.2,2);val.light.target.position.set(baseX,baseY+height*.53,.15);
@@ -218,18 +182,18 @@ async function createWebGL(){let renderer;
       // Preserve the beautiful saturated liquid authored in the original GLB.
       // Avoid a second copy of the liquid on the glass as a shader/overlay.
       mesh.visible=true;
-      mat.transmission=.91;mat.ior=1.37;mat.thickness=.095;
+      mat.transmission=Math.min(mat.transmission||0,.35);mat.ior=1.37;mat.thickness=.11;
       mat.roughness=.095;mat.clearcoat=.28;mat.clearcoatRoughness=.12;
       mat.attenuationColor=new Color(mats.liquid);
-      mat.attenuationDistance=.56;mat.envMapIntensity=.78;
+      mat.attenuationDistance=.38;mat.envMapIntensity=.95;
       mat.depthWrite=true;mat.side=0;
    }else if(name.includes('crystal') && !name.includes('cap')){
       // Keep ORIGINAL coloured glass, do not bleach it with whitish RGB overrides.
-      mat.transmission=.96;mat.thickness=.038;mat.ior=1.47;
+      mat.transmission=Math.min(mat.transmission||.88,.86);mat.thickness=.055;mat.ior=1.47;
       mat.attenuationColor=new Color(mats.absorption);
       mat.attenuationDistance=mats.distance;
       mat.roughness=.052;mat.clearcoat=.34;mat.clearcoatRoughness=.07;
-      mat.envMapIntensity=1.4;mat.side=0;
+      mat.envMapIntensity=1.18;mat.side=0;
    }else if(name.includes('clear')&&name.includes('cap')){
       mat.transmission=.97;mat.thickness=.04;mat.ior=1.49;
       mat.roughness=.045;mat.clearcoat=.36;mat.envMapIntensity=1.22;
@@ -250,7 +214,7 @@ async function createWebGL(){let renderer;
   s.models.set(p.key,{pivot,body,originalHeight:height,light,rim,white,product});s.loaded.add(p.key);resize();if(state.selected===p.key&&!reduced.matches)s.spins.set(p.key,performance.now());
   el.fallbacks.querySelector(`[data-key="${p.key}"]`)?.classList.add('webgl-ready');el.glows.querySelector(`[data-key="${p.key}"]`)?.classList.add('webgl-lit');
  }catch(err){console.warn('Original GLB unavailable; retaining bottle image',p.key,err)}}
- function frame(now){if(document.hidden)return;resize();if(now-lastBackdrop>75){drawIntegratedBackdrop(now);lastBackdrop=now;}for(const p of ITEMS){const model=s.models.get(p.key);if(!model)continue;
+ function frame(now){if(document.hidden)return;resize();for(const p of ITEMS){const model=s.models.get(p.key);if(!model)continue;
   const selected=state.selected===p.key,other=state.selected&&state.selected!==p.key;
   const emphasis=selected?1.5:other?.85:1;
   model.light.intensity=lerp(model.light.intensity,9.0*(selected?1.52:other?.70:1),.09);model.rim.intensity=lerp(model.rim.intensity,11*(selected?1.65:other?.65:1),.085);model.white.intensity=lerp(model.white.intensity,2.3*(selected?1.34:other?.8:1),.09);
@@ -262,24 +226,29 @@ async function createWebGL(){let renderer;
  }
  function spin(key){if(key==='photo'||!s.loaded.has(key)||reduced.matches||s.spins.has(key))return;s.spins.set(key,performance.now())}
  window.addEventListener('resize',resize);mql.addEventListener('change',resize);
- s.frame=frame;s.resize=resize;s.spin=spin;s.rotateBy=(key,delta)=>s.manualYaw.set(key,(s.manualYaw.get(key)||0)+delta);s.updateBackground=updateBackground;
+ s.frame=frame;s.resize=resize;s.spin=spin;s.rotateBy=(key,delta)=>s.manualYaw.set(key,(s.manualYaw.get(key)||0)+delta);
  resize();Promise.allSettled(ITEMS.filter(p=>p.file).map(load)).then(()=>{console.info('ATELIER restored four original 3D models')});return s;
 }
 
-function onResize(){const previous=state.progress;buildWorld();state.progress=clamp(scrollY/Math.max(1,innerHeight),0,5);state.target=shotAt(state.progress);state.shot=state.target;}
+function onResize(){
+ const previous=state.progress;buildWorld();
+ state.progress=mobile()?previous:clamp(Math.round(scrollY/Math.max(1,innerHeight)),0,5);
+ state.target=shotAt(state.progress);state.shot=state.target;
+}
 for(let i=0;i<6;i++){const block=document.createElement('div');block.className='scroll-stop';block.style.height='100vh';$('#scrollTrack').append(block)}
 window.addEventListener('scroll',readScroll,{passive:true});
 // One wheel gesture = one distinct product checkpoint, no intermediate stops.
 window.addEventListener('wheel',e=>{
- if(!$('#basketOverlay').hidden || Math.abs(e.deltaY)<3)return;
+ if(mobile() || !$('#basketOverlay').hidden || Math.abs(e.deltaY)<3)return;
  e.preventDefault();const now=performance.now();
  if(now-state.lastWheel<600)return;
  state.lastWheel=now;
  goTo(clamp(state.progress+(e.deltaY>0?1:-1),0,5));
 },{passive:false});
 let touchOrigin=null;
-window.addEventListener('touchstart',e=>{if(e.touches.length===1)touchOrigin={x:e.touches[0].clientX,y:e.touches[0].clientY};},{passive:true});
+window.addEventListener('touchstart',e=>{if(mobile())return;if(e.touches.length===1)touchOrigin={x:e.touches[0].clientX,y:e.touches[0].clientY};},{passive:true});
 window.addEventListener('touchend',e=>{
+ if(mobile())return;
  if(!touchOrigin || !$('#basketOverlay').hidden)return;
  const dy=(e.changedTouches[0]?.clientY||touchOrigin.y)-touchOrigin.y;
  const dx=(e.changedTouches[0]?.clientX||touchOrigin.x)-touchOrigin.x;
@@ -290,5 +259,6 @@ window.addEventListener('touchend',e=>{
 },{passive:true});
 window.addEventListener('resize',onResize);
 mql.addEventListener('change',onResize);
+if(mobile())window.scrollTo(0,0);
 renderBasket();buildWorld();readScroll();requestAnimationFrame(paintWorld);
 createWebGL().then(v=>state.three=v).catch(err=>console.warn('3D fallback remains available',err));

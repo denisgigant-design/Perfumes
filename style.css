@@ -110,3 +110,20 @@ html{scroll-snap-type:y mandatory;scroll-padding:0;scroll-behavior:auto}
  -webkit-mask-composite:source-in;
 }
 @media(max-width:720px){.niche-hit::after{font-size:23px}}
+
+
+/* 2026-11: single continuous photographed wall + transparent 3D products */
+.wall-image{opacity:1!important;visibility:visible!important;mask:none!important;-webkit-mask:none!important;filter:none!important}
+.three-layer,.three-layer canvas{background:transparent!important;pointer-events:none!important}
+.world-surround{opacity:1;pointer-events:none}
+.rock-edges,.water-continuation{display:none!important}
+/* Mobile is an interactive static gallery. There are no scroll checkpoints or
+   swipe-to-change controls: tap a bottle or return via All Fragrances. */
+@media(max-width:720px){
+ html,body{height:100%;overflow:hidden!important;touch-action:manipulation;overscroll-behavior:none;scroll-snap-type:none!important}
+ .experience,.camera-viewport{overscroll-behavior:none;touch-action:manipulation}
+ .world{touch-action:manipulation}
+ .scroll-track,.scroll-stop,.scroll-hint{display:none!important}
+ .niche-hit{touch-action:manipulation}
+ .camera-viewport{background-color:#131218;background-image:url('surround-mobile.jpg');background-size:cover;background-position:center center}
+}
