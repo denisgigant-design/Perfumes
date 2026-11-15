@@ -35,12 +35,12 @@ void refractThroughLiquid(inout vec3 diffuseLight) {
   float distanceThroughLiquid = max(0.0, wetEnd - wetStart) / height;
 
   vec3 absorption = exp(-max(vec3(0.10), vec3(1.0) - fluidColor)
-    * (distanceThroughLiquid * 1.05));
+    * (distanceThroughLiquid * 1.68));
   float wet = 1.0 - exp(-distanceThroughLiquid * 2.2);
   float deviation = abs(entry.y - level - dot(slope, entry.xz - center.xz));
   float meniscus = 1.0 - smoothstep(height * 0.005, height * 0.036, deviation);
   diffuseLight = diffuseLight * absorption
-    + fluidColor * wet * fluidLight * 0.078
+    + fluidColor * wet * fluidLight * 0.047
     + mix(vec3(0.92), fluidColor, 0.22) * meniscus * fluidLight * 0.031;
 }
 `;

@@ -29,7 +29,7 @@ const waterShader = {
       vec2 ripple = vec2(a * 0.6 + c * 0.22, b + c * 0.37);
       vec3 eye = normalize(cameraPosition - vSurface);
       float grazing = pow(1.0 - clamp(eye.y, 0.0, 1.0), 3.0);
-      vec2 uv = vUv.xy / vUv.w + ripple * (0.0165 + grazing * 0.014);
+      vec2 uv = vUv.xy / vUv.w + ripple * (0.0095 + grazing * 0.007);
       vec2 edge = min(uv, 1.0 - uv);
       float valid = smoothstep(0.0, 0.076, min(edge.x, edge.y));
       vec3 mirrored = texture2D(tDiffuse, clamp(uv, 0.0, 1.0)).rgb * valid;
@@ -44,7 +44,7 @@ const waterShader = {
       }
       float fade = 1.0 - smoothstep(14.0, 34.0, length(p));
       vec3 surface = vec3(0.0018, 0.0028, 0.0041) + glints;
-      surface += mirrored * (0.57 + 0.42 * grazing);
+      surface += mirrored * (0.78 + 0.18 * grazing);
       gl_FragColor = vec4(surface * fade, 1.0);
       #include <tonemapping_fragment>
       #include <colorspace_fragment>
@@ -62,7 +62,7 @@ export function makeWater(renderer, compact) {
     surface.getRenderTarget().texture.type = 1009;
   }
   surface.rotation.x = -Math.PI / 2;
-  surface.position.y = -1.28;
+  surface.position.y = -5.79;
   const renderReflection = surface.onBeforeRender.bind(surface);
   let last = -Infinity;
   surface.onBeforeRender = (activeRenderer, scene, camera, ...rest) => {

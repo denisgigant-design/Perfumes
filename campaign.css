@@ -252,3 +252,69 @@
     font-size: clamp(33px, 7vw, 54px);
   }
 }
+
+/* ARCHITECTURAL RECESSED-WALL SHOWROOM · all four niches are rendered as geometry. */
+.glb-live .studio-film{opacity:.035;filter:brightness(.25)}
+.glb-live .studio-rays{opacity:.23}
+.glb-live .stage,.stage{background:radial-gradient(ellipse at 50% 65%,#1b2125 0%,#080b0e 67%,#030405 100%)}
+.glb-live .gallery-intro{top:clamp(105px,12vh,150px);bottom:auto;pointer-events:none}
+.glb-live .gallery-intro h1{font:normal clamp(23px,3.5vw,50px) Italiana,Georgia,serif;letter-spacing:.13em;text-transform:uppercase;text-shadow:0 3px 16px #000}
+.glb-live .gallery-bay,.glb-live .gallery-bay.galet,.glb-live .gallery-bay.rose,.glb-live .gallery-bay.bleu,.glb-live .gallery-bay.ambre{
+  border:0;box-shadow:none;background:transparent;transform:translate(-50%,-50%);padding:0;
+  display:block;overflow:visible;cursor:zoom-in;min-width:0;min-height:0;
+}
+.glb-live .gallery-bay:hover,.glb-live .gallery-bay:focus-visible{outline:1px solid rgba(240,230,215,.35);outline-offset:5px}
+.glb-live .gallery-bay .bay-caption{display:block;font-size:clamp(8px,.80vw,11px);text-transform:uppercase;letter-spacing:.16em;color:#f0e6dc;
+  bottom:-21px;text-shadow:0 2px 7px #000,0 1px 18px #000;pointer-events:none}
+.glb-live .stage::after{background:linear-gradient(180deg,rgba(0,0,0,.51),transparent 14%,transparent 75%,rgba(0,0,0,.61))}
+.glb-live .stage:not([data-state="gallery"])::after{background:linear-gradient(0deg,rgba(0,0,0,.95),rgba(0,0,0,.80) 18%,transparent 42%),linear-gradient(180deg,rgba(0,0,0,.55),transparent 15%)}
+.stage:not([data-state="gallery"]) .detail-panel,.glb-live .stage:not([data-state="gallery"]) .detail-panel{bottom:max(55px,7svh)}
+.glb-live .stage:not([data-state="gallery"]) .detail-panel h2{text-transform:uppercase;letter-spacing:.055em}
+.glb-live .stage:not([data-state="gallery"]) .detail-panel .scent-desc{display:block;text-transform:uppercase;letter-spacing:.11em;font-size:10px;line-height:1.6}
+.glb-live .gallery-bay::before{display:none}
+@media(max-width:660px){
+ .glb-live .gallery-intro{top:118px;bottom:auto;left:8%;right:8%}
+ .glb-live .gallery-intro h1{font-size:clamp(23px,6vw,36px);letter-spacing:.12em}
+ .glb-live .gallery-bay .bay-caption{font-size:7px;letter-spacing:.09em;bottom:-17px}
+ .glb-live .stage:not([data-state="gallery"]) .detail-panel{bottom:max(64px,10svh);width:92%}
+ .glb-live .stage:not([data-state="gallery"]) .detail-panel h2{font-size:clamp(31px,8.6vw,48px);margin-bottom:3px}
+ .glb-live .stage:not([data-state="gallery"]) .detail-panel .scent-desc{font-size:8px;letter-spacing:.06em;margin:0 auto 6px}
+ .glb-live .stage:not([data-state="gallery"]) .product-drag{top:13%;height:47%;left:3%;width:94%}
+}
+
+/* Graceful static niche display on devices without WebGL. Never show the old pedestals. */
+html:not(.glb-live) .stage[data-state="gallery"] .gallery{
+  position:absolute;inset:17% 7% 17%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  grid-template-rows:repeat(2,minmax(0,1fr));gap:14px;
+}
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay,
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.galet,
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.rose,
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.bleu,
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.ambre{
+  position:relative;left:auto;top:auto;width:100%;height:100%;transform:none;
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 50% 9%,rgba(234,224,202,.19),transparent 47%),
+             linear-gradient(125deg,#131719,#080b0e 78%);
+  border:12px solid #202527;border-radius:2px;
+  box-shadow:inset 0 0 45px 15px #000,inset 10px 7px 18px #3d44486b,
+             inset -8px 0 18px #5f687128,0 4px 7px #000;
+}
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay::before{
+  content:"";display:block;position:absolute;left:32%;top:4%;width:36%;height:3px;
+  background:#faf0d9;box-shadow:0 0 21px 6px #eed5a670;z-index:1;
+}
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay .image-plinth{display:none}
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay img{
+  position:relative;max-height:77%;max-width:78%;width:auto;height:75%;
+  transform:none;filter:drop-shadow(0 17px 15px #000);object-fit:contain;
+}
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay .bay-caption{
+  bottom:6px;left:50%;transform:translateX(-50%);font-size:8px;
+  text-transform:uppercase;letter-spacing:.12em;white-space:nowrap
+}
+@media(max-width:660px){
+ html:not(.glb-live) .stage[data-state="gallery"] .gallery{inset:24% 3% 18%;gap:7px}
+ html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay{border-width:7px!important}
+ html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay .bay-caption{font-size:7px}
+}

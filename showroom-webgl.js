@@ -1,11 +1,12 @@
 import {makeWater} from './water.js?v=2';
 import {addLiquidRefraction, bindLiquidCamera} from './glass-volume.js';
 import {
-  ACESFilmicToneMapping, AmbientLight, Box3, CanvasTexture, Color, DoubleSide, GLTFLoader,
+  ACESFilmicToneMapping, AmbientLight, Box3, BoxGeometry, CanvasTexture, Color, DoubleSide, GLTFLoader,
   Group, MathUtils, Mesh, MeshBasicMaterial, MeshStandardMaterial, PerspectiveCamera,
-  PlaneGeometry, PMREMGenerator, RoomEnvironment, Scene, SpotLight, SRGBColorSpace, Vector3, WebGLRenderer
+  PlaneGeometry, PMREMGenerator, Reflector, RoomEnvironment, Scene, SpotLight, SRGBColorSpace, Vector3, WebGLRenderer
 } from './three-showroom.js?v=2';
 
+const compactLayout = innerWidth < 680;
 const stage = document.querySelector('#stage');
 const mount = document.querySelector('#showroom3d');
 const inspector = document.querySelector('#three-canvas');
@@ -18,29 +19,32 @@ const closeupCamera = new PerspectiveCamera(34, 1, .07, 35);
 const inspection = new Group();
 closeup.add(inspection);
 
+// The four GLBs sit inside physically modelled niches, rather than floating on platforms.
+// x/y are the centres of the shelf floors; the z-axis is negative inside the wall.
 const products = [
-  {key: 'galet', file: 'galet-crystal.glb', x: -.35, y: -.53, z: 3.1, height: 2.61,
-    tone: '#b6dc78', glass: '#f1f8e9', absorption: '#abb68a', liquid: '#6a763e',
-    distance: 1.18, thickness: .012, rest: -.12, shape: [1.1, .95, 2.0]},
-  {key: 'rose', file: 'rose-lune-smoked.glb', x: -3.4, y: -.06, z: -.2, height: 2.61,
-    tone: '#e28ca2', glass: '#eee2e5', absorption: '#aa7e89', liquid: '#87515f',
-    distance: 1.16, thickness: .016, rest: .11, shape: [1.02, .89, 2.65]},
-  {key: 'bleu', file: 'sillage-bleu.glb', x: 3.05, y: .04, z: -3.1, height: 3.14,
-    tone: '#709ff2', glass: '#e4edf6', absorption: '#839ebc', liquid: '#435776',
-    distance: 1.15, thickness: .011, rest: -.15, shape: [.94, 1.13, 2.4]},
-  {key: 'ambre', file: 'ambre-dore.glb', x: .46, y: .59, z: -8.3, height: 2.75,
-    tone: '#ffc068', glass: '#fff1d4', absorption: '#d9b26b', liquid: '#b48544',
-    distance: 1.32, thickness: .014, rest: .11, shape: [1.0, 1.04, 3.05]}
+  {key: 'galet', file: 'galet-crystal.glb', x: -3.18, y: .44, z: -.62, height: 2.61,
+    tone: '#b6dc78', glass: '#f1f8e9', absorption: '#abb68a', liquid: '#59662f',
+    distance: 1.18, thickness: .012, rest: -.10, shape: [1.1, .95, 2.0]},
+  {key: 'rose', file: 'rose-lune-smoked.glb', x: 3.18, y: .44, z: -.62, height: 2.61,
+    tone: '#e28ca2', glass: '#eee2e5', absorption: '#aa7e89', liquid: '#7e3b50',
+    distance: 1.16, thickness: .016, rest: .08, shape: [1.02, .89, 2.65]},
+  {key: 'bleu', file: 'sillage-bleu.glb', x: -3.18, y: -4.25, z: -.62, height: 3.14,
+    tone: '#709ff2', glass: '#e4edf6', absorption: '#839ebc', liquid: '#354966',
+    distance: 1.15, thickness: .011, rest: -.12, shape: [.94, 1.13, 2.4]},
+  {key: 'ambre', file: 'ambre-dore.glb', x: 3.18, y: -4.25, z: -.62, height: 2.75,
+    tone: '#ffc068', glass: '#fff1d4', absorption: '#d9b26b', liquid: '#986422',
+    distance: 1.32, thickness: .014, rest: .08, shape: [1.0, 1.04, 3.05]}
 ];
+
 const angle = Math.tan(MathUtils.degToRad(camera.fov / 2));
 const pointerStates = new Map();
 const lightingPointer = {x: 0, y: 0, targetX: 0, targetY: 0};
 const manualTurn = {x: 0, y: 0};
 const projected = new Vector3();
 const worldPoint = new Vector3();
-const hoverGap = .31;
+const hoverGap = .045;
 const flightOrder = ['galet', 'rose', 'bleu', 'ambre'];
-let renderer, studioReflection, modalBottle, modalProduct, water;
+let renderer, studioReflection, modalBottle, modalProduct, water, shelves;
 let width = 0, height = 0, zoom = 6.7, previousTime = 0, openedAt = 0;
 let shot = null, lastProduct = 'gallery';
 let dragDistance = 0;
@@ -165,6 +169,99 @@ function plinth(radius, height, [scaleX, scaleZ, exponent]) {
   return platform;
 }
 
+// Black stone recesses are assembled from real geometry: thick exterior piers,
+// deep top/bottom reveals, a back wall, reflective inner side panels and floor slabs.
+// No 2D image, no freestanding display plinths.
+function createWall() {
+  const wall = new Group();
+  const masonry = new MeshStandardMaterial({
+    color:'#16191b', metalness:.27, roughness:.61, bumpMap:satinMap, bumpScale:.055
+  });
+  const reveal = new MeshStandardMaterial({
+    color:'#34383b', metalness:.68, roughness:.22, bumpMap:satinMap, bumpScale:.011,
+    envMapIntensity:1.32
+  });
+  const onyx = new MeshStandardMaterial({
+    color:'#101315', metalness:.46, roughness:.34, bumpMap:satinMap, bumpScale:.018
+  });
+  const silver = new MeshStandardMaterial({
+    color:'#a8a4a0', metalness:.92, roughness:.21, envMapIntensity:1.23
+  });
+  const insetGold = new MeshStandardMaterial({
+    color:'#a3947e', metalness:.78, roughness:.29
+  });
+  function block(material, size, at, group=wall) {
+    const mesh = new Mesh(new BoxGeometry(...size),material);
+    mesh.position.set(...at);
+    group.add(mesh);
+    return mesh;
+  }
+  // Entire structural body, behind the four carved voids.
+  block(masonry, [14.15, 11.45, .62], [0, .05, -2.65]);
+  // Outer stone piers, solid middle column, and horizontal transoms.
+  for (const x of [-6.77, 0, 6.77]) {
+    block(masonry, [x===0 ? .72 : .67, 11.35, 3.55], [x, .05, -.55]);
+  }
+  for (const [y, thickness] of [[5.38,.75], [.05,.50], [-5.29,.72]]) {
+    block(masonry, [14.15, thickness, 3.55], [0,y,-.55]);
+  }
+  block(onyx, [14.3, .38, 4.0], [0, -5.58, -.55]);
+  const bayLights = new Map();
+  for (const product of products) {
+    const cx=product.x, bottom=product.y, centerY=bottom+2.22;
+    const bay = new Group(); wall.add(bay);
+    // The back wall is deep, so the niche has true parallax as the camera moves.
+    block(onyx, [5.75,4.36,.12],[cx,centerY,-2.25],bay);
+    block(reveal, [5.74,.12,3.20],[cx,bottom-.10,-.60],bay); // bottom ledge
+    block(reveal, [5.74,.09,3.20],[cx,bottom+4.48,-.60],bay); // ceiling
+    const sides=[], mirrors=[];
+    for (const dir of [-1,1]) {
+      const side=block(reveal,[.085,4.39,3.22],[cx+dir*2.84,centerY,-.60],bay);
+      sides.push(side);
+      // Actual planar mirror renders are enabled only for the selected niche.
+      // Gallery uses the inexpensive polished-metal finish for four visible bays.
+      const mirror=new Reflector(new PlaneGeometry(3.05,4.20),{
+        textureWidth:compactLayout?256:448,textureHeight:compactLayout?256:448,
+        clipBias:.004,color:0x414040,multisample:0
+      });
+      mirror.position.set(cx+dir*2.79,centerY,-.64);
+      mirror.rotation.y=dir<0?Math.PI/2:-Math.PI/2;
+      const renderMirror=mirror.onBeforeRender.bind(mirror);
+      mirror.onBeforeRender=(activeRenderer,activeScene,activeCamera,...args)=>{
+        if(activeRenderer.getRenderTarget())return; // prevent recursive multi-mirror passes
+        renderMirror(activeRenderer,activeScene,activeCamera,...args);
+      };
+      mirror.visible=false;
+      bay.add(mirror);
+      mirrors.push(mirror);
+      // Two fine metal rails catch the spotlight on the depth of each jamb.
+      block(silver,[.021,4.38,.038],[cx+dir*2.76,centerY,.94],bay);
+    }
+    const fixtures=[];
+    for (const xOffset of [-1.52,1.52]) {
+      const fixture=block(silver,[.76,.035,.20], [cx+xOffset,bottom+4.38,.34],bay);
+      const lamp=block(new MeshBasicMaterial({color:'#fff0dc',toneMapped:false}),
+        [.64,.025,.12],[cx+xOffset,bottom+4.348,.36],bay);
+      fixtures.push(lamp);
+    }
+    // Two raking beams plus the wider key make polished bottle glass light up.
+    const left=addSpot(bay,{color:'#fff0e2',intensity:67,
+      position:[cx-1.50,bottom+4.30,.36],look:[cx,bottom+1.16,-.60],spread:.40});
+    const right=addSpot(bay,{color:'#fff9e9',intensity:67,
+      position:[cx+1.50,bottom+4.30,.36],look:[cx,bottom+1.16,-.60],spread:.40});
+    const bounce=addSpot(bay,{color:product.tone,intensity:19,
+      position:[cx,bottom+1.30,-1.7],look:[cx,bottom+1.25,-.4],spread:.62});
+    bayLights.set(product.key,{left,right,bounce,fixtures,sides,mirrors});
+  }
+  // Fine polished trim makes the edge of each niche readable on mobile.
+  for(const x of [-6.39,-.36,.36,6.39])
+    block(insetGold,[.028,10.0,.034],[x,.06,1.20]);
+  wall.userData.lights=bayLights;
+  if(compactLayout) wall.scale.x=.64;
+  scene.add(wall);
+  return wall;
+}
+
 function addSpot(parent, {color, intensity, position, look, spread = .56}) {
   const light = new SpotLight(color, intensity, 0, spread, .74, 2);
   light.position.set(...position);
@@ -247,25 +344,29 @@ async function loadBottle(product, loader) {
   pivot.position.y = product.height / 2 + hoverGap;
   pivot.add(bottle);
   const radius = product.key === 'galet' ? 1.32 : 1.17;
-  const pedestal = plinth(radius, product.y + 1.28, product.shape);
-  group.add(pedestal, pivot);
-  product.shadow = pedestal.children[1];
-  product.overhead = addSpot(group, {
-    color: '#fff5e8', intensity: 112, position: [.34, 5.9, .52], look: [0, .32, 0], spread: .31
+  const shadow = new Mesh(new PlaneGeometry(radius*1.70,radius*1.65),
+    new MeshBasicMaterial({map:shadowMap,transparent:true,depthWrite:false,opacity:.78}));
+  shadow.rotateX(-Math.PI/2);
+  shadow.position.y=.012;
+  group.add(pivot,shadow);
+  product.shadow=shadow;
+  product.overhead=addSpot(group,{
+    color:'#fff2e2',intensity:52,position:[.22,3.89,.38],look:[0,1.18,0],spread:.53
   });
-  product.refraction = addRefraction(group, product.tone, radius);
-  product.keyLight = addSpot(group, {
-    color: '#fff3e9', intensity: 74, position: [-.95, 5.65, 2.8], look: [0, .98, 0]
+  product.refraction=addRefraction(group,product.tone,radius);
+  product.keyLight=addSpot(group,{
+    color:'#fff6eb',intensity:29,position:[-1.65,3.55,1.46],look:[0,1.13,0]
   });
-  product.rimLight = addSpot(group, {
-    color: product.tone, intensity: 50, position: [1.15, 4.3, -1.9], look: [0, 1.2, 0]
+  product.rimLight=addSpot(group,{
+    color:product.tone,intensity:16,position:[1.68,2.40,-1.14],look:[0,1.16,0]
   });
-  product.edgeLight = addSpot(group, {
-    color: '#fff2e8', intensity: 18, position: [-1.65, 1.90, -2.45], look: [0, 1.08, 0], spread: .34
+  product.edgeLight=addSpot(group,{
+    color:'#fff8f0',intensity:11,position:[-1.6,1.85,-1.18],look:[0,1.1,0],spread:.40
   });
   scene.add(group);
-  Object.assign(product, {group, pivot, bottle});
+  Object.assign(product,{group,pivot,bottle});
 }
+
 
 function viewAround({x, y, z}, radius, yaw, elevation, amount = 0) {
   return {
@@ -275,39 +376,33 @@ function viewAround({x, y, z}, radius, yaw, elevation, amount = 0) {
 }
 
 function galleryFrame(aspect) {
-  const narrow = aspect < .82;
-  const radius = Math.max(14.3, (narrow ? 4.25 : 4.12) / (angle * aspect));
-  return viewAround({x: .03, y: 1.10, z: -.84}, radius, .072, radius * .28);
+  const minWidth=compactLayout?10.05:14.95;
+  const radius=Math.max(23.2,minWidth/(2*angle*aspect));
+  return viewAround({x:0,y:-.08,z:-.30},radius,0,.55);
 }
 
-function productFrame(product, aspect, yaw, focus) {
-  const narrow = aspect < .88;
-  const radius = Math.max(product.height / (2 * angle * (narrow ? .37 : .43)),
-    1.18 / (angle * aspect));
-  return viewAround({x: product.x, y: product.y + product.height * .30, z: product.z},
-    radius, yaw, radius * .29, focus);
+function productFrame(product, aspect, yaw=0, focus=1) {
+  // Mobile focuses on the bottle in its recess while leaving product copy below.
+  // Desktop retains both reflective side walls in frame.
+  const narrow=aspect<.80;
+  const radius=narrow?8.6:Math.max(8.35,5.68/(2*angle*aspect)*.79);
+  const origin={x:product.x,y:product.y+.92,z:product.z-.12};
+  return viewAround(origin,radius,yaw*.26,narrow?.44:.83,focus);
 }
+
 
 function flyThrough(aspect, progress) {
-  const angles = [.15, -.36, .37, -.27];
-  const shots = [galleryFrame(aspect), ...flightOrder.map((key, index) =>
-    productFrame(products.find(product => product.key === key), aspect, angles[index], .26))];
-  const scaled = MathUtils.clamp(progress, 0, 1) * (shots.length - 1);
-  const index = Math.min(shots.length - 2, Math.floor(scaled));
-  const t = scaled - index;
-  const from = shots[index];
-  const to = shots[index + 1];
-  const prior = shots[Math.max(0, index - 1)];
-  const following = shots[Math.min(shots.length - 1, index + 2)];
-  // A cubic Hermite curve keeps the camera velocity continuous at each checkpoint.
-  return Object.fromEntries(Object.keys(from).map(key => {
-    const m0 = (to[key] - prior[key]) * .33;
-    const m1 = (following[key] - from[key]) * .33;
-    const u = t * t;
-    return [key, (2 * u * t - 3 * u + 1) * from[key] + (u * t - 2 * u + t) * m0
-      + (-2 * u * t + 3 * u) * to[key] + (u * t - u) * m1];
-  }));
+  const shots=[galleryFrame(aspect),...flightOrder.map(key=>
+    productFrame(products.find(p=>p.key===key),aspect,0,.34))];
+  const p=MathUtils.clamp(progress,0,1)*4;
+  const index=Math.min(3,Math.floor(p));
+  const t=MathUtils.smoothstep(p-index,0,1);
+  const from=shots[index], to=shots[index+1];
+  return Object.fromEntries(Object.keys(from).map(key=>[
+    key,MathUtils.lerp(from[key],to[key],t)
+  ]));
 }
+
 
 function frame() {
   const selected = products.find(product => product.key === stage.dataset.state);
@@ -413,13 +508,13 @@ function render(time) {
     const emphasis = lit ? MathUtils.clamp(shot.focus, 0, 1) : 0;
     const phase = seconds * (.73 + index * .095) + index * 1.72;
     const still = reducedMotion.matches || (selected && pointerStates.size > 0);
-    const orbitX = still ? 0 : Math.sin(phase) * .15;
-    const orbitY = still ? 0 : Math.sin(phase * .91 + .85) * .12;
-    const orbitZ = still ? 0 : Math.cos(phase) * .11;
+    const orbitX = 0;
+    const orbitY = 0;
+    const orbitZ = 0;
     const turn = product.rest + spinAngle(product, time)
-      + (still ? 0 : Math.sin(phase * .76) * .23) + (selected ? manualTurn.y : 0);
-    const pitch = (selected ? manualTurn.x : 0) + (still ? 0 : Math.sin(phase * .87 + .8) * .094);
-    const roll = still ? 0 : Math.cos(phase * .82) * .058;
+      + (still ? 0 : Math.sin(phase * .76) * .035) + (selected ? manualTurn.y : 0);
+    const pitch = (selected ? manualTurn.x : 0) + (still ? 0 : Math.sin(phase * .87 + .8) * .012);
+    const roll = still ? 0 : Math.cos(phase * .82) * .013;
     product.pivot.position.set(orbitX, product.height / 2 + hoverGap + orbitY, orbitZ);
     product.pivot.rotation.set(pitch, turn, roll);
     product.fluidMotion.x = MathUtils.damp(product.fluidMotion.x, roll * .84, 5.2, dt);
@@ -433,13 +528,21 @@ function render(time) {
     product.shadow.material.opacity = .72 - orbitY * 1.05;
     const otherFocus = current !== 'gallery' && !selected ? shot.focus : 0;
     const secondary = 1 - otherFocus * .81;
-    product.keyLight.intensity = (109 + emphasis * 160) * secondary;
-    product.overhead.intensity = (142 + emphasis * 174) * secondary;
+    product.keyLight.intensity = (38 + emphasis * 112) * secondary;
+    product.overhead.intensity = (67 + emphasis * 180) * secondary;
     product.overhead.target.position.x = orbitX + lightingPointer.x * .2;
-    product.keyLight.position.x = -.95 + lightingPointer.x * .95;
-    product.keyLight.position.z = 2.8 + lightingPointer.y * .36;
-    product.rimLight.intensity = (46 + emphasis * 92) * secondary;
-    product.edgeLight.intensity = (22 + emphasis * 23) * secondary;
+    product.keyLight.position.x = -1.65 + lightingPointer.x * .32;
+    product.keyLight.position.z = 1.46 + lightingPointer.y * .23;
+    product.rimLight.intensity = (31 + emphasis * 68) * secondary;
+    product.edgeLight.intensity = (16 + emphasis * 28) * secondary;
+    const niche = shelves?.userData.lights.get(product.key);
+    if (niche) {
+      niche.left.intensity=(64+emphasis*174)*secondary;
+      niche.right.intensity=(64+emphasis*174)*secondary;
+      niche.bounce.intensity=(17+emphasis*70)*secondary;
+      for(const mirror of niche.mirrors) mirror.visible=selected;
+      for(const lamp of niche.fixtures) lamp.material.color.setScalar(.76+emphasis*1.2);
+    }
     product.refraction.rotation.z = turn * .91;
     product.refraction.position.x = Math.sin(turn) * .15 + lightingPointer.x * .085;
     product.refraction.position.z = .26 + Math.cos(turn * 2) * .08;
@@ -447,7 +550,7 @@ function render(time) {
     if (water) {
       const {pools, poolColors} = water.material.uniforms;
       pools.value[index].set(product.x + lightingPointer.x * .22,
-        product.z + lightingPointer.y * .16, (.87 + emphasis * 2.15) * secondary);
+        2.8 + lightingPointer.y * .16, (.66 + emphasis * 1.25) * secondary);
       poolColors.value[index].set(product.tone);
     }
   }
@@ -584,6 +687,8 @@ async function start() {
     scene.add(new AmbientLight('#ebedf8', .26));
     closeup.add(new AmbientLight('#f3eefa', .32));
     addSpot(closeup, {color: '#fff4e7', intensity: 70, position: [3, 4, 4], look: [0, 0, 0]});
+    shelves=createWall();
+    if(compactLayout) for(const product of products) product.x*=.64;
     water = makeWater(renderer, innerWidth <= 700);
     scene.add(water);
     const loader = new GLTFLoader();
