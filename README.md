@@ -1,41 +1,19 @@
-# ATELIER — five-bottle interactive perfume showroom
+# ATELIER — restored continuous five-fragrance showroom
 
-A responsive static website built with HTML, CSS, JavaScript and bundled Three.js. No framework or build step.
+**Files are deliberately flat:** upload every file directly into the GitHub repository root (next to `index.html`). There is **no assets folder**, build step, package manager, or server-side dependency. GitHub Pages can serve `index.html` from the repository root.
 
-## The two supplied backgrounds
+## Design and motion
 
-The desktop scene keeps the supplied five-in-a-row carved rock alcoves. The mobile scene keeps the 2-over-3 layout. Their rock formations, framing and still-water surfaces are preserved. Only the fifth niche's original pink lighting/reflection has been colour-graded to blue to match the newly supplied blue-and-gold bottle.
+- The exact supplied desktop (`scene-desktop.png`, 1536 × 864) and portrait mobile (`scene-mobile.png`, 864 × 1536) images remain the background and never switch into a cropped screenshot or independent product page.
+- Four original GLB models are preserved unchanged: `ambre-dore.glb`, `rose-lune-smoked.glb`, `galet-crystal.glb`, and `sillage-bleu.glb`.
+- `bleu-royal-photo.png` is the supplied **static, transparent fifth bottle**. It is **never spun as a 3D object**.
+- The user can click any bottle for a direct camera flight to its niche, or scroll / swipe up the page to pass through all five positions. A click moves the scroll checkpoint instantly, then animates the same world into focus. No modal product image or separate scene is shown.
+- Colored ambient pools and downlights intensify for the current product, with subtle water distortion/reflection. No touch-following / mouse-following light.
+- Product copy, price, add-to-basket, and back-to-gallery appear as a minimal dock over the continuous experience.
+- The basket is a local demonstration saved in localStorage; no payments, shipping, or checkout are connected.
 
-## Products and behaviour
+## Test and troubleshoot
 
-1. Ambre Doré — €80 — 3D GLB model
-2. Rose Lune — €75 — 3D GLB model
-3. Galet — €95 — 3D GLB model
-4. Sillage Bleu — €60 — 3D GLB model
-5. Bleu Royal — €60 *temporary demo price* — the user's transparent PNG, used as a **static image only**, with **no 3D spin**.
+Test on GitHub Pages or a local HTTP server (for example `python3 -m http.server 8000`). JavaScript modules and GLBs require HTTP/HTTPS; opening `index.html` from `file://` may block assets in some browsers. WebGL-capable browsers render the GLB models; when WebGL is disabled, 2D bottle PNG previews are displayed instead. To see whether GLBs loaded, look for the `webgl-ready` class on the first four bottle image fallbacks and inspect the browser console.
 
-Click or tap a product to open a close-up that preserves the full niche. Coloured glow, top lighting, and water reflection brighten for the selected product. The four GLBs make a single complete 360-degree rotation on selection and settle; the photo stays completely still. The pointer-following light reacts to mouse/trackpad movement and finger touching/dragging. The image/photo fallback stays usable when WebGL is unavailable.
-
-The basket remembers item quantities in localStorage; no checkout or payments are connected. The product prices are demonstrations, not verified retail prices. To adjust the fifth price, modify `price` on the `photo` item in `app.js`.
-
-## Run it
-
-All files are placed directly beside `index.html` (no `assets/` folder). At the extracted folder root, start a local server:
-
-```bash
-python3 -m http.server 8000
-```
-
-Open `http://localhost:8000`. For GitHub Pages, upload everything in this folder to the repository root and enable Pages to deploy from the root of the default branch. The site uses no build tools. Google Fonts is optional and has local fallback fonts.
-
-## Files
-
-- `index.html`: minimal page structure, modal product view and basket
-- `style.css`: exact responsive scene placement, pointer light and visual styling
-- `app.js`: product data, 3D initialization, pointer/touch effects and basket
-- `three-showroom.js`: bundled Three.js and GLTFLoader code
-- The four GLBs, photo-only PNG, image fallbacks, scene photographs and close-up photo crops are in the same root directory as `index.html`.
-
-The site was checked with JavaScript syntax validation and in-browser fallback tests for desktop and mobile layouts, including five product hit targets, the static photo close-up, the 3D product selection path and basket arithmetic. GPU WebGL rendering was not visually verified in this environment.
-
-**GitHub upload:** Extract the ZIP, select all individual files and upload them together to the repository root using **Add file → Upload files**. Do not upload the ZIP itself; no directory creation is needed.
+The restored site uses a local Three.js r170 bundle (`three-showroom.js`) under its included MIT license. Google Fonts loads only when internet is available and falls back to system fonts.

@@ -1,55 +1,47 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#070707">
-<meta name="description" content="ATELIER — Five fragrances in five illuminated basalt alcoves; compare 3D bottle models with a photo-only presentation.">
-<title>ATELIER — The Night Collection</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#030405"><meta name="description" content="ATELIER — five fragrances displayed in a seamless, illuminated basalt showroom.">
+<title>ATELIER | The Night Collection</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Italiana&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
-</head>
-<body>
-<header class="topbar">
-  <button class="identity" id="home" type="button" aria-label="ATELIER, back to collection"><strong>ATELIER</strong><small>PARFUM HOUSE</small></button>
-  <p class="edition">THE NIGHT COLLECTION · VOL. I</p>
-  <button class="bag-trigger" id="bagOpen" type="button" aria-label="Open shopping basket">BASKET <span id="bagCount">0</span></button>
-</header>
-<main>
-  <section class="scene-wrap" aria-label="Explore the ATELIER perfume collection">
-    <div class="scene-stage" id="stage">
-      <picture class="rock-bg"><source media="(max-width: 720px)" srcset="scene-mobile.jpg"><img src="scene-desktop.jpg" alt="Five illuminated alcoves hand carved into a dark basalt wall above a still reflective water surface" fetchpriority="high"></picture>
-      <div id="nicheGlows" class="niche-glows" aria-hidden="true"></div>
-      <div id="waterGlows" class="water-glows" aria-hidden="true"></div>
-      <div id="pointerLight" class="pointer-light" aria-hidden="true"></div>
-      <div id="bottleFallbacks" class="bottle-fallbacks" aria-hidden="true"></div>
-      <div id="stage3d" class="stage3d" aria-hidden="true"></div>
-      <div id="nicheTargets" class="niche-targets" aria-label="Choose a fragrance"></div>
-      <div class="scene-intro"><span class="eyebrow">WELCOME TO ATELIER</span><h1>The <em>night</em> collection.</h1><p>Five fragrances. One unforgettable impression.</p></div>
-      <span class="interaction-tip">MOVE TO REVEAL LIGHT <span aria-hidden="true">·</span> SELECT A FRAGRANCE</span>
-    </div>
-  </section>
-  <section class="collection-note"><p>Thoughtfully composed, beautifully worn.</p><span>EXPLORE THE LIGHT WITH YOUR CURSOR OR TOUCH</span></section>
-</main>
-<div class="product-overlay" id="productOverlay" hidden>
-  <div class="overlay-dim" id="overlayDim"></div>
-  <section class="product-card" role="dialog" aria-modal="true" aria-labelledby="focusName">
-    <button class="close-view" id="closeFocus" type="button" aria-label="Return to collection">× <span>CLOSE</span></button>
-    <div class="focus-art" id="focusArt">
-      <picture id="focusPicture"><source id="focusMobileSource" media="(max-width: 720px)" srcset="focus-ambre-mobile.jpg"><img id="focusBackground" src="focus-ambre-desktop.jpg" alt="Illuminated perfume niche"></picture>
-      <span class="focus-niche-glow" id="focusGlow" aria-hidden="true"></span>
-      <span class="focus-pointer-light" id="focusPointerLight" aria-hidden="true"></span>
-      <img class="focus-fallback" id="focusBottleFallback" src="tight-ambre-dore.png" alt="" aria-hidden="true">
-      <div class="focus3d" id="focus3d" aria-hidden="true"></div>
-    </div>
-    <div class="product-copy"><p class="eyebrow">ATELIER · EAU DE PARFUM</p><h2 id="focusName">Ambre Doré</h2><p id="focusDescription">An invitation to linger.</p><div class="product-spec"><span>50 ML</span><span id="focusFamily">WARM · AMBER</span></div><p class="product-price" id="focusPrice">€80</p><button class="buy-btn" id="addToBasket" type="button">ADD TO BASKET <span aria-hidden="true">+</span></button><p class="presentation-note" id="presentationNote">INTERACTIVE 3D PRESENTATION</p><p class="soft-note">A fragrance concept store. No payments are taken here.</p></div>
-  </section>
+</head><body>
+<div class="experience" id="experience">
+ <div class="camera-viewport" id="viewport">
+  <div class="world" id="world" aria-label="Five coloured fragrances illuminated in a rough basalt wall">
+   <img id="background" class="wall-image" alt="Carved rough black-rock alcoves above a dark mirror-like reflective pool" src="scene-desktop.png">
+   <div class="niche-colors" id="nicheColors" aria-hidden="true"></div>
+   <canvas class="water-surface" id="waterSurface" aria-hidden="true"></canvas>
+   <svg class="rock-edges" id="rockEdges" aria-hidden="true"></svg>
+   <div class="bottle-fallbacks" id="fallbacks" aria-hidden="true"></div>
+   <div class="three-layer" id="threeMount" aria-hidden="true"></div>
+   <div class="hotspots" id="hotspots"></div>
+  </div>
+ </div>
+ <header class="masthead">
+   <button type="button" id="home" class="brand" aria-label="ATELIER — return to all fragrances"><strong>ATELIER</strong><span>PARFUM HOUSE</span></button>
+   <span class="collection-title">THE NIGHT COLLECTION</span>
+   <button type="button" class="basket-open" id="basketOpen">BASKET <span id="basketCount">0</span></button>
+ </header>
+ <div class="welcome" id="welcome"><p>WELCOME TO ATELIER</p><h1>The <em>night</em> collection.</h1><span>Five fragrances, unveiled in light.</span></div>
+ <div class="caption" id="caption" aria-live="polite" aria-hidden="true">
+   <div class="caption-text"><span id="stepNumber" class="step-label">01 / 05</span><h2 id="itemName">Ambre Doré</h2><p id="itemDesc"></p></div>
+   <div class="purchase"><span class="price" id="price">€80</span><button type="button" id="addBasket">ADD TO BASKET <span>+</span></button></div>
+ </div>
+ <button id="back" class="back-control" type="button" aria-label="View all fragrances">↖ <span>ALL FRAGRANCES</span></button>
+ <div class="scroll-hint" id="scrollHint">SCROLL TO DISCOVER <span aria-hidden="true">↓</span></div>
+ <span class="position-status" id="positionStatus">01 — 05</span>
 </div>
+<div class="scroll-track" id="scrollTrack" aria-hidden="true"></div>
 <div class="basket-overlay" id="basketOverlay" hidden>
-  <div class="basket-dim" id="basketDim"></div>
-  <aside class="basket-drawer" role="dialog" aria-modal="true" aria-label="Shopping basket"><div class="basket-head"><span>YOUR BASKET</span><button id="closeBasket" type="button" aria-label="Close basket">×</button></div><div class="basket-lines" id="basketLines"></div><div class="basket-bottom"><p><span>SUBTOTAL</span><strong id="basketTotal">€0</strong></p><small>Basket demonstration only. Payment checkout is not connected.</small></div></aside>
+ <div class="basket-shade" id="basketShade"></div>
+ <aside class="basket-drawer" role="dialog" aria-modal="true" aria-label="Your basket">
+ <div class="basket-heading"><span>YOUR BASKET</span><button type="button" id="basketClose" aria-label="Close basket">×</button></div>
+ <div id="basketLines" class="basket-lines"></div>
+ <div class="basket-total"><div><span>SUBTOTAL</span><strong id="basketTotal">€0</strong></div><p>This is a demonstration basket; payment processing is not connected.</p></div>
+ </aside>
 </div>
 <script type="module" src="app.js"></script>
 </body></html>
