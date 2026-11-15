@@ -106,7 +106,7 @@
   }
 }
 </style>
-<link rel="stylesheet" href="campaign.css?v=7">
+<link rel="stylesheet" href="campaign.css?v=9">
 </head>
 <body>
 <div class="intro-loader" id="loader" aria-hidden="true"><div class="loader-mark">ATELIER</div><div class="load-rule"></div></div>
@@ -114,7 +114,7 @@
 <main>
 <section class="experience" id="experience" aria-label="Interactive perfume showroom">
  <div class="stage" id="stage" data-state="gallery">
- <video class="studio-film" id="studio-film" poster="studio-trio.jpg" muted loop playsinline preload="none" aria-hidden="true"></video>
+ <video class="studio-film" id="studio-film" muted playsinline preload="none" aria-hidden="true" hidden></video>
  <canvas class="studio-rays" id="side-rays" aria-hidden="true"></canvas>
  <div id="showroom3d" aria-hidden="true"></div>
  <div class="gallery" id="gallery">
@@ -123,7 +123,7 @@
   <button class="gallery-bay bleu" data-go="bleu" aria-label="Discover Sillage Bleu perfume"><span class="image-plinth" aria-hidden="true"></span><img src="sillage-bleu-glass.png" alt="Sillage Bleu cobalt perfume bottle with a clear glass cap"><span class="bay-caption">Sillage Bleu ↗</span></button>
   <button class="gallery-bay ambre" data-go="ambre" aria-label="Discover Ambre Doré perfume"><span class="image-plinth" aria-hidden="true"></span><img src="ambre-dore.png" alt="Ambre Doré yellow-gold perfume bottle with a transparent cap"><span class="bay-caption">Ambre Doré ↗</span></button>
  </div>
- <div class="gallery-intro"><h1>The art of scent.</h1></div>
+ <div class="gallery-intro"><h1>The <em>night</em> collection.</h1></div>
  <div class="detail" id="detail" inert aria-live="polite">
   <div class="detail-panel">
    <h2 id="productName" tabindex="-1">Rose <em>Lune</em></h2>
@@ -259,20 +259,14 @@ $$('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go,b.clas
 const viewer=$('#viewerShade');function close3D(){viewer.classList.remove('show');window.Perfume3D?.stop?.()}function open3D(){const d=DATA[selected];viewer.classList.add('show');$('#viewerWindow').className='viewer-window '+selected;$('#viewerName').textContent=d.name;$('#viewerFallbackImg').src=d.img;$('#viewerFallback').hidden=true;if(window.Perfume3D)window.Perfume3D.open(selected).catch(()=>{$('#viewerFallback').hidden=false});else $('#viewerFallback').hidden=false}
 $('#inspectBtn').onclick=open3D;$('#closeViewer').onclick=close3D;viewer.addEventListener('click',e=>{if(e.target===viewer)close3D()});window.addEventListener('keydown',e=>{if(e.key==='Escape'){close3D();$('#bagShade').classList.remove('show')}if(viewer.classList.contains('show'))return;if(e.key==='ArrowRight')step(1);if(e.key==='ArrowLeft')step(-1)});
 const film=$('#studio-film');
-function syncFilm(){
- const active=!motion.matches&&!document.hidden&&track.getBoundingClientRect().bottom>stage.clientHeight*.25;
- if(active){
-  if(!film.hasAttribute('src'))film.src='studio-trio.mp4';
-  if(film.paused&&!film.error)film.play().catch(()=>{});
- }else if(!film.paused)film.pause();
-}
+function syncFilm(){if(!film.paused)film.pause();}
 window.addEventListener('perfume-progress',syncFilm);
 document.addEventListener('visibilitychange',syncFilm);
 motion.addEventListener('change',syncFilm);
 renderBag();updateScroll();window.addEventListener('load',()=>setTimeout(()=>$('#loader').classList.add('out'),450));setTimeout(()=>$('#loader').classList.add('out'),1800);
 })();
 </script>
-<script type="module" src="SideRays.js?v=3"></script>
-<script type="module" src="showroom-webgl.js?v=11"></script>
+
+<script type="module" src="showroom-webgl.js?v=12"></script>
 </body>
 </html>

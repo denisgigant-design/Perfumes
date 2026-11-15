@@ -1,6 +1,6 @@
 # ATELIER — 3D perfume showroom
 
-The showroom features **Galet**, **Rose Lune**, **Sillage Bleu**, and **Ambre Doré**. Scroll to fly between four camera checkpoints. Four bottles are seated inside a sculpted 2×2 black-stone shelf wall, with deep reflective side panels, twin overhead spots per niche and a reflective water floor beneath the wall. Tapping a bottle takes you into its brighter single-niche close-up and plays its own 360° turn. Drag to rotate it or open the separate 3D viewer.
+The showroom features **Galet**, **Rose Lune**, **Sillage Bleu**, and **Ambre Doré**. Scroll to fly between four camera checkpoints. Four bottles rest directly on carved black-basalt alcove floors (four tall niches across on desktop, two rows on mobile). Each recess has rough broken stone edges, a warm overhead spotlight, coloured indirect spill from its glass, and almost-still black reflective water below. Selection shows the entire niche rather than cropping in too close. Tapping a bottle takes you into its brighter single-niche close-up and plays its own 360° turn. Drag to rotate it or open the separate 3D viewer.
 
 The updated GLBs contain high-resolution labels, and Sillage Bleu uses a transmissive glass cap. The browser shader uses the liquid mesh to estimate an optical volume with colour absorption and a moving liquid line. The water shader stretches and distorts a planar scene reflection, with moving highlights beneath the overhead spotlights. Mobile rendering gives the main canvas a higher pixel budget than the water reflection pass.
 

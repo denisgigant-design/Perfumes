@@ -318,3 +318,89 @@ html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay .bay-caption{
  html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay{border-width:7px!important}
  html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay .bay-caption{font-size:7px}
 }
+
+/* BASALT REFERENCE REBUILD — dark broken rock, one top-down lamp per aperture. */
+html.glb-live .studio-film,html.glb-live .studio-rays {display:none!important}
+html.glb-live .stage{background:#030404!important}
+html.glb-live .stage::after{background:linear-gradient(180deg,rgba(0,0,0,.55),transparent 18%,transparent 72%,rgba(0,0,0,.27))!important}
+html.glb-live .stage:not([data-state="gallery"])::after{
+ background:linear-gradient(180deg,rgba(0,0,0,.55),transparent 15%,transparent 58%,rgba(0,0,0,.88) 88%)!important
+}
+html.glb-live .gallery-intro{left:3%!important;right:auto!important;top:auto!important;bottom:10%!important;text-align:left;max-width:270px!important}
+html.glb-live .gallery-intro h1{font-family:Italiana,Georgia,serif!important;font-size:clamp(28px,3.2vw,48px)!important;letter-spacing:-.015em!important;text-transform:none!important}
+html.glb-live .gallery-bay{background:transparent!important;box-shadow:none!important;border:0!important;outline-offset:6px!important}
+html.glb-live .gallery-bay .bay-caption{font-size:9px!important;letter-spacing:.095em!important;bottom:-18px!important;max-width:150px}
+html.glb-live .stage:not([data-state="gallery"]) .detail-panel{bottom:max(34px,5svh)!important}
+html.glb-live .stage:not([data-state="gallery"]) .detail-panel h2{font-weight:400!important;font-family:Italiana,Georgia,serif!important;text-transform:none!important;letter-spacing:.005em!important;font-size:clamp(36px,4vw,65px)!important}
+html.glb-live .stage:not([data-state="gallery"]) .product-drag{top:17%!important;height:47%!important}
+@media(max-width:660px){
+ html.glb-live .gallery-intro{left:6%!important;bottom:9%!important;max-width:85%!important}
+ html.glb-live .gallery-intro h1{font-size:clamp(28px,7vw,42px)!important}
+ html.glb-live .stage:not([data-state="gallery"]) .detail-panel{bottom:max(54px,8svh)!important}
+ html.glb-live .stage:not([data-state="gallery"]) .detail-panel h2{font-size:clamp(37px,9vw,53px)!important}
+ html.glb-live .stage:not([data-state="gallery"]) .product-drag{left:5%!important;width:90%!important;top:20%!important;height:45%!important}
+}
+/* Non-WebGL fallback uses the same matte basalt niche composition. */
+html:not(.glb-live) .stage{background:#090a0b url('basalt-fallback.jpg') center / cover no-repeat!important}
+html:not(.glb-live) .studio-film,html:not(.glb-live) .studio-rays{display:none}
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay{
+ border:12px solid #191b1d!important;background:radial-gradient(ellipse at 52% 4%,#8b756155 0%,#101213 40%,#08090a 100%)!important;
+ box-shadow:inset 0 0 34px #000,2px 5px 5px #030303!important
+}
+
+/* Standalone photo composition for older devices without WebGL2. The clickable
+   buttons are transparent hit regions placed over the exact niche photos. */
+html:not(.glb-live) .stage[data-state="gallery"]{
+  background: #08090a url('basalt-desktop.jpg') center center / cover no-repeat!important;
+}
+html:not(.glb-live) .stage:not([data-state="gallery"]){
+  background:#08090a center center / cover no-repeat!important;
+}
+html:not(.glb-live) .stage[data-state="galet"]{background-image:url('basalt-galet-desktop.jpg')!important}
+html:not(.glb-live) .stage[data-state="rose"]{background-image:url('basalt-rose-desktop.jpg')!important}
+html:not(.glb-live) .stage[data-state="bleu"]{background-image:url('basalt-bleu-desktop.jpg')!important}
+html:not(.glb-live) .stage[data-state="ambre"]{background-image:url('basalt-ambre-desktop.jpg')!important}
+html:not(.glb-live) .stage[data-state="gallery"] .gallery{position:absolute!important;inset:0!important;display:block!important;background:transparent!important}
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay,
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.galet,
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.rose,
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.bleu,
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.ambre{
+  position:absolute!important;left:15%!important;top:46%!important;
+  width:17%!important;height:58%!important;transform:translate(-50%,-50%)!important;
+  background:none!important;border:0!important;box-shadow:none!important;
+  clip-path:none!important;display:block!important;
+}
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.rose{left:38.2%!important}
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.bleu{left:61.4%!important}
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.ambre{left:84.6%!important}
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay::before,
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay::after,
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay img,
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay .image-plinth{display:none!important}
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay .bay-caption{display:none!important}
+html:not(.glb-live) .stage:not([data-state="gallery"]) .hero-product{display:none!important}
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-intro{left:3%!important;right:auto!important;bottom:9%!important;top:auto!important;text-align:left!important;max-width:340px!important}
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-intro h1{font-family:Italiana,Georgia,serif!important;font-size:clamp(25px,3.2vw,49px)!important;line-height:1!important;letter-spacing:-.015em!important;text-transform:none!important;text-shadow:0 3px 15px #000!important}
+html:not(.glb-live) .stage:not([data-state="gallery"]) .detail-panel{bottom:max(42px,6svh)!important}
+html:not(.glb-live) .stage:not([data-state="gallery"]) .detail-panel h2{font-family:Italiana,Georgia,serif!important;font-weight:400!important;font-size:clamp(32px,4.3vw,60px)!important}
+@media(max-width:660px){
+ html:not(.glb-live) .stage[data-state="gallery"]{background-image:url('basalt-phone.jpg')!important}
+ html:not(.glb-live) .stage[data-state="galet"]{background-image:url('basalt-galet-phone.jpg')!important}
+ html:not(.glb-live) .stage[data-state="rose"]{background-image:url('basalt-rose-phone.jpg')!important}
+ html:not(.glb-live) .stage[data-state="bleu"]{background-image:url('basalt-bleu-phone.jpg')!important}
+ html:not(.glb-live) .stage[data-state="ambre"]{background-image:url('basalt-ambre-phone.jpg')!important}
+ html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay,
+ html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.galet,
+ html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.rose,
+ html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.bleu,
+ html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.ambre{
+   width:35%!important;height:25%!important;top:28.5%!important;left:27.5%!important;
+ }
+ html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.rose{left:72.5%!important}
+ html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.bleu{top:56.5%!important;left:27.5%!important}
+ html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.ambre{top:56.5%!important;left:72.5%!important}
+ html:not(.glb-live) .stage[data-state="gallery"] .gallery-intro{left:5%!important;bottom:9%!important;max-width:88%!important}
+ html:not(.glb-live) .stage[data-state="gallery"] .gallery-intro h1{font-size:clamp(26px,7vw,40px)!important}
+ html:not(.glb-live) .stage:not([data-state="gallery"]) .detail-panel{bottom:max(56px,9svh)!important}
+}
