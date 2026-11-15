@@ -29,3 +29,84 @@ html{scroll-snap-type:y proximity}
 .water-continuation{position:absolute;z-index:0;left:0;display:block;object-fit:fill;pointer-events:none;filter:none;opacity:1}
 
 .niche-light.webgl-lit{opacity:0!important}
+
+/* DENNIS'S SHOP — continuity and restrained luxury polish */
+:root{--selected-rgb:175,169,159}
+html{scroll-snap-type:y mandatory;scroll-padding:0;scroll-behavior:auto}
+.scroll-stop{scroll-snap-align:start;scroll-snap-stop:always}
+.experience,.camera-viewport,.world{background-color:#111115}
+.world{overflow:visible}
+.world-surround{position:absolute;z-index:0;left:-100%;top:-100%;width:300%;height:300%;max-width:none;object-fit:fill;pointer-events:none;user-select:none}
+.wall-image{z-index:1;mask-image:linear-gradient(to right,transparent 0%,black 2.5%,black 97.5%,transparent 100%);-webkit-mask-image:linear-gradient(to right,transparent 0%,black 2.5%,black 97.5%,transparent 100%)}
+.water-continuation{z-index:1}
+.niche-colors{z-index:2}
+.water-surface{z-index:3;opacity:.78;mix-blend-mode:screen}
+.three-layer{z-index:5}
+.bottle-fallbacks{z-index:6}
+.hotspots{z-index:7}
+.rock-edges{display:none!important}
+.niche-light{opacity:.63;--strength:.40}
+.niche-light.active{opacity:1;--strength:1;filter:brightness(1.6)}
+.niche-light::before{filter:blur(18px);background:radial-gradient(ellipse 74% 60% at 50% 68%,var(--tint) 0%,transparent 100%)}
+/* Coloured ambient lighting must remain BEHIND the bottles, never be a pale overlay. */
+.niche-light.webgl-lit{opacity:0!important}
+.bottle-img{filter:saturate(1.45) contrast(1.28) drop-shadow(0 16px 13px rgba(0,0,0,.82)) drop-shadow(0 0 8px var(--glow))}
+.bottle-img.active{filter:saturate(1.6) contrast(1.3) drop-shadow(0 19px 14px #000) drop-shadow(0 0 17px var(--glow))}
+.photo-bottle,.photo-bottle.active{filter:saturate(1.28) contrast(1.16) drop-shadow(0 15px 15px #000) drop-shadow(0 0 13px #266cdb)}
+.niche-hit::after{bottom:-28px;font-size:14px;font-weight:500;letter-spacing:.12em;text-shadow:0 2px 6px #000,0 2px 12px #000;opacity:.91}
+.camera-viewport.is-focused .niche-hit::after{opacity:0}
+.masthead{padding:25px clamp(26px,4vw,78px);align-items:center}
+.brand strong{font-weight:600;font-size:clamp(22px,2.6vw,40px);letter-spacing:.16em}
+.brand span{font-size:11px;letter-spacing:.18em}
+.collection-title{font-size:13px;letter-spacing:.16em;color:#f1e9df}
+.basket-open{border-radius:999px;letter-spacing:.13em;border:1px solid #e5d8ce85;background:rgba(11,12,17,.42);padding:12px 19px;backdrop-filter:blur(13px)}
+.basket-open:hover{border-color:#fff;background:rgba(10,11,17,.65)}
+.welcome{max-width:min(780px,90vw);bottom:4.5%;left:clamp(25px,5vw,90px)}
+.welcome p{font-size:clamp(11px,1.2vw,17px);letter-spacing:.16em;font-weight:500}
+.welcome h1{font-size:clamp(45px,5.2vw,82px);white-space:normal;line-height:1.03;max-width:780px}
+.welcome em{color:#ead4d1}
+.welcome span{font-size:clamp(13px,1.14vw,17px);letter-spacing:.03em;color:#f2eae2}
+.caption{min-height:175px;padding:26px clamp(28px,6vw,106px) 28px;background:linear-gradient(to top,rgba(3,4,7,.99) 0%,rgba(4,5,10,.96) 40%,rgba(var(--selected-rgb),.14) 74%,transparent 100%)}
+.caption-text{max-width:600px}
+.caption h2{font-size:clamp(36px,4vw,65px)}
+.caption p{font-size:14px;max-width:580px}
+.caption .fruit-caption{margin-top:5px;font-size:clamp(12px,1.1vw,16px);font-weight:500;letter-spacing:.09em;color:rgba(var(--selected-rgb),.98)}
+.purchase button{border-color:rgba(var(--selected-rgb),.95);background:rgb(var(--selected-rgb));border-radius:999px;color:#08090c;box-shadow:0 3px 27px rgba(var(--selected-rgb),.22)}
+.purchase button:hover{background:rgb(var(--selected-rgb));filter:brightness(1.1)}
+.back-control{border-radius:999px;background:rgba(10,10,12,.35);backdrop-filter:blur(10px)}
+@media(max-width:720px){
+ .masthead{padding:17px 17px;gap:8px;align-items:start}
+ .brand strong{font-size:clamp(17px,5.1vw,24px);letter-spacing:.09em}
+ .brand span{font-size:8px}
+ .basket-open{border-radius:999px;font-size:10px;padding:9px 11px}
+ .welcome{left:21px;bottom:max(19px,env(safe-area-inset-bottom));max-width:calc(100% - 35px)}
+ .welcome p{font-size:10px}
+ .welcome h1{font-size:clamp(31px,9vw,46px);white-space:normal;line-height:1.05}
+ .welcome span{font-size:11px}
+ .niche-hit::after{font-size:15px;bottom:-25px}
+ .caption{min-height:175px;padding:22px 17px max(19px,env(safe-area-inset-bottom));gap:9px;background:linear-gradient(to top,rgba(3,4,6,1) 0%,rgba(4,5,8,.96) 35%,rgba(var(--selected-rgb),.15) 72%,transparent 100%)}
+ .caption h2{font-size:clamp(26px,7vw,34px)}
+ .caption p{font-size:11px;line-height:1.4}
+ .caption .fruit-caption{font-size:11px;line-height:1.3}
+ .purchase{gap:10px;align-self:center}
+ .purchase .price{font-size:26px}
+ .purchase button{border-radius:999px;font-size:10px;padding:13px 10px;min-width:112px}
+ .back-control{top:72px}
+}
+/* The expanded photographic surroundings provide continuous water themselves.
+   Suppress the old flat tail image that caused the hard horizontal black seam. */
+.water-continuation{display:none!important}
+.wall-image{
+ mask-image:linear-gradient(to right,transparent 0%,#000 2.5%,#000 97.5%,transparent 100%),linear-gradient(to bottom,#000 0%,#000 90%,transparent 100%);
+ mask-composite:intersect;
+ -webkit-mask-image:linear-gradient(to right,transparent 0%,#000 2.5%,#000 97.5%,transparent 100%),linear-gradient(to bottom,#000 0%,#000 90%,transparent 100%);
+ -webkit-mask-composite:source-in;
+}
+/* Feather original photo into the mirrored stone beyond both outside edges. */
+.wall-image{
+ mask-image:linear-gradient(to right,transparent 0%,#000 5%,#000 95%,transparent 100%),linear-gradient(to bottom,#000 0%,#000 90%,transparent 100%);
+ mask-composite:intersect;
+ -webkit-mask-image:linear-gradient(to right,transparent 0%,#000 5%,#000 95%,transparent 100%),linear-gradient(to bottom,#000 0%,#000 90%,transparent 100%);
+ -webkit-mask-composite:source-in;
+}
+@media(max-width:720px){.niche-hit::after{font-size:23px}}

@@ -1,29 +1,33 @@
-# ATELIER — restored continuous five-fragrance showroom
+# Dennis’s Shop — Unveiled Collection
 
-**Files are deliberately flat:** upload every file directly into the GitHub repository root (next to `index.html`). There is **no assets folder**, build step, package manager, or server-side dependency. GitHub Pages can serve `index.html` from the repository root.
+Five-bottle luxury basalt showroom. The files in this package are **all at the root level**, ready to upload individually in GitHub using **Add file → Upload files**. `index.html` is lowercase. Do not upload the ZIP itself as a site file; extract it first. GitHub Pages must be configured to deploy from the default branch, root (`/`).
 
-## Design and motion
+## Experience
 
-- The exact supplied desktop (`scene-desktop.png`, 1536 × 864) and portrait mobile (`scene-mobile.png`, 864 × 1536) images remain the background and never switch into a cropped screenshot or independent product page.
-- Four original GLB models are preserved unchanged: `ambre-dore.glb`, `rose-lune-smoked.glb`, `galet-crystal.glb`, and `sillage-bleu.glb`.
-- `bleu-royal-photo.png` is the supplied **static, transparent fifth bottle**. It is **never spun as a 3D object**.
-- The user can click any bottle for a direct camera flight to its niche, or scroll / swipe up the page to pass through all five positions. A click moves the scroll checkpoint instantly, then animates the same world into focus. No modal product image or separate scene is shown.
-- Colored ambient pools and downlights intensify for the current product, with subtle water distortion/reflection. No touch-following / mouse-following light.
-- Product copy, price, add-to-basket, and back-to-gallery appear as a minimal dock over the continuous experience.
-- The basket is a local demonstration saved in localStorage; no payments, shipping, or checkout are connected.
+- Five photographic niches, preserving the source rough-rock layouts: five in a row on desktop, two above three on phones.
+- The scene, reflection floor, and rock all extend beyond the edges, including on close-up. There are no separate screenshots or product pages.
+- Four original, unchanged GLB model files (Amber Doré, Rose Lune, Galet, Sillage Bleu) with restored native saturated glass and liquid. The script no longer uses the previous secondary refraction shader which caused stippled overlays. A soft spotlight and coloured back/rim lights highlight the selected bottle.
+- Fifth **Bleu Royal** uses the supplied transparent blue-and-gold PNG as an intentionally static photo; it does not spin.
+- Wheel and touch navigation snap to the gallery and five exact product checkpoints, no halfway holding positions. Direct tap/click flies to a product in the same environment. GLB bottles turn once on selection and can be manually rotated horizontally.
+- Product names display beneath gallery niches and only in the bottom gradient dock when focused. The dock shows the product description, price, a symbolic Fruit of the Spirit pairing, and the add-to-basket action.
+- Coloured water highlights, soft ripple movement and continued rough stone surround. Blue and green ambient panels are graded from the user's original images, preserving their physical texture and niche geometry. No touch-follow light or particle-dot layer.
+- Basket stores local demo quantities only; no real payment checkout is integrated.
 
-## Test and troubleshoot
+## Prices and five illustrative fruit pairings
 
-Test on GitHub Pages or a local HTTP server (for example `python3 -m http.server 8000`). JavaScript modules and GLBs require HTTP/HTTPS; opening `index.html` from `file://` may block assets in some browsers. WebGL-capable browsers render the GLB models; when WebGL is disabled, 2D bottle PNG previews are displayed instead. To see whether GLBs loaded, look for the `webgl-ready` class on the first four bottle image fallbacks and inspect the browser console.
+| Perfume | Price | Fruit of the Spirit |
+| --- | ---: | --- |
+| Ambre Doré | €80 | Joy |
+| Rose Lune | €75 | Love |
+| Galet | €95 | Kindness |
+| Sillage Bleu | €60 | Peace |
+| Bleu Royal | €60 (placeholder) | Faithfulness |
 
-The restored site uses a local Three.js r170 bundle (`three-showroom.js`) under its included MIT license. Google Fonts loads only when internet is available and falls back to system fonts.
+The pairings are creative merchandising labels, not a theological equivalence. The fifth bottle's €60 is a placeholder until an exact fifth price is supplied.
 
+## Verification and limitations
 
-## Restored camera and glass (November 15 revision)
-
-- All four original GLB bottle files are intact. Their glass now uses the earlier colour-absorption shader rather than a duplicate semi-transparent liquid mesh.
-- Scroll and click both use the same five checkpoints in the same rock-wall viewport. A camera flight never opens a separate screenshot/page.
-- 3D perfumes spin once when selected and can be rotated manually by dragging horizontally; the fifth transparent-PNG bottle does not spin. Native vertical touch scrolling is preserved.
-- Rock-wall reference image is exactly the supplied image on desktop and mobile. The artificial jagged edge overlays and touch-follow lights are removed.
-- Water movement is minimal, with coloured reflection spill.
-- Pricing is a demo; cart quantities are stored locally and payment checkout is not connected.
+- HTML/CSS/JS paths resolve from repository root, with no folder nesting.
+- The four GLB files are unchanged from the prior original model set.
+- Automated desktop/mobile interaction tests passed: gallery, all 5 click targets, snap to exact checkpoint, captions, backdrop, prices and basket totals.
+- The automated local browser did **not** provide a WebGL context. The screenshots from that browser show the improved 2D fallbacks, not the finished live 3D graphics. Real-time glass and cap appearance must be visually checked in a WebGL-capable browser on GitHub Pages. A browser with no WebGL shows the cleaned PNG fallbacks.
