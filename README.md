@@ -1,25 +1,41 @@
-# ATELIER — 3D perfume showroom
+# ATELIER — five-bottle interactive perfume showroom
 
-The showroom features **Galet**, **Rose Lune**, **Sillage Bleu**, and **Ambre Doré**. Scroll to fly between four camera checkpoints. Four bottles rest directly on carved black-basalt alcove floors (four tall niches across on desktop, two rows on mobile). Each recess has rough broken stone edges, a warm overhead spotlight, coloured indirect spill from its glass, and almost-still black reflective water below. Selection shows the entire niche rather than cropping in too close. Tapping a bottle takes you into its brighter single-niche close-up and plays its own 360° turn. Drag to rotate it or open the separate 3D viewer.
+A responsive static website built with HTML, CSS, JavaScript and bundled Three.js. No framework or build step.
 
-The updated GLBs contain high-resolution labels, and Sillage Bleu uses a transmissive glass cap. The browser shader uses the liquid mesh to estimate an optical volume with colour absorption and a moving liquid line. The water shader stretches and distorts a planar scene reflection, with moving highlights beneath the overhead spotlights. Mobile rendering gives the main canvas a higher pixel budget than the water reflection pass.
+## The two supplied backgrounds
 
-The background combines a darkened Seedance studio plate with [Side Rays from React Bits](https://reactbits.dev/c/backgrounds/side-rays). Both the rays and the scene lighting respond to pointer movement.
+The desktop scene keeps the supplied five-in-a-row carved rock alcoves. The mobile scene keeps the 2-over-3 layout. Their rock formations, framing and still-water surfaces are preserved. Only the fifth niche's original pink lighting/reflection has been colour-graded to blue to match the newly supplied blue-and-gold bottle.
 
-## Run locally
+## Products and behaviour
 
-Run `python3 -m http.server 8000` from the repository root and open http://localhost:8000. GitHub Pages serves the same root directly. No runtime build or package installation is needed. Browsers without WebGL 2 use the included bottle images.
+1. Ambre Doré — €80 — 3D GLB model
+2. Rose Lune — €75 — 3D GLB model
+3. Galet — €95 — 3D GLB model
+4. Sillage Bleu — €60 — 3D GLB model
+5. Bleu Royal — €60 *temporary demo price* — the user's transparent PNG, used as a **static image only**, with **no 3D spin**.
 
-The bag is a local demo. It saves quantities on the device and does not process payments.
+Click or tap a product to open a close-up that preserves the full niche. Coloured glow, top lighting, and water reflection brighten for the selected product. The four GLBs make a single complete 360-degree rotation on selection and settle; the photo stays completely still. The pointer-following light reacts to mouse/trackpad movement and finger touching/dragging. The image/photo fallback stays usable when WebGL is unavailable.
 
-## Models and renderer
+The basket remembers item quantities in localStorage; no checkout or payments are connected. The product prices are demonstrations, not verified retail prices. To adjust the fifth price, modify `price` on the `photo` item in `app.js`.
 
-- Rose Lune uses the assembled perfume bottle extracted from the supplied OBJ. The web GLB has separate glass, liquid, atomizer and label meshes. Ambre Doré uses the supplied bottle geometry with a clear cap, amber glass, and gold hardware. The original OBJ referenced a separate MTL file, so its finishes were recreated from the requested colours.
-- Galet uses a custom crystal model based on the supplied green bottle. It has a separate liquid mesh, a pearlescent cap and the printed Galet label. Sillage Bleu is a custom tall cobalt glass GLB with a fluted cap, a separate liquid mesh and its own label artwork.
-- The bundled renderer uses Three.js r170, its GLTFLoader, and RoomEnvironment. Its MIT license is included in `LICENSE-three.txt`.
+## Run it
 
-## Shelf update
+All files are placed directly beside `index.html` (no `assets/` folder). At the extracted folder root, start a local server:
 
-The main scene uses genuine deep box geometry for the carved four-niche wall, two overhead emitters and spotlights per niche, glossy side wall panels, live-selected side-wall mirror passes, and a dark reflecting floor. The bottles are **seated on their shelf floors** without floating plinths. Selecting one smoothly frames its recess and intensifies only its lights; returning to Collection restores the four-bottle view and even baseline illumination. Scroll checkpoints visit Galet, Rose Lune, Sillage Bleu and Ambre Doré in that order. The compact view compresses niche spacing, not bottle geometry, while keeping copy beneath the bottle. WebGL-disabled devices use a four-niche 2D fallback.
+```bash
+python3 -m http.server 8000
+```
 
-This package is ready to upload at the **repository root**. It is not a build-step project. Open with an HTTP server, not `file://` (ES modules need an HTTP origin).
+Open `http://localhost:8000`. For GitHub Pages, upload everything in this folder to the repository root and enable Pages to deploy from the root of the default branch. The site uses no build tools. Google Fonts is optional and has local fallback fonts.
+
+## Files
+
+- `index.html`: minimal page structure, modal product view and basket
+- `style.css`: exact responsive scene placement, pointer light and visual styling
+- `app.js`: product data, 3D initialization, pointer/touch effects and basket
+- `three-showroom.js`: bundled Three.js and GLTFLoader code
+- The four GLBs, photo-only PNG, image fallbacks, scene photographs and close-up photo crops are in the same root directory as `index.html`.
+
+The site was checked with JavaScript syntax validation and in-browser fallback tests for desktop and mobile layouts, including five product hit targets, the static photo close-up, the 3D product selection path and basket arithmetic. GPU WebGL rendering was not visually verified in this environment.
+
+**GitHub upload:** Extract the ZIP, select all individual files and upload them together to the repository root using **Add file → Upload files**. Do not upload the ZIP itself; no directory creation is needed.
