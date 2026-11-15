@@ -10,3 +10,22 @@ html{scroll-snap-type:y proximity}
 /* Physical transparency in WebGL now samples the SAME photo wall in-scene.
    Colored light and water overlays remain above, rather than being hidden by it. */
 .three-layer{z-index:3}.niche-colors{z-index:4}.water-surface{z-index:5}.rock-edges{z-index:6}.bottle-fallbacks{z-index:7}.hotspots{z-index:8}
+
+/* Seamless full-black stage; the supplied photo fades naturally into the surrounding page. */
+.camera-viewport{background:#030405}
+.world{box-shadow:none}
+.wall-image{mask-image:linear-gradient(to bottom,#000 0%,#000 95%,transparent 100%);-webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 95%,transparent 100%)}
+.rock-edges{display:none}
+/* No particle-dot overlays, and no touch-following spotlight. */
+.niche-light::before{filter:blur(17px)}
+.niche-hit{touch-action:pan-y}
+@media(max-width:720px){
+  .welcome{bottom:max(16px,env(safe-area-inset-bottom));left:19px;max-width:calc(100vw - 40px)}
+  .welcome h1{font-size:clamp(27px,8vw,35px)}
+  .welcome span{display:block;font-size:9px}
+  .caption{background:linear-gradient(0deg,#030405 67%,rgba(3,4,5,.93) 90%,transparent);padding-bottom:max(16px,env(safe-area-inset-bottom))}
+}
+
+.water-continuation{position:absolute;z-index:0;left:0;display:block;object-fit:fill;pointer-events:none;filter:none;opacity:1}
+
+.niche-light.webgl-lit{opacity:0!important}

@@ -17,3 +17,13 @@
 Test on GitHub Pages or a local HTTP server (for example `python3 -m http.server 8000`). JavaScript modules and GLBs require HTTP/HTTPS; opening `index.html` from `file://` may block assets in some browsers. WebGL-capable browsers render the GLB models; when WebGL is disabled, 2D bottle PNG previews are displayed instead. To see whether GLBs loaded, look for the `webgl-ready` class on the first four bottle image fallbacks and inspect the browser console.
 
 The restored site uses a local Three.js r170 bundle (`three-showroom.js`) under its included MIT license. Google Fonts loads only when internet is available and falls back to system fonts.
+
+
+## Restored camera and glass (November 15 revision)
+
+- All four original GLB bottle files are intact. Their glass now uses the earlier colour-absorption shader rather than a duplicate semi-transparent liquid mesh.
+- Scroll and click both use the same five checkpoints in the same rock-wall viewport. A camera flight never opens a separate screenshot/page.
+- 3D perfumes spin once when selected and can be rotated manually by dragging horizontally; the fifth transparent-PNG bottle does not spin. Native vertical touch scrolling is preserved.
+- Rock-wall reference image is exactly the supplied image on desktop and mobile. The artificial jagged edge overlays and touch-follow lights are removed.
+- Water movement is minimal, with coloured reflection spill.
+- Pricing is a demo; cart quantities are stored locally and payment checkout is not connected.
