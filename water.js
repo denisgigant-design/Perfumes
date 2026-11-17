@@ -32,7 +32,7 @@ const waterShader = {
         -.012 * fine, 1.0, -.055 * cos(dot(p,vec2(-5.1,6.7))-clock*.37)));
       vec3 eye = normalize(cameraPosition - vSurface);
       float grazing = pow(1.0 - clamp(eye.y, 0.0, 1.0), 3.0);
-      vec2 uv = vUv.xy / vUv.w + ripple * (0.0019 + grazing * 0.0015);
+      vec2 uv = vUv.xy / vUv.w + ripple * (0.00085 + grazing * 0.00065);
       vec2 edge = min(uv, 1.0 - uv);
       float valid = smoothstep(0.0, 0.076, min(edge.x, edge.y));
       vec3 mirrored = texture2D(tDiffuse, clamp(uv, 0.0, 1.0)).rgb * valid;
@@ -48,7 +48,7 @@ const waterShader = {
         vec3 halfway = normalize(light + eye);
         float specular = pow(max(dot(normal,halfway),0.0),96.0);
         glints += mix(poolColors[i],vec3(1.0),.18) * drop * pools[i].z
-          * (0.014 + 0.065 * shine * slope + specular * .24);
+          * (0.014 + 0.035 * shine * slope + specular * .24);
       }
       float fade = 1.0 - smoothstep(14.0, 34.0, length(p));
       vec3 surface = vec3(0.0018, 0.0028, 0.0041) + glints;
