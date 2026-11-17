@@ -304,12 +304,14 @@ html.glb-live .stage:not([data-state="gallery"]) .product-drag{top:17%!important
  html.glb-live .stage:not([data-state="gallery"]) .product-drag{left:5%!important;width:90%!important;top:20%!important;height:45%!important}
 }
 
+body::before {display:none}
+
 /* Generated stone backgrounds support the same four selectable products without WebGL. */
 html:not(.glb-live) .studio-film,
 html:not(.glb-live) .studio-rays {display:none}
 html:not(.glb-live) .stage {
   --niche-x:14.5%;
-  --niche-y:0%;
+  --niche-y:6%;
   background:#030405 url('stone-showroom-desktop.jpg') center / 100% 100% no-repeat!important;
 }
 html:not(.glb-live) .stage[data-state="rose"] {--niche-x:38.5%}
@@ -382,18 +384,18 @@ html:not(.glb-live) .detail-panel .product-actions {justify-content:center}
     --niche-x:28%;
   }
   html:not(.glb-live) .stage[data-state="rose"] {--niche-x:72%}
-  html:not(.glb-live) .stage[data-state="bleu"] {--niche-x:28%;--niche-y:100%}
-  html:not(.glb-live) .stage[data-state="ambre"] {--niche-x:72%;--niche-y:100%}
+  html:not(.glb-live) .stage[data-state="bleu"] {--niche-x:28%;--niche-y:76%}
+  html:not(.glb-live) .stage[data-state="ambre"] {--niche-x:72%;--niche-y:76%}
   html:not(.glb-live) .stage:not([data-state="gallery"]) {
     background-size:200% 200%!important;
     background-position:calc(var(--niche-x) * 2 - 50%) var(--niche-y)!important;
   }
   html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay {
-    --bottle-left:28%;left:var(--bottle-left);top:21.7%;height:31%;width:34%;
+    --bottle-left:28%;left:var(--bottle-left);top:23.2%;height:31%;width:34%;
   }
   html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.rose {--bottle-left:72%}
-  html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.bleu {--bottle-left:28%;top:56.2%}
-  html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.ambre {--bottle-left:72%;top:56.2%}
+  html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.bleu {--bottle-left:28%;top:57.8%}
+  html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.ambre {--bottle-left:72%;top:57.8%}
   html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay img {height:72%;width:95%}
   html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay .bay-caption {bottom:-18px;font-size:7px}
   html:not(.glb-live) .stage[data-state="gallery"] .gallery-intro {left:5%;bottom:10%;max-width:88%}
