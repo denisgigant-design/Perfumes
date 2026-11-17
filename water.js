@@ -53,7 +53,7 @@ const waterShader = {
 };
 
 export function makeWater(renderer, compact) {
-  const size = compact ? 512 : 1024;
+  const size = compact ? 256 : 640;
   const surface = new Reflector(new PlaneGeometry(72, 62), {
     textureWidth: size, textureHeight: size, multisample: 0, clipBias: 0.002, shader: waterShader
   });
@@ -68,7 +68,7 @@ export function makeWater(renderer, compact) {
   surface.onBeforeRender = (activeRenderer, scene, camera, ...rest) => {
     if (activeRenderer.getRenderTarget()) return;
     const now = performance.now();
-    if (now - last < (compact ? 47 : 27)) return;
+    if (now - last < (compact ? 85 : 45)) return;
     last = now;
     renderReflection(activeRenderer, scene, camera, ...rest);
   };

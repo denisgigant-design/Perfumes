@@ -295,13 +295,11 @@ html.glb-live .gallery-bay{background:transparent!important;box-shadow:none!impo
 html.glb-live .gallery-bay .bay-caption{font-size:9px!important;letter-spacing:.095em!important;bottom:-18px!important;max-width:150px}
 html.glb-live .stage:not([data-state="gallery"]) .detail-panel{bottom:max(34px,5svh)!important}
 html.glb-live .stage:not([data-state="gallery"]) .detail-panel h2{font-weight:400!important;font-family:Italiana,Georgia,serif!important;text-transform:none!important;letter-spacing:.005em!important;font-size:clamp(36px,4vw,65px)!important}
-html.glb-live .stage:not([data-state="gallery"]) .product-drag{top:17%!important;height:47%!important}
 @media(max-width:660px){
  html.glb-live .gallery-intro{left:6%!important;bottom:9%!important;max-width:85%!important}
  html.glb-live .gallery-intro h1{font-size:clamp(28px,7vw,42px)!important}
  html.glb-live .stage:not([data-state="gallery"]) .detail-panel{bottom:max(54px,8svh)!important}
  html.glb-live .stage:not([data-state="gallery"]) .detail-panel h2{font-size:clamp(37px,9vw,53px)!important}
- html.glb-live .stage:not([data-state="gallery"]) .product-drag{left:5%!important;width:90%!important;top:20%!important;height:45%!important}
 }
 
 body::before {display:none}
@@ -402,4 +400,24 @@ html:not(.glb-live) .detail-panel .product-actions {justify-content:center}
   html:not(.glb-live) .gallery-intro h1 {font-size:clamp(26px,7vw,40px)}
   html:not(.glb-live) .stage:not([data-state="gallery"]) .hero-product {inset:19% 14% 35%}
   html:not(.glb-live) .stage:not([data-state="gallery"]) .detail-panel {bottom:max(62px,9svh)}
+}
+
+/* Direct manipulation stays inside the selected stone recess. */
+.glb-live .gallery-bay:hover,
+.glb-live .gallery-bay:focus-visible,
+.gallery-bay:focus {outline:none!important;box-shadow:none!important}
+.gallery-bay {-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.gallery-bay:focus-visible .bay-caption {text-decoration:underline;text-underline-offset:5px}
+html.glb-live .stage:not([data-state="gallery"]) .product-drag {
+  touch-action:none!important;user-select:none;-webkit-user-select:none;
+  -webkit-tap-highlight-color:transparent;pointer-events:auto;
+  top:var(--drag-top,45%)!important;left:var(--drag-left,50%)!important;
+  width:var(--drag-width,70%)!important;height:var(--drag-height,45%)!important;
+  transform:translate(-50%,-50%);
+}
+html.glb-live .stage::after {
+  background:linear-gradient(180deg,#0006,transparent 16%,transparent 82%,#0006)!important;
+}
+html.glb-live .stage:not([data-state="gallery"])::after {
+  background:linear-gradient(180deg,#0006,transparent 14%,transparent 65%,#000b 96%)!important;
 }

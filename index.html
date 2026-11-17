@@ -106,7 +106,7 @@
   }
 }
 </style>
-<link rel="stylesheet" href="campaign.css?v=dark-stone-2">
+<link rel="stylesheet" href="campaign.css?v=shelf-fix-1">
 </head>
 <body>
 <div class="intro-loader" id="loader" aria-hidden="true"><div class="loader-mark">ATELIER</div><div class="load-rule"></div></div>
@@ -130,7 +130,6 @@
    <p class="scent-desc" id="desc">Pink pepper, velvet rose and cashmere wood.</p>
    <button class="price detail-price" id="addBtn" type="button"><span id="price">€185</span><span aria-hidden="true">+</span></button>
   </div>
-  <button type="button" class="detail-inspect inspect-btn" id="inspectBtn" aria-label="Inspect bottle in 3D">3D</button>
   <div class="hero-product" id="heroProduct"><img src="rose-lune-smoked.png?v=dark-stone-1" id="heroImage" alt="Selected perfume bottle"></div>
  </div>
  <div class="product-drag" id="product-drag" aria-hidden="true"></div>
@@ -151,7 +150,6 @@
 <section class="ending"><div class="eyebrow">A study in feeling</div><h2>Some things are<br><i>better felt.</i></h2><p>Explore every note, catch the light against the glass, and find the fragrance that stays with you long after the moment ends.</p><button id="returnBtn">Return to the collection &nbsp; ↗</button><div class="copyright"><span>© ATELIER — A CONCEPT SHOWROOM</span><span>CRAFTED FOR AN IMMERSIVE WEB EXPERIENCE</span></div></section>
 </main>
 <div class="shade" id="bagShade" role="dialog" aria-modal="true" aria-label="Your bag"><div class="side-drawer"><div class="drawer-head"><h2>Your bag</h2><button class="close" id="closeBag" aria-label="Close bag">×</button></div><div class="bag-list" id="bagList"></div><div class="total"><span>Subtotal</span><span id="bagTotal">€0</span></div><p class="demo-note">This is an interactive concept demonstration. Products and prices are illustrative; checkout and payment are not connected.</p></div></div>
-<div class="viewer-shade" id="viewerShade" role="dialog" aria-modal="true" aria-label="Interactive 3D perfume model"><div class="viewer-window" id="viewerWindow"><div class="viewer-head"><div class="eyebrow">Interactive object study — move to rotate</div><h2 id="viewerName">Rose Lune</h2></div><div id="three-canvas"></div><div id="viewerFallback" class="viewer-fallback" hidden><img id="viewerFallbackImg" src="rose-lune-smoked.png?v=dark-stone-1" alt="Selected perfume"><p>3D rendering could not load on this connection. The transparent product artwork remains available.</p></div><div class="viewer-caption">DRAG TO ROTATE &nbsp; / &nbsp; PINCH OR SCROLL TO ZOOM</div><button class="viewer-close" id="closeViewer" aria-label="Close 3D model">×</button></div></div>
 <script>
 (function(){
 'use strict';
@@ -170,7 +168,7 @@ const positions={galet:.25, rose:.50, bleu:.75, ambre:1};
 const orbitOrder=Object.keys(positions);
 const productOrder=Object.keys(DATA);
 const stage=$('#stage'), track=$('#experience'), motion=matchMedia('(prefers-reduced-motion: reduce)');
-let state='gallery', selected='galet', checkpoint='galet', focusScroll=0;
+let state='gallery', selected='galet', checkpoint='galet';
 
 const bag=Object.fromEntries(Object.keys(DATA).map(key=>[key,0]));
 try {
@@ -207,10 +205,9 @@ function setState(s){
   $('#heroImage').src=d.img;
   $('#heroImage').alt=d.name+' bottle';
   $('#heroProduct').className='hero-product '+s;
-  $('#inspectBtn').setAttribute('aria-label','Inspect '+d.name+' in 3D');
  }
  $('#numberText').textContent=DATA[inGallery?checkpoint:s].num;
- $('#scrollText').textContent=inGallery?'Scroll to explore':'Scroll to keep exploring';
+ $('#scrollText').textContent=inGallery?'Scroll to explore':'Drag the bottle to rotate';
  $('#collectionBtn').classList.toggle('active',inGallery);
  $('#discoverBtn').classList.toggle('active',!inGallery);
 }
@@ -221,7 +218,6 @@ function go(s, spin=false){
   updateScroll();
   return;
  }
- focusScroll=window.scrollY;
  setState(s);
  if(spin)window.Perfume3D?.spin(s);
  updateScroll();
@@ -244,7 +240,6 @@ function updateScroll(){
  const extent=Math.max(1,track.offsetHeight-stage.clientHeight);
  const p=Math.max(0,Math.min(1,-track.getBoundingClientRect().top/extent));
  stage.dataset.progress=String(p);
- if(state!=='gallery'&&Math.abs(window.scrollY-focusScroll)>18)setState('gallery');
  // The last sector returns the camera to its starting angle.
  checkpoint=p<.375?'galet':p<.625?'rose':p<.875?'bleu':'ambre';
  stage.dataset.checkpoint=checkpoint;
@@ -256,17 +251,25 @@ function updateScroll(){
 let ticking=false;window.addEventListener('scroll',()=>{if(ticking)return;ticking=true;requestAnimationFrame(()=>{ticking=false;updateScroll()})},{passive:true});window.addEventListener('resize',updateScroll);
 $$('[data-checkpoint]').forEach(b=>b.onclick=()=>orbitTo(b.dataset.checkpoint));
 $$('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go,b.classList.contains('gallery-bay'))));$('#homeBtn').onclick=()=>go('gallery');$('#collectionBtn').onclick=()=>go('gallery');$('#discoverBtn').onclick=()=>go(checkpoint,true);$('#returnBtn').onclick=()=>go('gallery');$('#prevBtn').onclick=()=>step(-1);$('#nextBtn').onclick=()=>step(1);$('#addBtn').onclick=()=>{bag[selected]++;saveBag();renderBag();$('#bagShade').classList.add('show')};$('#bagBtn').onclick=()=>{$('#bagShade').classList.add('show');renderBag()};$('#closeBag').onclick=()=>$('#bagShade').classList.remove('show');$('#bagShade').onclick=e=>{if(e.target===$('#bagShade'))$('#bagShade').classList.remove('show')};
-const viewer=$('#viewerShade');function close3D(){viewer.classList.remove('show');window.Perfume3D?.stop?.()}function open3D(){const d=DATA[selected];viewer.classList.add('show');$('#viewerWindow').className='viewer-window '+selected;$('#viewerName').textContent=d.name;$('#viewerFallbackImg').src=d.img;$('#viewerFallback').hidden=true;if(window.Perfume3D)window.Perfume3D.open(selected).catch(()=>{$('#viewerFallback').hidden=false});else $('#viewerFallback').hidden=false}
-$('#inspectBtn').onclick=open3D;$('#closeViewer').onclick=close3D;viewer.addEventListener('click',e=>{if(e.target===viewer)close3D()});window.addEventListener('keydown',e=>{if(e.key==='Escape'){close3D();$('#bagShade').classList.remove('show')}if(viewer.classList.contains('show'))return;if(e.key==='ArrowRight')step(1);if(e.key==='ArrowLeft')step(-1)});
+window.addEventListener('keydown',event=>{
+ if(event.key==='Escape'){
+  $('#bagShade').classList.remove('show');
+  go('gallery');
+ }
+ if(event.key==='ArrowRight')step(1);
+ if(event.key==='ArrowLeft')step(-1);
+});
 const film=$('#studio-film');
 function syncFilm(){if(!film.paused)film.pause();}
 window.addEventListener('perfume-progress',syncFilm);
 document.addEventListener('visibilitychange',syncFilm);
 motion.addEventListener('change',syncFilm);
-renderBag();updateScroll();window.addEventListener('load',()=>setTimeout(()=>$('#loader').classList.add('out'),450));setTimeout(()=>$('#loader').classList.add('out'),1800);
+renderBag();updateScroll();
+window.addEventListener('perfume-ready',()=>$('#loader').classList.add('out'),{once:true});
+setTimeout(()=>$('#loader').classList.add('out'),8000);
 })();
 </script>
 
-<script type="module" src="showroom-webgl.js?v=dark-stone-1"></script>
+<script type="module" src="showroom-webgl.js?v=shelf-fix-1"></script>
 </body>
 </html>
