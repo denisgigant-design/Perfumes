@@ -4,7 +4,7 @@ The showroom features **Galet**, **Rose Lune**, **Sillage Bleu**, and **Ambre Do
 
 The updated GLBs contain high-resolution labels, and Sillage Bleu uses a transmissive glass cap. The browser shader uses the liquid mesh to estimate an optical volume with colour absorption and a moving liquid line. The water shader stretches and distorts a planar scene reflection, with moving highlights beneath the overhead spotlights. Mobile rendering gives the main canvas a higher pixel budget than the water reflection pass.
 
-The WebGL scene generates the stone surround and lights it with overhead spots and coloured spill. Browsers without WebGL 2 display the included basalt images.
+The WebGL scene generates the stone surround and lights it with overhead spots and coloured spill. The stone surfaces use the generated basalt texture. Each recess has a ceiling fixture, coloured spill on both sides, and a refracted light pool beneath the bottle. The glass uses richer product colours and polished highlights above a higher-resolution rippling water reflection. Each GLB includes a sharp lossless label sized for its physical print surface. Browsers without WebGL 2 display generated stone environments and bottle previews.
 
 ## Run locally
 

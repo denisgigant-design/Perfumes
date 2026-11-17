@@ -85,7 +85,7 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .studio-film { display: none; }
-  .stage, .glb-live .stage { background-image: url("studio-trio.jpg"); background-size: cover; }
+  .stage, .glb-live .stage { background-image: url("stone-showroom-desktop.jpg"); background-size: cover; }
 }
 
 @media (max-width: 660px) and (max-height: 690px) {
@@ -124,7 +124,7 @@
   .studio-film { width: 120%; left: -10%; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .stage, .glb-live .stage { background-image: url("studio-trio.jpg"); }
+  .stage, .glb-live .stage { background-image: url("stone-showroom-desktop.jpg"); }
 }
 
 /* Side Rays sits above the studio film and behind the transparent 3D canvas. */
@@ -282,43 +282,6 @@
  .glb-live .stage:not([data-state="gallery"]) .product-drag{top:13%;height:47%;left:3%;width:94%}
 }
 
-/* Graceful static niche display on devices without WebGL. Never show the old pedestals. */
-html:not(.glb-live) .stage[data-state="gallery"] .gallery{
-  position:absolute;inset:17% 7% 17%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
-  grid-template-rows:repeat(2,minmax(0,1fr));gap:14px;
-}
-html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay,
-html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.galet,
-html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.rose,
-html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.bleu,
-html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.ambre{
-  position:relative;left:auto;top:auto;width:100%;height:100%;transform:none;
-  display:flex;align-items:center;justify-content:center;
-  background:radial-gradient(ellipse at 50% 9%,rgba(234,224,202,.19),transparent 47%),
-             linear-gradient(125deg,#131719,#080b0e 78%);
-  border:12px solid #202527;border-radius:2px;
-  box-shadow:inset 0 0 45px 15px #000,inset 10px 7px 18px #3d44486b,
-             inset -8px 0 18px #5f687128,0 4px 7px #000;
-}
-html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay::before{
-  content:"";display:block;position:absolute;left:32%;top:4%;width:36%;height:3px;
-  background:#faf0d9;box-shadow:0 0 21px 6px #eed5a670;z-index:1;
-}
-html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay .image-plinth{display:none}
-html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay img{
-  position:relative;max-height:77%;max-width:78%;width:auto;height:75%;
-  transform:none;filter:drop-shadow(0 17px 15px #000);object-fit:contain;
-}
-html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay .bay-caption{
-  bottom:6px;left:50%;transform:translateX(-50%);font-size:8px;
-  text-transform:uppercase;letter-spacing:.12em;white-space:nowrap
-}
-@media(max-width:660px){
- html:not(.glb-live) .stage[data-state="gallery"] .gallery{inset:24% 3% 18%;gap:7px}
- html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay{border-width:7px!important}
- html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay .bay-caption{font-size:7px}
-}
-
 /* BASALT REFERENCE REBUILD — dark broken rock, one top-down lamp per aperture. */
 html.glb-live .studio-film,html.glb-live .studio-rays {display:none!important}
 html.glb-live .stage{background:#030404!important}
@@ -340,66 +303,101 @@ html.glb-live .stage:not([data-state="gallery"]) .product-drag{top:17%!important
  html.glb-live .stage:not([data-state="gallery"]) .detail-panel h2{font-size:clamp(37px,9vw,53px)!important}
  html.glb-live .stage:not([data-state="gallery"]) .product-drag{left:5%!important;width:90%!important;top:20%!important;height:45%!important}
 }
-/* Non-WebGL fallback uses the same matte basalt niche composition. */
-html:not(.glb-live) .stage{background:#090a0b!important}
-html:not(.glb-live) .studio-film,html:not(.glb-live) .studio-rays{display:none}
-html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay{
- border:12px solid #191b1d!important;background:radial-gradient(ellipse at 52% 4%,#8b756155 0%,#101213 40%,#08090a 100%)!important;
- box-shadow:inset 0 0 34px #000,2px 5px 5px #030303!important
-}
 
-/* Standalone photo composition for older devices without WebGL2. The clickable
-   buttons are transparent hit regions placed over the exact niche photos. */
-html:not(.glb-live) .stage[data-state="gallery"]{
-  background: #08090a url('basalt-desktop.jpg') center center / cover no-repeat!important;
+/* Generated stone backgrounds support the same four selectable products without WebGL. */
+html:not(.glb-live) .studio-film,
+html:not(.glb-live) .studio-rays {display:none}
+html:not(.glb-live) .stage {
+  --niche-x:14.5%;
+  --niche-y:0%;
+  background:#030405 url('stone-showroom-desktop.jpg') center / 100% 100% no-repeat!important;
 }
-html:not(.glb-live) .stage:not([data-state="gallery"]){
-  background:#08090a center center / cover no-repeat!important;
+html:not(.glb-live) .stage[data-state="rose"] {--niche-x:38.5%}
+html:not(.glb-live) .stage[data-state="bleu"] {--niche-x:62%}
+html:not(.glb-live) .stage[data-state="ambre"] {--niche-x:86%}
+html:not(.glb-live) .stage:not([data-state="gallery"]) {
+  background-size:400% 100%!important;
+  background-position-x:calc((var(--niche-x) * 4 - 50%) / 3)!important;
 }
-html:not(.glb-live) .stage[data-state="galet"]{background-image:url('basalt-galet-desktop.jpg')!important}
-html:not(.glb-live) .stage[data-state="rose"]{background-image:url('basalt-rose-desktop.jpg')!important}
-html:not(.glb-live) .stage[data-state="bleu"]{background-image:url('basalt-bleu-desktop.jpg')!important}
-html:not(.glb-live) .stage[data-state="ambre"]{background-image:url('basalt-ambre-desktop.jpg')!important}
-html:not(.glb-live) .stage[data-state="gallery"] .gallery{position:absolute!important;inset:0!important;display:block!important;background:transparent!important}
-html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay,
-html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.galet,
-html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.rose,
-html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.bleu,
-html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.ambre{
-  position:absolute!important;left:15%!important;top:46%!important;
-  width:17%!important;height:58%!important;transform:translate(-50%,-50%)!important;
-  background:none!important;border:0!important;box-shadow:none!important;
-  clip-path:none!important;display:block!important;
+html:not(.glb-live) .edge-stone,
+html:not(.glb-live) .detail-frame,
+html:not(.glb-live) .aura,
+html:not(.glb-live) .side-quote {display:none}
+html:not(.glb-live) .stage[data-state="gallery"] .gallery {
+  position:absolute;inset:0;display:block;background:transparent;
 }
-html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.rose{left:38.2%!important}
-html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.bleu{left:61.4%!important}
-html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.ambre{left:84.6%!important}
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay {
+  --bottle-left:14.5%;
+  position:absolute;left:var(--bottle-left);top:36%;width:19%;height:65%;
+  transform:translate(-50%,-50%);display:flex;align-items:flex-end;justify-content:center;
+  background:none;border:0;box-shadow:none;
+}
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.rose {--bottle-left:38.5%}
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.bleu {--bottle-left:62%}
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.ambre {--bottle-left:86%}
 html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay::before,
 html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay::after,
-html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay img,
-html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay .image-plinth{display:none!important}
-html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay .bay-caption{display:none!important}
-html:not(.glb-live) .stage:not([data-state="gallery"]) .hero-product{display:none!important}
-html:not(.glb-live) .stage[data-state="gallery"] .gallery-intro{left:3%!important;right:auto!important;bottom:9%!important;top:auto!important;text-align:left!important;max-width:340px!important}
-html:not(.glb-live) .stage[data-state="gallery"] .gallery-intro h1{font-family:Italiana,Georgia,serif!important;font-size:clamp(25px,3.2vw,49px)!important;line-height:1!important;letter-spacing:-.015em!important;text-transform:none!important;text-shadow:0 3px 15px #000!important}
-html:not(.glb-live) .stage:not([data-state="gallery"]) .detail-panel{bottom:max(42px,6svh)!important}
-html:not(.glb-live) .stage:not([data-state="gallery"]) .detail-panel h2{font-family:Italiana,Georgia,serif!important;font-weight:400!important;font-size:clamp(32px,4.3vw,60px)!important}
-@media(max-width:660px){
- html:not(.glb-live) .stage[data-state="gallery"]{background-image:url('basalt-phone.jpg')!important}
- html:not(.glb-live) .stage[data-state="galet"]{background-image:url('basalt-galet-phone.jpg')!important}
- html:not(.glb-live) .stage[data-state="rose"]{background-image:url('basalt-rose-phone.jpg')!important}
- html:not(.glb-live) .stage[data-state="ambre"]{background-image:url('basalt-ambre-phone.jpg')!important}
- html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay,
- html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.galet,
- html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.rose,
- html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.bleu,
- html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.ambre{
-   width:35%!important;height:25%!important;top:28.5%!important;left:27.5%!important;
- }
- html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.rose{left:72.5%!important}
- html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.bleu{top:56.5%!important;left:27.5%!important}
- html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.ambre{top:56.5%!important;left:72.5%!important}
- html:not(.glb-live) .stage[data-state="gallery"] .gallery-intro{left:5%!important;bottom:9%!important;max-width:88%!important}
- html:not(.glb-live) .stage[data-state="gallery"] .gallery-intro h1{font-size:clamp(26px,7vw,40px)!important}
- html:not(.glb-live) .stage:not([data-state="gallery"]) .detail-panel{bottom:max(56px,9svh)!important}
+html:not(.glb-live) .gallery-bay .image-plinth {display:none}
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay img {
+  display:block;position:absolute;bottom:0;left:50%;height:65%;width:88%;max-height:none;
+  max-width:none;object-fit:contain;object-position:center bottom;transform:translateX(-50%);
+  filter:saturate(1.32) contrast(1.06) drop-shadow(0 8px 12px #0009);
+}
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay .bay-caption {
+  display:block;bottom:-25px;left:50%;transform:translateX(-50%);white-space:nowrap;
+  font-size:9px;letter-spacing:.10em;
+}
+html:not(.glb-live) .stage:not([data-state="gallery"]) .hero-product {
+  display:flex;inset:19% 12% 31%;width:auto;height:auto;transform:none;
+}
+html:not(.glb-live) .stage:not([data-state="gallery"]) .hero-product img {
+  width:100%;height:100%;max-width:380px;object-fit:contain;
+  filter:saturate(1.32) contrast(1.06) drop-shadow(0 14px 20px #0009);
+}
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-intro {
+  left:4%;right:auto;top:auto;bottom:9%;max-width:340px;text-align:left;
+}
+html:not(.glb-live) .gallery-intro h1 {
+  font:normal clamp(25px,3.2vw,49px)/1 Italiana,Georgia,serif;
+  text-transform:none;letter-spacing:-.015em;text-shadow:0 3px 15px #000;
+}
+html:not(.glb-live) .gallery-intro p,
+html:not(.glb-live) .gallery-intro > button {display:none}
+html:not(.glb-live) .stage:not([data-state="gallery"]) .detail-panel {
+  left:50%;top:auto;bottom:max(56px,8svh);width:92%;max-width:600px;
+  transform:translateX(-50%);text-align:center;
+}
+html:not(.glb-live) .detail-panel h2 {
+  font:normal clamp(32px,4.3vw,60px)/1 Italiana,Georgia,serif;
+  text-transform:none;letter-spacing:0;
+}
+html:not(.glb-live) .detail-panel .scent-desc {max-width:none;margin:5px 0 12px}
+html:not(.glb-live) .detail-panel .catalogue,
+html:not(.glb-live) .detail-panel .notes,
+html:not(.glb-live) .detail-panel .details-sub {display:none}
+html:not(.glb-live) .detail-panel .product-actions {justify-content:center}
+@media(max-width:679px) {
+  html:not(.glb-live) .stage {
+    background-image:url('stone-showroom-mobile.jpg')!important;
+    --niche-x:28%;
+  }
+  html:not(.glb-live) .stage[data-state="rose"] {--niche-x:72%}
+  html:not(.glb-live) .stage[data-state="bleu"] {--niche-x:28%;--niche-y:100%}
+  html:not(.glb-live) .stage[data-state="ambre"] {--niche-x:72%;--niche-y:100%}
+  html:not(.glb-live) .stage:not([data-state="gallery"]) {
+    background-size:200% 200%!important;
+    background-position:calc(var(--niche-x) * 2 - 50%) var(--niche-y)!important;
+  }
+  html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay {
+    --bottle-left:28%;left:var(--bottle-left);top:21.7%;height:31%;width:34%;
+  }
+  html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.rose {--bottle-left:72%}
+  html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.bleu {--bottle-left:28%;top:56.2%}
+  html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay.ambre {--bottle-left:72%;top:56.2%}
+  html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay img {height:72%;width:95%}
+  html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay .bay-caption {bottom:-18px;font-size:7px}
+  html:not(.glb-live) .stage[data-state="gallery"] .gallery-intro {left:5%;bottom:10%;max-width:88%}
+  html:not(.glb-live) .gallery-intro h1 {font-size:clamp(26px,7vw,40px)}
+  html:not(.glb-live) .stage:not([data-state="gallery"]) .hero-product {inset:19% 14% 35%}
+  html:not(.glb-live) .stage:not([data-state="gallery"]) .detail-panel {bottom:max(62px,9svh)}
 }
