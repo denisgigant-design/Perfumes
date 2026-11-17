@@ -27,16 +27,16 @@ const waterShader = {
       float b = sin(dot(p, vec2(-5.1, 6.7)) - clock * .37 + a * 0.72);
       float c = sin(dot(p, vec2(8.9, 13.2)) + clock * .53);
       float fine = sin(dot(p, vec2(24.7, -18.3)) + clock * .81);
-      vec2 ripple = vec2(a * 0.6 + c * 0.22 + fine * .08, b + c * 0.37);
+      vec2 ripple = vec2(a * 0.6 + c * 0.28 + fine * .16, b + c * 0.37 + fine * .18);
       vec3 normal = normalize(vec3(-.045 * cos(dot(p,vec2(2.4,7.8))+clock*.48)
         -.012 * fine, 1.0, -.055 * cos(dot(p,vec2(-5.1,6.7))-clock*.37)));
       vec3 eye = normalize(cameraPosition - vSurface);
       float grazing = pow(1.0 - clamp(eye.y, 0.0, 1.0), 3.0);
-      vec2 uv = vUv.xy / vUv.w + ripple * (0.00085 + grazing * 0.00065);
+      vec2 uv = vUv.xy / vUv.w + ripple * (0.0022 + grazing * 0.0016);
       vec2 edge = min(uv, 1.0 - uv);
       float valid = smoothstep(0.0, 0.076, min(edge.x, edge.y));
       vec3 mirrored = texture2D(tDiffuse, clamp(uv, 0.0, 1.0)).rgb * valid;
-      mirrored = max(vec3(0.0), (mirrored - .004) * 1.12);
+      mirrored = max(vec3(0.0), (mirrored - .009) * .82);
       vec3 glints = vec3(0.0);
       float slope = smoothstep(0.66, 1.12, a * b * 0.66 + c * 0.24);
       for (int i = 0; i < 4; ++i) {
@@ -51,8 +51,8 @@ const waterShader = {
           * (0.014 + 0.035 * shine * slope + specular * .24);
       }
       float fade = 1.0 - smoothstep(14.0, 34.0, length(p));
-      vec3 surface = vec3(0.0018, 0.0028, 0.0041) + glints;
-      surface += mirrored * (0.81 + 0.17 * grazing);
+      vec3 surface = vec3(0.0009, 0.0015, 0.0022) + glints * .60;
+      surface += mirrored * (0.56 + 0.12 * grazing);
       gl_FragColor = vec4(surface * fade, 1.0);
       #include <tonemapping_fragment>
       #include <colorspace_fragment>

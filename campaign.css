@@ -436,3 +436,11 @@ html.glb-live .gallery, html.glb-live .gallery-bay {filter:none!important}
   html.glb-live .gallery-bay .bay-caption {font-size:clamp(20px,5.3vw,24px)!important}
   html.glb-live .gallery-intro h1 {font-size:clamp(24px,6vw,28px)!important}
 }
+
+/* Keep white collection typography legible across the reflected highlights. */
+html.glb-live .gallery-intro::before {
+  content:"";position:absolute;inset:-24px -36px;z-index:-1;pointer-events:none;
+  background:radial-gradient(ellipse at 40% 50%,#000b 0%,#0006 45%,transparent 74%);
+}
+html.glb-live .gallery-intro h1 {text-shadow:0 2px 6px #000,0 0 20px #000}
+html:not(.glb-live) .hero-product {pointer-events:auto;cursor:zoom-out}

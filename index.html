@@ -106,7 +106,7 @@
   }
 }
 </style>
-<link rel="stylesheet" href="campaign.css?v=luxury-stone-1">
+<link rel="stylesheet" href="campaign.css?v=night-focus-1">
 </head>
 <body>
 <div class="intro-loader" id="loader" aria-hidden="true"><div class="loader-mark">ATELIER</div><div class="load-rule"></div></div>
@@ -132,7 +132,7 @@
   </div>
   <div class="hero-product" id="heroProduct"><img src="rose-lune-smoked.png?v=dark-stone-1" id="heroImage" alt="Selected perfume bottle"></div>
  </div>
- <div class="product-drag" id="product-drag" aria-hidden="true"></div>
+ <div class="product-drag" id="product-drag" role="button" tabindex="0" aria-label="Drag bottle to rotate, or activate to return to collection"></div>
  <div class="stage-footer">
   <div class="scroll-prompt"><span class="scroll-icon" aria-hidden="true"></span><span id="scrollText">Scroll to explore</span></div>
   <div class="scene-nav">
@@ -207,7 +207,7 @@ function setState(s){
   $('#heroProduct').className='hero-product '+s;
  }
  $('#numberText').textContent=DATA[inGallery?checkpoint:s].num;
- $('#scrollText').textContent=inGallery?'Scroll to explore':'Drag the bottle to rotate';
+ $('#scrollText').textContent=inGallery?'Scroll to explore':'Drag to rotate · '+(matchMedia('(pointer:coarse)').matches?'Tap':'Click')+' to return';
  $('#collectionBtn').classList.toggle('active',inGallery);
  $('#discoverBtn').classList.toggle('active',!inGallery);
 }
@@ -222,6 +222,8 @@ function go(s, spin=false){
  if(spin)window.Perfume3D?.spin(s);
  updateScroll();
 }
+window.addEventListener('perfume-collection-request',()=>go('gallery'));
+$('#heroProduct').addEventListener('click',()=>go('gallery'));
 function orbitTo(key){
  const extent=Math.max(1,track.offsetHeight-stage.clientHeight);
  setState('gallery');
@@ -270,6 +272,6 @@ setTimeout(()=>$('#loader').classList.add('out'),8000);
 })();
 </script>
 
-<script type="module" src="showroom-webgl.js?v=luxury-stone-1"></script>
+<script type="module" src="showroom-webgl.js?v=night-focus-1"></script>
 </body>
 </html>

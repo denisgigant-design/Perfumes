@@ -1,4 +1,4 @@
-import {makeWater} from './water.js?v=luxury-stone-1';
+import {makeWater} from './water.js?v=night-focus-1';
 import {addLiquidRefraction, bindLiquidCamera} from './glass-volume.js?v=dark-stone-1';
 import {
   ACESFilmicToneMapping, AmbientLight, Box3, BoxGeometry, CanvasTexture, Color, DoubleSide, GLTFLoader,
@@ -62,6 +62,7 @@ function contactTexture() {
 }
 
 const shadowMap = contactTexture();
+const inspectionWhite = new Color('#fff8ef');
 
 function refractionTexture() {
   const canvas = document.createElement('canvas');
@@ -169,15 +170,13 @@ const satinMap = satinBump();
 // adjacent architectural pieces and the displacement fades out at their edges.
 function createWall() {
   const wall=new Group();
-  const outside = new MeshStandardMaterial({color:'#b6b8bc',map:rockMap,
+  const outside = new MeshStandardMaterial({color:'#73777e',map:rockMap,
     metalness:.04,roughness:.94,roughnessMap:stoneRoughnessMap,
-    bumpMap:rockHeightMap,bumpScale:.16,envMapIntensity:.58,
-    emissive:'#7a8089',emissiveMap:rockMap,emissiveIntensity:.035});
-  const inner=outside;
-  const floorStone=outside.clone(); floorStone.roughness=.78; floorStone.bumpScale=.035;
+    bumpMap:rockHeightMap,bumpScale:.16,envMapIntensity:.34,
+    emissive:'#7a8089',emissiveMap:rockMap,emissiveIntensity:.006});
+  const inner=outside.clone(); inner.color.set('#999ca2');
+  const floorStone=inner.clone(); floorStone.roughness=.78; floorStone.bumpScale=.035;
   const dark=new MeshStandardMaterial({color:'#101114',metalness:.7,roughness:.32});
-  const edgeStone=outside.clone(); edgeStone.color.set('#bfc4c6');
-  edgeStone.bumpScale=.045;edgeStone.roughness=.64;edgeStone.metalness=.12;
   function rock(size,pos,mat=outside,amount=.008,seed=1){
     const sx=Math.max(1,Math.min(64,Math.ceil(size[0]*9)));
     const sy=Math.max(1,Math.min(96,Math.ceil(size[1]*12)));
@@ -203,6 +202,22 @@ function createWall() {
       a.setXYZ(i,x+nx*relief,y+ny*relief,z+nz*relief);
     }
     g.computeVertexNormals();
+    if(Array.isArray(mat)){
+      // Keep all exterior faces in one draw call and the lit reveal in a second.
+      const unique=[...new Set(mat)];
+      const ordered=new g.index.array.constructor(g.index.count);
+      const groups=[...g.groups];let offset=0;
+      g.clearGroups();
+      for(const [materialIndex,material] of unique.entries()){
+        const start=offset;
+        for(const group of groups)if(mat[group.materialIndex]===material){
+          ordered.set(g.index.array.subarray(group.start,group.start+group.count),offset);
+          offset+=group.count;
+        }
+        g.addGroup(start,offset-start,materialIndex);
+      }
+      g.index.array.set(ordered);mat=unique;
+    }
     const mesh=new Mesh(g,mat);mesh.position.set(...pos);wall.add(mesh);return mesh;
   }
   const w=BAY.width,step=BAY.step,cols=BAY.columns;
@@ -215,7 +230,7 @@ function createWall() {
     const bottom=eachBottom[row],ceiling=bottom+BAY.height;
     for(let c=0;c<=cols;c++){
       const x=c===0?leftEdge-.4:c===cols?rightEdge+.4:(xs[c-1]+xs[c])/2;
-      const bw=c===0||c===cols?.8:step-w+.10;
+      const bw=c===0||c===cols?.8:step-w;
       rock([bw,BAY.height+.48,3.06],[x,bottom+BAY.height/2,-.27],outside,.025);
     }
     rock([totalWidth,.57,3.06],[(leftEdge+rightEdge)/2,ceiling+.23,-.25],outside,.015);
@@ -228,21 +243,27 @@ function createWall() {
   for(const dir of [-1,1])rock([sideWidth,surroundTop-surroundBottom,3.06],
     [dir*(totalWidth/2+sideWidth/2-.10),(surroundTop+surroundBottom)/2,-.25],outside,.015);
   const bayLights=new Map();
+  // One inspection light serves the selected recess. Keeping it in the light
+  // set at zero intensity avoids recompiling every glass material on selection.
+  const inspection=addSpot(wall,{color:'#fff8ef',intensity:0,
+    position:[0,0,.50],look:[0,0,-1.28],spread:.61});
+  inspection.penumbra=.94;
+  wall.userData.inspection=inspection;
   for(const product of products){
     const cx=product.x,bottom=product.y,topY=bottom+BAY.height;
-    const tintedSides=outside.clone();
+    const tintedSides=inner.clone();
     tintedSides.emissive.set(product.tone);
     const tintedFloor=floorStone.clone();
-    const backWall=rock([w-.05,BAY.height-.10,.14],[cx,bottom+BAY.height/2,-2.10],inner,.04);
-    rock([w-.03,.15,2.63],[cx,bottom-.035,-.70],tintedFloor,.006);
-    rock([w-.03,.19,2.58],[cx,topY+.005,-.70],inner,.006);
-    const sideOffset=w/2-.01;
+    const backWall=rock([w+.16,BAY.height+.14,.14],[cx,bottom+BAY.height/2,-2.10],inner,.04);
+    rock([w+.12,.15,3.32],[cx,bottom-.075,-.37],
+      [outside,outside,tintedFloor,outside,outside,outside],.006);
+    rock([w+.12,.19,3.32],[cx,topY+.04,-.37],
+      [outside,outside,outside,inner,outside,outside],.006);
+    const sideOffset=w/2+.06;
     for(const dir of [-1,1]){
-      rock([.12,BAY.height-.10,2.63],[cx+dir*sideOffset,bottom+BAY.height/2,-.76],tintedSides,.009);
-      // A narrow honed edge catches a restrained architectural highlight.
-      rock([.028,BAY.height-.02,.032],[cx+dir*(w/2+.025),bottom+BAY.height/2,1.287],edgeStone,0);
+      rock([.12,BAY.height+.10,3.32],[cx+dir*sideOffset,bottom+BAY.height/2,-.37],
+        [dir<0?tintedSides:outside,dir>0?tintedSides:outside,outside,outside,outside,outside],.009);
     }
-    for(const y of [bottom-.08,topY+.075])rock([w+.09,.026,.032],[cx,y,1.287],edgeStone,0);
     // The recessed LED aperture, soft haze and actual wall wash share the fragrance hue.
     rock([.74,.06,.34],[cx,topY-.28,.66],dark,0);
     const luminousColor=new Color(product.tone).lerp(new Color('#ffffff'),.22);
@@ -271,13 +292,14 @@ function createWall() {
     spill.penumbra=.95;
     // Continuous wall-side transmission extends over the entire stone reveal.
     const caustics=[-1,1].map(dir=>{
-      const patch=new Mesh(new PlaneGeometry(2.58,BAY.height-.20),new MeshBasicMaterial({
+      const patch=new Mesh(new PlaneGeometry(3.24,BAY.height-.20),new MeshBasicMaterial({
         map:refractionMap,color:product.tone,transparent:true,opacity:.17,
         blending:additiveBlending,depthWrite:false,toneMapped:false}));
-      patch.position.set(cx+dir*(sideOffset-.08),bottom+BAY.height*.5,-.76);
+      patch.position.set(cx+dir*(sideOffset-.08),bottom+BAY.height*.5,-.37);
       patch.rotation.y=dir<0?Math.PI/2:-Math.PI/2;wall.add(patch);return patch;
     });
     bayLights.set(product.key,{overhead,front,spill,caustics,lightSource,halo,beam,beamPivot,
+      baseEmitterColor:luminousColor.clone(),
       tintedSides,tintedFloor,backWall});
   }
   rock([totalWidth,.16,3.1],[(leftEdge+rightEdge)/2,base-.19,-.20],floorStone,.006);
@@ -549,6 +571,17 @@ function render(time) {
   const reach = reducedMotion.matches ? 0 : 1;
   lightingPointer.x = MathUtils.damp(lightingPointer.x, lightingPointer.targetX * reach, 3.8, dt);
   lightingPointer.y = MathUtils.damp(lightingPointer.y, lightingPointer.targetY * reach, 3.8, dt);
+  const selectedProduct=products.find(product=>current===product.key);
+  const inspection=shelves?.userData.inspection;
+  if(inspection){
+    inspection.intensity=selectedProduct?MathUtils.clamp(shot.focus,0,1)*180:0;
+    inspection.userData.selected=selectedProduct?.key??null;
+    if(selectedProduct){
+      inspection.position.set(selectedProduct.x,selectedProduct.y+BAY.height-.33,.50);
+      inspection.target.position.set(selectedProduct.x+lightingPointer.x*.18,
+        selectedProduct.y+1.12,-1.28+lightingPointer.y*.10);
+    }
+  }
   for (const [index, product] of products.entries()) {
     const selected = current === product.key;
     product.group.visible = current === 'gallery' || selected;
@@ -577,9 +610,9 @@ function render(time) {
     const secondary = 1 - otherFocus * .81;
     const niche = shelves?.userData.lights.get(product.key);
     if (niche) {
-      niche.overhead.intensity=(150+emphasis*110)*secondary;
-      niche.front.intensity=(105+emphasis*65)*secondary;
-      niche.spill.intensity=(17+emphasis*20)*secondary;
+      niche.overhead.intensity=(125+emphasis*30)*secondary;
+      niche.front.intensity=(105+emphasis*25)*secondary;
+      niche.spill.intensity=(14+emphasis*9)*secondary;
       niche.overhead.target.position.x=product.x+lightingPointer.x*.30;
       niche.overhead.target.position.z=-2.10+lightingPointer.y*.10;
       niche.front.target.position.x=product.x+lightingPointer.x*.10;
@@ -595,6 +628,7 @@ function render(time) {
       }
       niche.tintedSides.emissiveIntensity=(.065+emphasis*.065)*secondary;
       niche.lightSource.material.opacity=.90+emphasis*.10;
+      niche.lightSource.material.color.copy(niche.baseEmitterColor).lerp(inspectionWhite,emphasis);
     }
     product.refraction.rotation.z = turn * .91;
     product.refraction.position.x = Math.sin(turn) * .15 + lightingPointer.x * .085;
@@ -624,7 +658,9 @@ function controls(element) {
     if (!product || (event.pointerType === 'mouse' && event.button !== 0)) return;
     event.preventDefault();
     product.spin = null;
-    pointerStates.set(event.pointerId, {x: event.clientX, y: event.clientY});
+    pointerStates.set(event.pointerId, {x:event.clientX,y:event.clientY,
+      startX:event.clientX,startY:event.clientY,key:product.key,moved:false});
+    if(pointerStates.size>1)for(const gesture of pointerStates.values())gesture.moved=true;
     element.setPointerCapture(event.pointerId);
   });
   element.addEventListener('pointermove', event => {
@@ -633,21 +669,34 @@ function controls(element) {
     event.preventDefault();
     const dx = event.clientX - previous.x;
     const dy = event.clientY - previous.y;
+    previous.moved ||= Math.hypot(event.clientX-previous.startX,event.clientY-previous.startY)>8;
+    previous.x=event.clientX;previous.y=event.clientY;
+    if(!previous.moved)return;
     manualTurn.y += dx * .012;
     manualTurn.x = MathUtils.clamp(manualTurn.x + dy * .004, -.24, .24);
-    pointerStates.set(event.pointerId, {x: event.clientX, y: event.clientY});
   });
   function release(event) {
+    const gesture=pointerStates.get(event.pointerId);
     pointerStates.delete(event.pointerId);
+    if(event.type==='pointerup' && gesture && !gesture.moved && stage.dataset.state===gesture.key){
+      window.dispatchEvent(new Event('perfume-collection-request'));
+    }
   }
   for (const event of ['pointerup', 'pointercancel', 'lostpointercapture']) {
     element.addEventListener(event, release);
   }
+  element.addEventListener('keydown',event=>{
+    if(event.key==='Enter'||event.key===' '){
+      event.preventDefault();event.stopPropagation();
+      window.dispatchEvent(new Event('perfume-collection-request'));
+    }
+  });
   element.addEventListener('wheel', event => {
     const product = products.find(item => item.key === stage.dataset.state);
     if (!product) return;
     event.preventDefault();
     product.spin = null;
+    for(const gesture of pointerStates.values())gesture.moved=true;
     manualTurn.y += (event.deltaX + event.deltaY) * .006;
   }, {passive: false});
 }
