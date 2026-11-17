@@ -1,4 +1,4 @@
-import {Color, Vector3} from './three-showroom.js';
+import {Color, Vector3} from './three-showroom.js?v=2';
 
 const declarations = `
 varying vec3 glassPoint;
