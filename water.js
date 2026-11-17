@@ -26,13 +26,17 @@ const waterShader = {
       float a = sin(dot(p, vec2(2.4, 7.8)) + clock * .48);
       float b = sin(dot(p, vec2(-5.1, 6.7)) - clock * .37 + a * 0.72);
       float c = sin(dot(p, vec2(8.9, 13.2)) + clock * .53);
-      vec2 ripple = vec2(a * 0.6 + c * 0.22, b + c * 0.37);
+      float fine = sin(dot(p, vec2(24.7, -18.3)) + clock * .81);
+      vec2 ripple = vec2(a * 0.6 + c * 0.22 + fine * .08, b + c * 0.37);
+      vec3 normal = normalize(vec3(-.045 * cos(dot(p,vec2(2.4,7.8))+clock*.48)
+        -.012 * fine, 1.0, -.055 * cos(dot(p,vec2(-5.1,6.7))-clock*.37)));
       vec3 eye = normalize(cameraPosition - vSurface);
       float grazing = pow(1.0 - clamp(eye.y, 0.0, 1.0), 3.0);
       vec2 uv = vUv.xy / vUv.w + ripple * (0.0019 + grazing * 0.0015);
       vec2 edge = min(uv, 1.0 - uv);
       float valid = smoothstep(0.0, 0.076, min(edge.x, edge.y));
       vec3 mirrored = texture2D(tDiffuse, clamp(uv, 0.0, 1.0)).rgb * valid;
+      mirrored = max(vec3(0.0), (mirrored - .004) * 1.12);
       vec3 glints = vec3(0.0);
       float slope = smoothstep(0.66, 1.12, a * b * 0.66 + c * 0.24);
       for (int i = 0; i < 4; ++i) {
@@ -40,7 +44,11 @@ const waterShader = {
         vec2 streak = vec2(q.x * 0.62, q.y * 0.92);
         float drop = exp(-dot(streak, streak) * 0.24);
         float shine = pow(max(0.0, 0.5 + 0.5 * sin(14.0 * length(q) - clock * 1.6 + b)), 4.0);
-        glints += poolColors[i] * drop * pools[i].z * (0.018 + 0.058 * shine * slope);
+        vec3 light = normalize(vec3(pools[i].x-p.x, 5.5, pools[i].y-p.y));
+        vec3 halfway = normalize(light + eye);
+        float specular = pow(max(dot(normal,halfway),0.0),96.0);
+        glints += mix(poolColors[i],vec3(1.0),.18) * drop * pools[i].z
+          * (0.014 + 0.065 * shine * slope + specular * .24);
       }
       float fade = 1.0 - smoothstep(14.0, 34.0, length(p));
       vec3 surface = vec3(0.0018, 0.0028, 0.0041) + glints;
@@ -53,7 +61,7 @@ const waterShader = {
 };
 
 export function makeWater(renderer, compact) {
-  const size = compact ? 256 : 640;
+  const size = compact ? 512 : 1024;
   const surface = new Reflector(new PlaneGeometry(72, 62), {
     textureWidth: size, textureHeight: size, multisample: 0, clipBias: 0.002, shader: waterShader
   });
@@ -68,7 +76,7 @@ export function makeWater(renderer, compact) {
   surface.onBeforeRender = (activeRenderer, scene, camera, ...rest) => {
     if (activeRenderer.getRenderTarget()) return;
     const now = performance.now();
-    if (now - last < (compact ? 85 : 45)) return;
+    if (now - last < (compact ? 60 : 40)) return;
     last = now;
     renderReflection(activeRenderer, scene, camera, ...rest);
   };

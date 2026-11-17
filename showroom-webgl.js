@@ -1,4 +1,4 @@
-import {makeWater} from './water.js?v=shelf-fix-1';
+import {makeWater} from './water.js?v=lighting-1';
 import {addLiquidRefraction, bindLiquidCamera} from './glass-volume.js?v=dark-stone-1';
 import {
   ACESFilmicToneMapping, AmbientLight, Box3, BoxGeometry, CanvasTexture, Color, DoubleSide, GLTFLoader,
@@ -41,7 +41,7 @@ const projected = new Vector3();
 const worldPoint = new Vector3();
 const hoverGap = .016;
 const flightOrder = ['galet', 'rose', 'bleu', 'ambre'];
-let renderer, studioReflection, water, shelves, keyLight, rimLight;
+let renderer, studioReflection, water, shelves;
 let width = 0, height = 0, previousTime = 0;
 let presented = false;
 let shot = null, lastProduct = 'gallery';
@@ -124,24 +124,36 @@ async function loadStoneTexture() {
   return texture;
 }
 
-async function loadNicheBackdrops() {
-  const image = new Image();
-  image.src = new URL('stone-showroom-mobile.jpg', import.meta.url).href;
-  await image.decode();
-  const crops = [[.19, .16], [.59, .16], [.19, .51], [.59, .51]];
-  for (const [index, product] of products.entries()) {
-    const canvas = document.createElement('canvas');
-    canvas.width = 384;
-    canvas.height = 512;
-    const [x, y] = crops[index];
-    canvas.getContext('2d').drawImage(image, image.width * x, image.height * y,
-      image.width * .22, image.height * .18, 0, 0, canvas.width, canvas.height);
-    const texture = new CanvasTexture(canvas);
-    texture.colorSpace = SRGBColorSpace;
-    texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
-    product.wallTexture = texture;
-  }
+function beamTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 256;
+  const context = canvas.getContext('2d');
+  const gradient = context.createLinearGradient(0, 0, 0, 256);
+  gradient.addColorStop(0, 'rgba(255,255,255,.95)');
+  gradient.addColorStop(.25, 'rgba(255,255,255,.35)');
+  gradient.addColorStop(1, 'rgba(255,255,255,0)');
+  context.fillStyle = gradient;
+  context.beginPath();
+  context.moveTo(128, 0);
+  context.lineTo(6, 256);
+  context.lineTo(250, 256);
+  context.closePath();
+  context.fill();
+  context.globalCompositeOperation = 'destination-in';
+  const feather = context.createLinearGradient(0, 0, 256, 0);
+  feather.addColorStop(0, 'transparent');
+  feather.addColorStop(.3, 'rgba(255,255,255,.6)');
+  feather.addColorStop(.5, 'white');
+  feather.addColorStop(.7, 'rgba(255,255,255,.6)');
+  feather.addColorStop(1, 'transparent');
+  context.fillStyle = feather;
+  context.fillRect(0, 0, 256, 256);
+  const texture = new CanvasTexture(canvas);
+  texture.colorSpace = SRGBColorSpace;
+  return texture;
 }
+
+const lightBeamMap = beamTexture();
 
 const satinMap = satinBump();
 
@@ -149,14 +161,12 @@ const satinMap = satinBump();
 // irregular piers, not a flat overlay. Back, side and roof faces catch coloured light.
 function createWall() {
   const wall=new Group();
-  const outside=new MeshStandardMaterial({color:'#8b8f92',map:rockMap,emissive:'#c1c5c8',emissiveMap:rockMap,emissiveIntensity:.18,metalness:.04,
-    roughness:.91,bumpMap:rockMap,bumpScale:.16});
-  const inner=new MeshStandardMaterial({color:'#8f969b',map:rockMap,emissive:'#a9b2bb',emissiveMap:rockMap,emissiveIntensity:.15,metalness:.08,
-    roughness:.84,bumpMap:rockMap,bumpScale:.12});
-  const sideStone=new MeshStandardMaterial({color:'#a5afb7',map:rockMap,emissive:'#8a99a4',emissiveMap:rockMap,emissiveIntensity:.18,metalness:.18,
-    roughness:.50,bumpMap:rockMap,bumpScale:.08,envMapIntensity:.65});
-  const floorStone=new MeshStandardMaterial({color:'#a4acb0',map:rockMap,emissive:'#7e888e',emissiveMap:rockMap,emissiveIntensity:.14,metalness:.16,
-    roughness:.43,bumpMap:rockMap,bumpScale:.06});
+  const outside = new MeshStandardMaterial({color:'#92979b',map:rockMap,
+    emissive:'#b2bbc4',emissiveMap:rockMap,emissiveIntensity:.24,
+    metalness:.12,roughness:.74,bumpMap:rockMap,bumpScale:.10,envMapIntensity:.5});
+  const inner = outside;
+  const sideStone = outside;
+  const floorStone = outside;
   const dark=new MeshStandardMaterial({color:'#151618',roughness:.82});
   function rock(size,pos,mat=outside,amount=.058,seed=1){
     const g=new BoxGeometry(size[0],size[1],size[2],5,20,4);
@@ -204,21 +214,23 @@ function createWall() {
   if(compactLayout){
     rock([totalWidth,.35,3.12],[(leftEdge+rightEdge)/2,-.06,-.25],outside,.12,57);
   }
+  const highestCeiling = Math.max(...products.map(product => product.y + BAY.height));
+  const surroundBottom = base - .48;
+  const surroundTop = highestCeiling + .50;
+  rock([72, 60, 3.06], [0, surroundTop + 30, -.25], outside, .03, 119);
+  const sideWidth = 40 - totalWidth / 2;
+  for (const direction of [-1, 1]) {
+    rock([sideWidth, surroundTop - surroundBottom, 3.06],
+      [direction * (totalWidth / 2 + sideWidth / 2 - .10),
+       (surroundTop + surroundBottom) / 2, -.25], outside, .03, 124);
+  }
   const bayLights=new Map();
   for(let i=0;i<products.length;i++){
     const product=products[i],cx=product.x,bottom=product.y,topY=bottom+BAY.height;
     const tintedSides = sideStone.clone();
-    tintedSides.emissive.set(product.tone);
-    tintedSides.emissiveIntensity = .28;
     const tintedFloor = floorStone.clone();
-    tintedFloor.emissive.set(product.tone);
-    tintedFloor.emissiveIntensity = .32;
-    const backdrop = new Mesh(new PlaneGeometry(w - .12, BAY.height - .16),
-      new MeshBasicMaterial({map: product.wallTexture, color: '#b4b4b4'}));
-    backdrop.position.set(cx, bottom + BAY.height / 2, -1.94);
-    wall.add(backdrop);
     // True cavity planes two metres behind the front face.
-    rock([w-.05,BAY.height-.10,.14],[cx,bottom+BAY.height/2,-2.10],inner,.07,60+i);
+    const backWall = rock([w-.05,BAY.height-.10,.14],[cx,bottom+BAY.height/2,-2.10],inner,.07,60+i);
     rock([w-.03,.15,2.63],[cx,bottom-.035,-.70],tintedFloor,.015,72+i);
     rock([w-.03,.19,2.58],[cx,topY+.005,-.70],inner,.032,83+i);
     const sideOffset=w/2-.01;
@@ -228,9 +240,26 @@ function createWall() {
     rock([.54,.035,.34],[cx,topY-.12,.10],dark,.003,99+i);
     const lightSource=new Mesh(new PlaneGeometry(.42,.18),new MeshBasicMaterial({
       color:'#ffe9ce',transparent:true,opacity:.82,toneMapped:false,side:DoubleSide}));
+    lightSource.material.color.set('#fff6dd').multiplyScalar(1.6);
     lightSource.position.set(cx,topY-.155,.21);lightSource.rotation.x=-Math.PI/2;wall.add(lightSource);
+    const halo = new Mesh(new PlaneGeometry(.92,.46),new MeshBasicMaterial({
+      map:refractionMap,color:'#fff1d6',transparent:true,opacity:.75,
+      blending:additiveBlending,depthWrite:false,toneMapped:false,side:DoubleSide}));
+    halo.position.set(cx,topY-.17,.21);
+    halo.rotation.x=-Math.PI/2;
+    wall.add(halo);
+    const beam = new Mesh(new PlaneGeometry(w*.84,BAY.height-.38),new MeshBasicMaterial({
+      map:lightBeamMap,color:'#fff2df',transparent:true,opacity:.15,
+      blending:additiveBlending,depthWrite:false,toneMapped:false,side:DoubleSide}));
+    beam.position.y=-(BAY.height-.38)/2;
+    const beamPivot = new Group();
+    beamPivot.position.set(cx,topY-.17,.10);
+    beamPivot.add(beam);
+    wall.add(beamPivot);
     const overhead=addSpot(wall,{color:'#ffe4d0',intensity:105,
       position:[cx,topY-.17,.10],look:[cx,bottom+.88,-.80],spread:.42});
+    const front = addSpot(wall,{color:'#fff6ed',intensity:105,
+      position:[cx-.80,bottom+2.8,2.8],look:[cx,bottom+1.28,-.72],spread:.52});
     const spill=addSpot(wall,{color:product.tone,intensity:31,
       position:[cx,bottom+1.50,-.93],look:[cx,bottom+1.28,-2.10],spread:.84});
     // Transmitted pools follow the bottle and illuminate the shelf and both inner sides.
@@ -244,7 +273,14 @@ function createWall() {
       wall.add(patch);
       return patch;
     });
-    bayLights.set(product.key,{overhead,spill,caustics,lightSource,tintedSides,tintedFloor,backdrop});
+    const backCaustic = new Mesh(new PlaneGeometry(w*.94,BAY.height*.74),new MeshBasicMaterial({
+      map:refractionMap,color:product.tone,transparent:true,opacity:.30,
+      blending:additiveBlending,depthWrite:false,toneMapped:false}));
+    backCaustic.position.set(cx,bottom+BAY.height*.43,-1.94);
+    wall.add(backCaustic);
+    caustics.push(backCaustic);
+    bayLights.set(product.key,{overhead,front,spill,caustics,lightSource,halo,beam,beamPivot,
+      tintedSides,tintedFloor,backWall});
   }
   // A barely perceptible stone lip touches the dark mirror-like water at the foot.
   rock([totalWidth,.23,3.1],[(leftEdge+rightEdge)/2,base-.19,-.20],outside,.08,108);
@@ -341,12 +377,11 @@ async function loadBottle(product, loader) {
     } else if (/(print|label)/i.test(material.name) && material.map) {
       material.map.anisotropy = Math.min(16, renderer.capabilities.getMaxAnisotropy());
       material.map.colorSpace = SRGBColorSpace;
-      material.roughness = .72;
-      material.metalness = 0;
-      material.envMapIntensity = .28;
-      material.emissiveMap = material.map;
-      material.emissive.set('#fff7ed');
-      material.emissiveIntensity = .16;
+      // Keep printed ink legible and equally exposed under every product spotlight.
+      mesh.material = new MeshBasicMaterial({
+        name: material.name, map: material.map, color: '#fffef9', toneMapped: false,
+        polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1
+      });
     } else if (/atomizer tube/i.test(material.name)) {
       // Leave a muted highlight on the dip tube in the solid pass refracted by the shell.
       material.transmission = 0;
@@ -395,7 +430,9 @@ function galleryFrame(aspect) {
   // Preserve the complete rock wall and a strip of nearly still reflection below.
   const radius=compactLayout?Math.max(23.5,7.0/(2*angle*aspect))
     :Math.max(16.5,15.0/(2*angle*aspect));
-  return viewAround({x:0,y:compactLayout?-.08:-.38,z:-.60},radius,0,.25);
+  const aimY = compactLayout ? -.55 : .22 - radius * 2 * angle * .14;
+  const cameraY = compactLayout ? .95 : 1.65;
+  return viewAround({x:0,y:aimY,z:-.60},radius,0,cameraY-aimY);
 }
 
 function productFrame(product,aspect,yaw=0,focus=1){
@@ -453,8 +490,8 @@ function resize() {
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
   const compact = width <= 700;
-  const pixelBudget = compact ? 750_000 : 1_600_000;
-  const ratio = Math.min(devicePixelRatio || 1, compact ? 1.5 : 1.65, Math.sqrt(pixelBudget / (width * height)));
+  const pixelBudget = compact ? 2_000_000 : 3_000_000;
+  const ratio = Math.min(devicePixelRatio || 1, 2, Math.sqrt(pixelBudget / (width * height)));
   renderer.setPixelRatio(ratio);
   renderer.setSize(width, height, false);
 }
@@ -475,6 +512,15 @@ function updateHits() {
     product.button.style.height = (height * (product.height + .18) / (2 * angle * distance)) + 'px';
     product.button.style.zIndex = String(Math.max(0, Math.round(105 - distance * 3)));
     product.button.hidden = Math.abs(projected.x) > 1.18 || Math.abs(projected.y) > 1.18 || projected.z > 1;
+    const buttonCenterX = (projected.x + 1) * width / 2;
+    const buttonCenterY = (1 - projected.y) * height / 2;
+    const hitHeight = height * (product.height + .18) / (2 * angle * distance);
+    const captionDrop = compactLayout && product.y > 0 ? .16 : .37;
+    worldPoint.set(product.x,product.y-captionDrop,1.32).project(camera);
+    product.button.style.setProperty('--caption-left',
+      ((worldPoint.x+1)*width/2-buttonCenterX+hitWidth/2)+'px');
+    product.button.style.setProperty('--caption-top',
+      ((1-worldPoint.y)*height/2-buttonCenterY+hitHeight/2)+'px');
     if (stage.dataset.state === product.key) {
       dragArea.style.setProperty('--drag-left', ((projected.x + 1) * 50) + '%');
       dragArea.style.setProperty('--drag-top', ((1 - projected.y) * 50) + '%');
@@ -504,13 +550,6 @@ function render(time) {
   }
   camera.position.set(shot.x, shot.y, shot.z);
   camera.lookAt(shot.aimX, shot.aimY, shot.aimZ);
-  const selectedProduct = products.find(product => product.key === current);
-  const lightX = selectedProduct?.x || 0;
-  const lightY = selectedProduct?.y || (compactLayout ? -1.4 : -2.14);
-  keyLight.position.set(lightX - 2.4, lightY + 4.2, 3.7);
-  keyLight.target.position.set(lightX, lightY + 1.3, -.7);
-  rimLight.position.set(lightX + 2.5, lightY + 3.1, -1.2);
-  rimLight.target.position.set(lightX, lightY + 1.3, -.7);
   const seconds = time / 1000;
   const reach = reducedMotion.matches ? 0 : 1;
   lightingPointer.x = MathUtils.damp(lightingPointer.x, lightingPointer.targetX * reach, 3.8, dt);
@@ -518,11 +557,10 @@ function render(time) {
   for (const [index, product] of products.entries()) {
     const selected = current === product.key;
     product.group.visible = current === 'gallery' || selected;
-    const lit = selected || current === 'gallery' && stage.dataset.checkpoint === product.key;
-    const emphasis = lit ? MathUtils.clamp(shot.focus, 0, 1) : 0;
+    const emphasis = selected ? MathUtils.clamp(shot.focus, 0, 1) : 0;
     const orbitX = 0;
     const orbitZ = 0;
-    const turn = product.rest + spinAngle(product, time) + (selected ? manualTurn.y : 0);
+    const turn = spinAngle(product, time) + (selected ? manualTurn.y : 0);
     const pitch = selected ? manualTurn.x : 0;
     const roll = 0;
     const rotatedDepth = product.footprint.width * Math.abs(Math.sin(turn))
@@ -544,14 +582,22 @@ function render(time) {
     const secondary = 1 - otherFocus * .81;
     const niche = shelves?.userData.lights.get(product.key);
     if (niche) {
-      niche.overhead.intensity=(88+emphasis*104)*secondary;
-      niche.tintedSides.emissiveIntensity=(.28+emphasis*.38)*secondary;
-      niche.tintedFloor.emissiveIntensity=(.32+emphasis*.42)*secondary;
-      niche.backdrop.material.color.setScalar((.66+emphasis*.28)*secondary);
-      niche.spill.intensity=(32+emphasis*54)*secondary;
+      niche.overhead.intensity=(125+emphasis*110)*secondary;
+      niche.front.intensity=(105+emphasis*65)*secondary;
+      niche.spill.intensity=(35+emphasis*60)*secondary;
+      niche.overhead.target.position.x=product.x+lightingPointer.x*.30;
+      niche.overhead.target.position.z=-.8+lightingPointer.y*.15;
+      niche.front.target.position.x=product.x+lightingPointer.x*.10;
+      niche.spill.target.position.x=product.x+Math.sin(turn)*.25+lightingPointer.x*.22;
+      niche.spill.target.position.y=product.y+1.28+lightingPointer.y*.12;
+      niche.beamPivot.rotation.z=-lightingPointer.x*.065;
+      niche.beamPivot.rotation.x=lightingPointer.y*.035;
+      niche.beam.material.opacity=(.15+emphasis*.10)*secondary;
+      niche.halo.material.opacity=(.65+emphasis*.25)*secondary;
       for (const [side, patch] of niche.caustics.entries()) {
         patch.material.opacity=(.42+emphasis*.34)*secondary;
-        patch.position.y=product.y+1.18+Math.sin(turn+side)*.035;
+        patch.position.y=product.y+(side===2?BAY.height*.43:1.18)
+          +Math.sin(turn+side)*.035+lightingPointer.y*.06;
       }
       niche.lightSource.material.opacity=.72+emphasis*.20;
     }
@@ -644,7 +690,7 @@ function reflectionPanels(environment) {
 }
 
 function trackLighting(event) {
-  const rect = stage.getBoundingClientRect();
+  const rect = (stage.dataset.state === 'gallery' ? stage : dragArea).getBoundingClientRect();
   if (rect.width <= 0 || rect.height <= 0) return;
   lightingPointer.targetX = MathUtils.clamp((event.clientX - rect.left) / rect.width * 2 - 1, -1, 1);
   lightingPointer.targetY = MathUtils.clamp((event.clientY - rect.top) / rect.height * 2 - 1, -1, 1);
@@ -664,7 +710,7 @@ async function start() {
     renderer.debug.onShaderError = () => { throw new Error('The 3D material could not compile.'); };
     renderer.toneMapping = ACESFilmicToneMapping;
     renderer.toneMappingExposure = .98;
-    renderer.transmissionResolutionScale = innerWidth <= 700 ? .45 : .65;
+    renderer.transmissionResolutionScale = innerWidth <= 700 ? .85 : 1;
     const studio = new RoomEnvironment();
     reflectionPanels(studio);
     const pmrem = new PMREMGenerator(renderer);
@@ -674,12 +720,7 @@ async function start() {
     scene.environment = studioReflection.texture;
     scene.environmentIntensity = .55;
     scene.add(new AmbientLight('#dde0e5', .12));
-    keyLight = addSpot(scene, {color: '#fff5eb', intensity: 110,
-      position: [-2.4, 3, 3.7], look: [0, 0, -.7], spread: 1.2});
-    rimLight = addSpot(scene, {color: '#dde9ff', intensity: 70,
-      position: [2.5, 2, -1.2], look: [0, 0, -.7], spread: 1.1});
     rockMap = await loadStoneTexture();
-    await loadNicheBackdrops();
     shelves=createWall();
 
     water = makeWater(renderer, innerWidth <= 700);
