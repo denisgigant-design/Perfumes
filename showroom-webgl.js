@@ -653,6 +653,22 @@ function render(time) {
 }
 
 function controls(element) {
+  let ignoreReturnClick=false;
+  function returnToCollection(){
+    for(const product of products)product.spin=null;
+    window.dispatchEvent(new Event('perfume-collection-request'));
+  }
+  // The compatibility click can be retargeted to a gallery bottle after the
+  // drag surface disappears. Consume that one click before it can reopen it.
+  for(const type of ['pointerdown','keydown'])stage.addEventListener(type,()=>{
+    ignoreReturnClick=false;
+  },{capture:true});
+  stage.addEventListener('click',event=>{
+    if(ignoreReturnClick){
+      ignoreReturnClick=false;
+      event.preventDefault();event.stopImmediatePropagation();
+    }
+  },{capture:true});
   element.addEventListener('pointerdown', event => {
     const product = products.find(item => item.key === stage.dataset.state);
     if (!product || (event.pointerType === 'mouse' && event.button !== 0)) return;
@@ -679,7 +695,8 @@ function controls(element) {
     const gesture=pointerStates.get(event.pointerId);
     pointerStates.delete(event.pointerId);
     if(event.type==='pointerup' && gesture && !gesture.moved && stage.dataset.state===gesture.key){
-      window.dispatchEvent(new Event('perfume-collection-request'));
+      ignoreReturnClick=true;
+      returnToCollection();
     }
   }
   for (const event of ['pointerup', 'pointercancel', 'lostpointercapture']) {
@@ -688,7 +705,7 @@ function controls(element) {
   element.addEventListener('keydown',event=>{
     if(event.key==='Enter'||event.key===' '){
       event.preventDefault();event.stopPropagation();
-      window.dispatchEvent(new Event('perfume-collection-request'));
+      returnToCollection();
     }
   });
   element.addEventListener('wheel', event => {
