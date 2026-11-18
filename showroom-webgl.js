@@ -13,6 +13,8 @@ const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const scene = new Scene();
 const camera = new PerspectiveCamera(34, 1, .07, 65);
 // Five tall slots share one continuous facade at every viewport size.
+const whiteShelfGain = .75;
+const colourBounceGain = 1.15;
 const BAY = {width:2.40, height:5.80, columns:5, step:2.96};
 const entries = [
   {key:'galet', file:'galet-crystal.glb', height:2.58,
@@ -352,7 +354,7 @@ function mergeCapFlutes(model) {
 
 async function loadBottle(product, loader) {
   const url = new URL(product.file, import.meta.url);
-  url.searchParams.set('v', 'spirits-1');
+  url.searchParams.set('v', product.key === 'terre' ? 'bronze-4' : 'spirits-1');
   const {scene: model} = await loader.loadAsync(url.href);
   mergeCapFlutes(model);
   const bottle = new Group();
@@ -403,9 +405,13 @@ async function loadBottle(product, loader) {
         const levels={galet:.88661,rose:.94172,iris:.90881,terre:.92150,nacre:.84475};
         addLiquidRefraction(mesh,cavity,product,levels[product.key]);
       }
-    } else if (/brushed bronze label/i.test(material.name)) {
-      material.envMapIntensity = 1.65;
-      material.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    } else if (/satin bronze plaque|champagne raised type/i.test(material.name)) {
+      const isPlaque = /plaque/i.test(material.name);
+      material.envMapIntensity = isPlaque ? 2.1 : 2.6;
+      if (isPlaque) {
+        material.bumpMap = satinMap;
+        material.bumpScale = .0007;
+      }
     } else if (/(print|label)/i.test(material.name) && material.map) {
       material.map.anisotropy = Math.min(16, renderer.capabilities.getMaxAnisotropy());
       material.map.colorSpace = SRGBColorSpace;
@@ -614,7 +620,7 @@ function render(time) {
   const selectedProduct=products.find(product=>current===product.key);
   const inspection=shelves?.userData.inspection;
   if(inspection){
-    inspection.intensity=selectedProduct?MathUtils.clamp(shot.focus,0,1)*116:0;
+    inspection.intensity=selectedProduct?MathUtils.clamp(shot.focus,0,1)*116*whiteShelfGain:0;
     inspection.userData.selected=selectedProduct?.key??null;
     if(selectedProduct){
       inspection.position.set(selectedProduct.x-.12,selectedProduct.y+BAY.height-.12,-.59);
@@ -657,33 +663,33 @@ function render(time) {
     const secondary = 1 - otherFocus * .81;
     const niche = shelves?.userData.lights.get(product.key);
     if (niche) {
-      niche.overhead.intensity=(210+emphasis*134)*secondary;
-      niche.spill.intensity=(15+emphasis*(20+8*glint))*secondary;
+      niche.overhead.intensity=(210+emphasis*134)*secondary*whiteShelfGain;
+      niche.spill.intensity=(15+emphasis*(20+8*glint))*secondary*colourBounceGain;
       niche.overhead.target.position.x=product.x+lightingPointer.x*.30;
       niche.overhead.target.position.z=-1.93+lightingPointer.y*.10;
       niche.spill.target.position.x=product.x+Math.sin(turn)*.25+lightingPointer.x*.22;
       niche.spill.target.position.y=product.y+product.height*.42+lightingPointer.y*.12;
       niche.beamPivot.rotation.z=-lightingPointer.x*.065;
       niche.beamPivot.rotation.x=.24+lightingPointer.y*.025;
-      niche.beam.material.opacity=(.38+emphasis*.065)*secondary;
-      niche.halo.material.opacity=(.28+emphasis*.12)*secondary;
+      niche.beam.material.opacity=(.38+emphasis*.065)*secondary*whiteShelfGain;
+      niche.halo.material.opacity=(.28+emphasis*.12)*secondary*whiteShelfGain;
       for (const [side, patch] of niche.caustics.entries()) {
         const direction=side===0?-1:1;
-        patch.material.opacity=(.17+emphasis*(.18+direction*.12*glint))*secondary;
+        patch.material.opacity=(.17+emphasis*(.18+direction*.12*glint))*secondary*colourBounceGain;
         patch.position.z=-.37+emphasis*direction*glint*.20;
         patch.position.y=product.y+product.height*.37+lightingPointer.y*.03;
       }
-      niche.tintedSides.emissiveIntensity=(.008+emphasis*.009)*secondary;
+      niche.tintedSides.emissiveIntensity=(.008+emphasis*.009)*secondary*colourBounceGain;
       niche.lens.material.color.set(selected?'#fffaf3':'#e6dcd2');
     }
     product.refraction.rotation.z = turn * .91;
     product.refraction.position.x = Math.sin(turn) * .15 + lightingPointer.x * .085;
     product.refraction.position.z = .26 + Math.cos(turn * 2) * .08;
-    product.refraction.material.opacity = (.23 + emphasis * .15) * secondary * (.88 + .12 * Math.cos(turn * 2));
+    product.refraction.material.opacity = (.23 + emphasis * .15) * colourBounceGain * secondary * (.88 + .12 * Math.cos(turn * 2));
     if (water) {
       const {pools, poolColors} = water.material.uniforms;
       pools.value[index].set(product.x + lightingPointer.x * .12,
-        1.0 + lightingPointer.y * .07, (.42 + emphasis * .62) * secondary);
+        1.0 + lightingPointer.y * .07, (.42 + emphasis * .62) * colourBounceGain * secondary);
       poolColors.value[index].set(product.tone);
     }
   }

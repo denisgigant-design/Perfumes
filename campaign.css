@@ -516,9 +516,9 @@ html .stage .gallery-bay .bay-caption{display:none!important}
 html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay[data-go]{
  background:
  radial-gradient(ellipse 8% 1.6% at 50% 4%,var(--fixture,#f5ede5) 20%,transparent 95%),
- conic-gradient(from 150deg at 50% 4%,transparent 0deg,#eaded31d 15deg,#fff6ec40 30deg,#eaded31d 45deg,transparent 60deg),
+ conic-gradient(from 150deg at 50% 4%,transparent 0deg,#eaded316 15deg,#fff6ec30 30deg,#eaded316 45deg,transparent 60deg),
  radial-gradient(ellipse at 50% 68%,transparent,#030306e8 84%),
- linear-gradient(175deg,#08080ca8,#0b0a10bd 50%,var(--spill)),url('cleaved-rock-color.webp') center/cover;
+ linear-gradient(175deg,#08080ca8,#0b0a10bd 50%,color-mix(in srgb,var(--spill) 85%,var(--scent-ink,var(--spill)))),url('cleaved-rock-color.webp') center/cover;
 }
 
 .nav .logo i{font:italic 1.3em Georgia,serif;letter-spacing:.01em;text-transform:none}
