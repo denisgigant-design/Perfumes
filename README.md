@@ -1,4 +1,4 @@
-# ATELIER — 3D perfume showroom
+# Unveiled Finest — 3D perfume showroom
 
 Five tall basalt recesses display Galet, Rose Lune, Iris Noir, Terre Fumée and Nacre. Portrait phones display two above three. Desktop displays a single row. Select a fragrance to move into its recess, turn on its white inspection light and play one opening spin. Drag or use the trackpad to rotate it. Activate the bottle again to return. On portrait screens the close-up frames the product below the niche ceiling.
 

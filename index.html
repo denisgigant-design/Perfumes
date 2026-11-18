@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#090a0d">
 <meta name="description" content="Five interactive glass fragrances in illuminated dark basalt recesses above reflecting water.">
-<title>ATELIER — Scent, Unveiled</title>
+<title>Unveiled Finest — The Spirits Collection</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Italiana&display=swap" rel="stylesheet">
@@ -106,11 +106,14 @@
   }
 }
 </style>
-<link rel="stylesheet" href="campaign.css?v=grazing-stone-1">
+<link rel="stylesheet" href="campaign.css?v=spirits-1">
 </head>
 <body>
-<div class="intro-loader" id="loader" aria-hidden="true"><div class="loader-mark">ATELIER</div><div class="load-rule"></div></div>
-<header class="nav"><button class="logo" id="homeBtn" aria-label="Return to collection">ATELIER<span>MAISON DE PARFUM</span></button><div class="nav-center" role="group" aria-label="Main navigation"><button id="collectionBtn" class="active">Collection</button><button id="discoverBtn">Discover</button></div><div class="nav-right"><button id="bagBtn" aria-label="Open bag">Bag <span class="bag-count" id="bagCount">0</span></button></div></header>
+<div class="intro-loader" id="loader" aria-hidden="true"><div class="loader-mark">UNVEILED FINEST</div><div class="load-rule"></div></div>
+<header class="nav">
+ <button class="logo" id="homeBtn" aria-label="Unveiled Finest, return to collection">UNVEILED <i>Finest</i></button>
+ <div class="nav-right"><button id="bagBtn" aria-label="Open basket"><svg width="26" height="26" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 12 5-8m7 8-5-8M3 12h22l-2 3H5zm2.6 3 2 8h12.8l2-8M11 17l.6 3m5.4-3-.6 3"/></svg></button></div>
+</header>
 <main>
 <section class="experience" id="experience" aria-label="Interactive perfume showroom">
  <div class="stage" id="stage" data-state="gallery">
@@ -118,38 +121,26 @@
  <canvas class="studio-rays" id="side-rays" aria-hidden="true"></canvas>
  <div id="showroom3d" aria-hidden="true"></div>
  <div class="gallery" id="gallery">
-  <button class="gallery-bay rose" data-go="rose" aria-label="Discover Rose Lune perfume"><span class="image-plinth" aria-hidden="true"></span><img src="rose-lune-smoked.png?v=atelier-stacked-1" alt="Rose Lune smoked plum glass bottle with champagne atomizer"><span class="bay-caption">Rose Lune</span></button>
-  <button class="gallery-bay galet" data-go="galet" aria-label="Discover Galet perfume"><span class="image-plinth" aria-hidden="true"></span><img src="galet-smoked.png?v=atelier-stacked-1" alt="Galet green-tinted rectangular perfume bottle"><span class="bay-caption">Galet</span></button>
-  <button class="gallery-bay iris" data-go="iris" aria-label="Discover Iris Noir perfume"><img src="iris.png?v=atelier-stacked-1" alt="Iris Noir perfume bottle"><span class="bay-caption">Iris Noir</span></button>
-  <button class="gallery-bay terre" data-go="terre" aria-label="Discover Terre Fumée perfume"><img src="grenat.png?v=atelier-stacked-1" alt="Terre Fumée perfume bottle"><span class="bay-caption">Terre Fumée</span></button>
-  <button class="gallery-bay nacre" data-go="nacre" aria-label="Discover Nacre perfume"><img src="nacre.png?v=atelier-stacked-1" alt="Nacre perfume bottle"><span class="bay-caption">Nacre</span></button>
+  <button class="gallery-bay rose" data-go="rose" aria-label="Discover Rose Lune perfume"><span class="image-plinth" aria-hidden="true"></span><img src="rose-lune-smoked.png?v=spirits-1" alt="Rose Lune smoked plum glass bottle with champagne atomizer"><span class="bay-caption">Rose Lune</span></button>
+  <button class="gallery-bay galet" data-go="galet" aria-label="Discover Galet perfume"><span class="image-plinth" aria-hidden="true"></span><img src="galet-smoked.png?v=spirits-1" alt="Galet green-tinted rectangular perfume bottle"><span class="bay-caption">Galet</span></button>
+  <button class="gallery-bay iris" data-go="iris" aria-label="Discover Iris Noir perfume"><img src="iris.png?v=spirits-1" alt="Iris Noir perfume bottle"><span class="bay-caption">Iris Noir</span></button>
+  <button class="gallery-bay terre" data-go="terre" aria-label="Discover Terre Fumée perfume"><img src="grenat.png?v=spirits-1" alt="Terre Fumée perfume bottle"><span class="bay-caption">Terre Fumée</span></button>
+  <button class="gallery-bay nacre" data-go="nacre" aria-label="Discover Nacre perfume"><img src="nacre.png?v=spirits-1" alt="Nacre perfume bottle"><span class="bay-caption">Nacre</span></button>
  </div>
- <div class="gallery-intro"><h1>The <em>night</em> collection.</h1></div>
+ <div class="gallery-intro"><h1>The <em>spirits</em> collection.</h1></div>
  <div class="detail" id="detail" inert aria-live="polite">
   <div class="detail-panel">
    <h2 id="productName" tabindex="-1">Rose <em>Lune</em></h2>
    <p class="scent-desc" id="desc">Pink pepper, velvet rose and cashmere wood.</p>
    <button class="price detail-price" id="addBtn" type="button"><span id="price">€185</span><span aria-hidden="true">+</span></button>
   </div>
-  <div class="hero-product" id="heroProduct"><img src="rose-lune-smoked.png?v=atelier-stacked-1" id="heroImage" alt="Selected perfume bottle"></div>
+  <div class="hero-product" id="heroProduct"><img src="rose-lune-smoked.png?v=spirits-1" id="heroImage" alt="Selected perfume bottle"></div>
  </div>
  <div class="product-drag" id="product-drag" role="button" tabindex="0" aria-label="Drag bottle to rotate, or activate to return to collection"></div>
- <div class="stage-footer">
-  <div class="scroll-prompt"><span class="scroll-icon" aria-hidden="true"></span><span id="scrollText">Scroll to explore</span></div>
-  <div class="scene-nav">
-   <div class="progresstrack" aria-label="Fragrance checkpoints">
-    <button type="button" data-checkpoint="galet" aria-label="Fly to Galet"></button>
-    <button type="button" data-checkpoint="rose" aria-label="Fly to Rose Lune"></button>
-    <button type="button" data-checkpoint="iris" aria-label="Fly to Iris Noir"></button>
-    <button type="button" data-checkpoint="terre" aria-label="Fly to Terre Fumée"></button>
-    <button type="button" data-checkpoint="nacre" aria-label="Fly to Nacre"></button>
-   </div>
-   <button id="prevBtn" aria-label="Previous fragrance">←</button><span class="number" id="numberText">01 / 05</span><button id="nextBtn" aria-label="Next fragrance">→</button>
-  </div>
- </div>
+
  </div>
 </section>
-<section class="ending"><div class="eyebrow">A study in feeling</div><h2>Some things are<br><i>better felt.</i></h2><p>Explore every note, catch the light against the glass, and find the fragrance that stays with you long after the moment ends.</p><button id="returnBtn">Return to the collection &nbsp; ↗</button><div class="copyright"><span>© ATELIER — A CONCEPT SHOWROOM</span><span>CRAFTED FOR AN IMMERSIVE WEB EXPERIENCE</span></div></section>
+<section class="ending"><div class="eyebrow">A study in feeling</div><h2>Some things are<br><i>better felt.</i></h2><p>Explore every note, catch the light against the glass, and find the fragrance that stays with you long after the moment ends.</p><button id="returnBtn">Return to the collection &nbsp; ↗</button><div class="copyright"><span>© UNVEILED FINEST — A CONCEPT SHOWROOM</span><span>CRAFTED FOR AN IMMERSIVE WEB EXPERIENCE</span></div></section>
 </main>
 <div class="shade" id="bagShade" role="dialog" aria-modal="true" aria-label="Your bag"><div class="side-drawer"><div class="drawer-head"><h2>Your bag</h2><button class="close" id="closeBag" aria-label="Close bag">×</button></div><div class="bag-list" id="bagList"></div><div class="total"><span>Subtotal</span><span id="bagTotal">€0</span></div><p class="demo-note">This is an interactive concept demonstration. Products and prices are illustrative; checkout and payment are not connected.</p></div></div>
 <script>
@@ -157,12 +148,12 @@
 'use strict';
 const DATA = {
   galet: {name:'Galet', html:'Galet', desc:'Fig leaf, green tea and white woods.',
-    price:175, img:'galet-smoked.png?v=atelier-stacked-1', num:'01 / 05'},
+    price:175, img:'galet-smoked.png?v=spirits-1', num:'01 / 05'},
   rose: {name:'Rose Lune', html:'Rose <em>Lune</em>', desc:'Pink pepper, velvet rose and cashmere wood.',
-    price:185, img:'rose-lune-smoked.png?v=atelier-stacked-1', num:'02 / 05'},
-  iris: {name:'Iris Noir', html:'Iris <em>Noir</em>', desc:'Orris butter, violet leaf and black tea.', price:195, img:'iris.png?v=atelier-stacked-1', num:'03 / 05'},
-  terre: {name:'Terre Fumée', html:'Terre <em>Fumée</em>', desc:'Tobacco leaf, dry cedar and smoked vetiver.', price:205, img:'grenat.png?v=atelier-stacked-1', num:'04 / 05'},
-  nacre: {name:'Nacre', html:'Nacre', desc:'Sea salt, white iris and sandalwood.', price:190, img:'nacre.png?v=atelier-stacked-1', num:'05 / 05'}
+    price:185, img:'rose-lune-smoked.png?v=spirits-1', num:'02 / 05'},
+  iris: {name:'Iris Noir', html:'Iris <em>Noir</em>', desc:'Orris butter, violet leaf and black tea.', price:195, img:'iris.png?v=spirits-1', num:'03 / 05'},
+  terre: {name:'Terre Fumée', html:'Terre <em>Fumée</em>', desc:'Tobacco leaf, dry cedar and smoked vetiver.', price:205, img:'grenat.png?v=spirits-1', num:'04 / 05'},
+  nacre: {name:'Nacre', html:'Nacre', desc:'Sea salt, white iris and sandalwood.', price:190, img:'nacre.png?v=spirits-1', num:'05 / 05'}
 };
 const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
 const phoneLayout=matchMedia('(max-width:679px) and (orientation:portrait)');
@@ -173,11 +164,9 @@ function syncCollectionOrder(){
  const order=collectionOrder();
  for(const key of order){
   $('#gallery').append($('[data-go="'+key+'"].gallery-bay'));
-  $('.progresstrack').append($('.progresstrack button[data-checkpoint="'+key+'"]'));
  }
  updateScroll();
 }
-function numberFor(key){return String(collectionOrder().indexOf(key)+1).padStart(2,'0')+' / 05';}
 const stage=$('#stage'), track=$('#experience'), motion=matchMedia('(prefers-reduced-motion: reduce)');
 let state='gallery', selected='galet', checkpoint='galet';
 
@@ -191,7 +180,7 @@ function renderBag(){
  const keys=Object.keys(DATA);
  const count=keys.reduce((total,key)=>total+bag[key],0);
  const subtotal=keys.reduce((total,key)=>total+bag[key]*DATA[key].price,0);
- $('#bagCount').textContent=count;
+ $('#bagBtn').setAttribute('aria-label',count ? 'Open basket, '+count+' items' : 'Open basket');
  $('#bagTotal').textContent='€'+subtotal;
  $('#bagList').innerHTML=count ? keys.filter(key=>bag[key]).map(key=>{
   const d=DATA[key];
@@ -230,10 +219,6 @@ function setState(s){
   $('#heroImage').alt=d.name+' bottle';
   $('#heroProduct').className='hero-product '+s;
  }
- $('#numberText').textContent=numberFor(inGallery?checkpoint:s);
- $('#scrollText').textContent=inGallery?'Scroll to explore':'Drag to rotate · '+(matchMedia('(pointer:coarse)').matches?'Tap':'Click')+' to return';
- $('#collectionBtn').classList.toggle('active',inGallery);
- $('#discoverBtn').classList.toggle('active',!inGallery);
 }
 function go(s, spin=false){
  if(s==='gallery'){
@@ -271,14 +256,10 @@ function updateScroll(){
  const orbitOrder=collectionOrder();
  checkpoint=orbitOrder[Math.max(0,Math.round(p*orbitOrder.length)-1)];
  stage.dataset.checkpoint=checkpoint;
- const active=state==='gallery'?checkpoint:state;
- $('#numberText').textContent=numberFor(active);
- $$('.progresstrack button[data-checkpoint]').forEach(node=>node.setAttribute('aria-pressed',String(node.dataset.checkpoint===active)));
  window.dispatchEvent(new Event('perfume-progress'));
 }
 let ticking=false;window.addEventListener('scroll',()=>{if(ticking)return;ticking=true;requestAnimationFrame(()=>{ticking=false;updateScroll()})},{passive:true});window.addEventListener('resize',updateScroll);
-$$('.progresstrack button[data-checkpoint]').forEach(b=>b.onclick=()=>orbitTo(b.dataset.checkpoint));
-$$('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go,b.classList.contains('gallery-bay'))));$('#homeBtn').onclick=()=>go('gallery');$('#collectionBtn').onclick=()=>go('gallery');$('#discoverBtn').onclick=()=>go(checkpoint,true);$('#returnBtn').onclick=()=>go('gallery');$('#prevBtn').onclick=()=>step(-1);$('#nextBtn').onclick=()=>step(1);$('#addBtn').onclick=()=>{bag[selected]++;saveBag();renderBag();$('#bagShade').classList.add('show')};$('#bagBtn').onclick=()=>{$('#bagShade').classList.add('show');renderBag()};$('#closeBag').onclick=()=>$('#bagShade').classList.remove('show');$('#bagShade').onclick=e=>{if(e.target===$('#bagShade'))$('#bagShade').classList.remove('show')};
+$$('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go,b.classList.contains('gallery-bay'))));$('#homeBtn').onclick=()=>go('gallery');$('#returnBtn').onclick=()=>go('gallery');$('#addBtn').onclick=()=>{bag[selected]++;saveBag();renderBag();$('#bagShade').classList.add('show')};$('#bagBtn').onclick=()=>{$('#bagShade').classList.add('show');renderBag()};$('#closeBag').onclick=()=>$('#bagShade').classList.remove('show');$('#bagShade').onclick=e=>{if(e.target===$('#bagShade'))$('#bagShade').classList.remove('show')};
 window.addEventListener('keydown',event=>{
  if(event.key==='Escape'){
   $('#bagShade').classList.remove('show');
@@ -298,6 +279,6 @@ setTimeout(()=>$('#loader').classList.add('out'),8000);
 })();
 </script>
 
-<script type="module" src="showroom-webgl.js?v=grazing-stone-1"></script>
+<script type="module" src="showroom-webgl.js?v=spirits-1"></script>
 </body>
 </html>

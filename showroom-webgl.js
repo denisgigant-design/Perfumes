@@ -352,7 +352,7 @@ function mergeCapFlutes(model) {
 
 async function loadBottle(product, loader) {
   const url = new URL(product.file, import.meta.url);
-  url.searchParams.set('v', 'atelier-stacked-1');
+  url.searchParams.set('v', 'spirits-1');
   const {scene: model} = await loader.loadAsync(url.href);
   mergeCapFlutes(model);
   const bottle = new Group();
@@ -403,12 +403,15 @@ async function loadBottle(product, loader) {
         const levels={galet:.88661,rose:.94172,iris:.90881,terre:.92150,nacre:.84475};
         addLiquidRefraction(mesh,cavity,product,levels[product.key]);
       }
+    } else if (/brushed bronze label/i.test(material.name)) {
+      material.envMapIntensity = 1.65;
+      material.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
     } else if (/(print|label)/i.test(material.name) && material.map) {
       material.map.anisotropy = Math.min(16, renderer.capabilities.getMaxAnisotropy());
       material.map.colorSpace = SRGBColorSpace;
       // Keep printed ink legible and equally exposed under every product spotlight.
       mesh.material = new MeshBasicMaterial({
-        name: material.name, map: material.map, color: '#fffef9', toneMapped: false,
+        name: material.name, map: material.map, alphaTest: material.alphaTest, color: '#fffef9', toneMapped: false,
         polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1
       });
     } else if (/brushed champagne/i.test(material.name) && ['terre','iris'].includes(product.key)){
@@ -610,7 +613,7 @@ function render(time) {
   const selectedProduct=products.find(product=>current===product.key);
   const inspection=shelves?.userData.inspection;
   if(inspection){
-    inspection.intensity=selectedProduct?MathUtils.clamp(shot.focus,0,1)*58:0;
+    inspection.intensity=selectedProduct?MathUtils.clamp(shot.focus,0,1)*116:0;
     inspection.userData.selected=selectedProduct?.key??null;
     if(selectedProduct){
       inspection.position.set(selectedProduct.x-.12,selectedProduct.y+BAY.height-.12,-.59);
@@ -823,7 +826,7 @@ async function start() {
     scene.add(new AmbientLight('#d4d7ed',.026));
     // Grazing incidence exposes the left flanks of fractures across the facade.
     const key=addSpot(scene,{color:'#e4e2f3',intensity:1500,
-      position:[-15,11,5.6],look:[-5,2,.9],spread:.77});
+      position:[-21,13.5,6.5],look:[-5,2,.9],spread:.77});
     key.penumbra=.95;key.castShadow=true;
     key.shadow.mapSize.set(1024,1024);
     key.shadow.camera.near=1;key.shadow.camera.far=46;

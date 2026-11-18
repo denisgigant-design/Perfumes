@@ -519,3 +519,6 @@ html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay[data-go]{
  radial-gradient(ellipse at 50% 68%,transparent,#030306e8 84%),
  linear-gradient(175deg,#08080ca8,#0b0a10bd 50%,var(--spill)),url('cleaved-rock-color.webp') center/cover;
 }
+
+.nav .logo i{font:italic 1.3em Georgia,serif;letter-spacing:.01em;text-transform:none}
+.nav #bagBtn{display:grid;place-items:center;min-width:44px;min-height:44px;padding:0;color:#f4eee5}
