@@ -29,7 +29,7 @@ const entries = [
 const products = entries.map((d,i)=>{
   const x = (i - (entries.length-1)/2) * BAY.step;
   const y = -2.14;
-  return {...d, x, y, z:-.74};
+  return {...d, x, y, z:.52};
 });
 
 const angle = Math.tan(MathUtils.degToRad(camera.fov / 2));
@@ -444,8 +444,8 @@ function viewAround({x, y, z}, radius, yaw, elevation, amount = 0) {
 
 function galleryFrame(aspect) {
   // Preserve the complete rock wall and a strip of nearly still reflection below.
-  const radius=Math.max(16.5,15.9/(2*angle*aspect));
-  const aimY = aspect<.80 ? -.35 : .22 - radius * 2 * angle * .12;
+  const radius=Math.max(18.7,16.4/(2*angle*aspect));
+  const aimY = aspect<.80 ? -.35 : .22 - radius * 2 * angle * .068;
   const cameraY = aspect<.80 ? 1.1 : 1.65;
   return viewAround({x:0,y:aimY,z:-.60},radius,0,cameraY-aimY);
 }
@@ -454,7 +454,7 @@ function productFrame(product,aspect,yaw=0,focus=1){
   // On phones the camera frames the glass, with the overhead fixture above the crop.
   const radius=aspect<.80 ? Math.max(8.2, product.footprint.width/(2*angle*aspect)*1.18) : 12.2;
   const aimY=product.y+(aspect<.80?product.height*.44:BAY.height*.40);
-  return viewAround({x:product.x,y:aimY,z:-.72},radius, yaw*.13,.21,focus);
+  return viewAround({x:product.x,y:aimY,z:product.z},radius, yaw*.13,.21,focus);
 }
 
 function flyThrough(aspect, progress) {
