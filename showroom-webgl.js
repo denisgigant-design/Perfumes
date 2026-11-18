@@ -288,7 +288,7 @@ function createWall() {
     const beamPivot=new Group();beamPivot.position.set(cx,topY-.09,-.28);
     beamPivot.add(beam);wall.add(beamPivot);
     const overhead=addSpot(wall,{color:'#fff8f0',intensity:150,
-      position:[cx,topY-.09,-.28],look:[cx,bottom+product.height,.34],spread:.47});
+      position:[cx,topY-.09,-.28],look:[cx,bottom+product.height+.35,-1.93],spread:.58});
     overhead.penumbra=.97;overhead.distance=9;
     const spill=addSpot(wall,{color:product.tone,intensity:8,
       position:[cx,bottom+product.height*.40,-.24],look:[cx,bottom+product.height*.45,-2.10],spread:1.08});
@@ -613,10 +613,9 @@ function render(time) {
   lightingPointer.y = MathUtils.damp(lightingPointer.y, lightingPointer.targetY * reach, 3.8, dt);
   const selectedProduct=products.find(product=>current===product.key);
   const inspection=shelves?.userData.inspection;
-  const litProduct = stage.dataset.inspection === 'off' ? null : selectedProduct;
   if(inspection){
-    inspection.intensity=litProduct?MathUtils.clamp(shot.focus,0,1)*116:0;
-    inspection.userData.selected=litProduct?.key??null;
+    inspection.intensity=selectedProduct?MathUtils.clamp(shot.focus,0,1)*116:0;
+    inspection.userData.selected=selectedProduct?.key??null;
     if(selectedProduct){
       inspection.position.set(selectedProduct.x-.12,selectedProduct.y+BAY.height-.12,-.59);
       inspection.target.position.set(selectedProduct.x+lightingPointer.x*.18,
@@ -626,7 +625,7 @@ function render(time) {
   for (const [index, product] of products.entries()) {
     const selected = current === product.key;
     product.group.visible = current === 'gallery' || selected || Boolean(transition);
-    const emphasis = litProduct === product ? MathUtils.clamp(shot.focus, 0, 1) : 0;
+    const emphasis = selectedProduct === product ? MathUtils.clamp(shot.focus, 0, 1) : 0;
     const orbitX = 0;
     const orbitZ = 0;
     const turn = spinAngle(product, time) + (selected ? manualTurn.y : 0);
@@ -658,14 +657,14 @@ function render(time) {
     const secondary = 1 - otherFocus * .81;
     const niche = shelves?.userData.lights.get(product.key);
     if (niche) {
-      niche.overhead.intensity=(183+emphasis*23)*secondary;
+      niche.overhead.intensity=(210+emphasis*134)*secondary;
       niche.spill.intensity=(15+emphasis*(20+8*glint))*secondary;
       niche.overhead.target.position.x=product.x+lightingPointer.x*.30;
-      niche.overhead.target.position.z=product.z-.18+lightingPointer.y*.13;
+      niche.overhead.target.position.z=-1.93+lightingPointer.y*.10;
       niche.spill.target.position.x=product.x+Math.sin(turn)*.25+lightingPointer.x*.22;
       niche.spill.target.position.y=product.y+product.height*.42+lightingPointer.y*.12;
       niche.beamPivot.rotation.z=-lightingPointer.x*.065;
-      niche.beamPivot.rotation.x=-.14+lightingPointer.y*.025;
+      niche.beamPivot.rotation.x=.24+lightingPointer.y*.025;
       niche.beam.material.opacity=(.38+emphasis*.065)*secondary;
       niche.halo.material.opacity=(.28+emphasis*.12)*secondary;
       for (const [side, patch] of niche.caustics.entries()) {
@@ -701,9 +700,9 @@ function render(time) {
 
 function controls(element) {
   let ignoreReturnClick=false;
-  function toggleInspection(){
+  function returnToCollection(){
     for(const product of products)product.spin=null;
-    window.dispatchEvent(new Event('perfume-light-toggle'));
+    window.dispatchEvent(new Event('perfume-collection-request'));
   }
   // The compatibility click can be retargeted to a gallery bottle after the
   // drag surface disappears. Consume that one click before it can reopen it.
@@ -743,7 +742,7 @@ function controls(element) {
     pointerStates.delete(event.pointerId);
     if(event.type==='pointerup' && gesture && !gesture.moved && stage.dataset.state===gesture.key){
       ignoreReturnClick=true;
-      toggleInspection();
+      returnToCollection();
     }
   }
   for (const event of ['pointerup', 'pointercancel', 'lostpointercapture']) {
@@ -752,12 +751,12 @@ function controls(element) {
   element.addEventListener('keydown',event=>{
     if(event.key==='Enter'||event.key===' '){
       event.preventDefault();event.stopPropagation();
-      toggleInspection();
+      returnToCollection();
     }
   });
   element.addEventListener('wheel', event => {
     const product = products.find(item => item.key === stage.dataset.state);
-    if (!product || stage.dataset.inspection==='off') return;
+    if (!product) return;
     event.preventDefault();
     product.spin = null;
     for(const gesture of pointerStates.values())gesture.moved=true;
