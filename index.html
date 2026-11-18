@@ -173,7 +173,7 @@ function syncCollectionOrder(){
  const order=collectionOrder();
  for(const key of order){
   $('#gallery').append($('[data-go="'+key+'"].gallery-bay'));
-  $('.progresstrack').append($('[data-checkpoint="'+key+'"]'));
+  $('.progresstrack').append($('.progresstrack button[data-checkpoint="'+key+'"]'));
  }
  updateScroll();
 }
@@ -273,11 +273,11 @@ function updateScroll(){
  stage.dataset.checkpoint=checkpoint;
  const active=state==='gallery'?checkpoint:state;
  $('#numberText').textContent=numberFor(active);
- $$('[data-checkpoint]').forEach(node=>node.setAttribute('aria-pressed',String(node.dataset.checkpoint===active)));
+ $$('.progresstrack button[data-checkpoint]').forEach(node=>node.setAttribute('aria-pressed',String(node.dataset.checkpoint===active)));
  window.dispatchEvent(new Event('perfume-progress'));
 }
 let ticking=false;window.addEventListener('scroll',()=>{if(ticking)return;ticking=true;requestAnimationFrame(()=>{ticking=false;updateScroll()})},{passive:true});window.addEventListener('resize',updateScroll);
-$$('[data-checkpoint]').forEach(b=>b.onclick=()=>orbitTo(b.dataset.checkpoint));
+$$('.progresstrack button[data-checkpoint]').forEach(b=>b.onclick=()=>orbitTo(b.dataset.checkpoint));
 $$('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go,b.classList.contains('gallery-bay'))));$('#homeBtn').onclick=()=>go('gallery');$('#collectionBtn').onclick=()=>go('gallery');$('#discoverBtn').onclick=()=>go(checkpoint,true);$('#returnBtn').onclick=()=>go('gallery');$('#prevBtn').onclick=()=>step(-1);$('#nextBtn').onclick=()=>step(1);$('#addBtn').onclick=()=>{bag[selected]++;saveBag();renderBag();$('#bagShade').classList.add('show')};$('#bagBtn').onclick=()=>{$('#bagShade').classList.add('show');renderBag()};$('#closeBag').onclick=()=>$('#bagShade').classList.remove('show');$('#bagShade').onclick=e=>{if(e.target===$('#bagShade'))$('#bagShade').classList.remove('show')};
 window.addEventListener('keydown',event=>{
  if(event.key==='Escape'){
