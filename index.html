@@ -106,7 +106,7 @@
   }
 }
 </style>
-<link rel="stylesheet" href="campaign.css?v=spirits-1">
+<link rel="stylesheet" href="campaign.css?v=spirits-light-2">
 </head>
 <body>
 <div class="intro-loader" id="loader" aria-hidden="true"><div class="loader-mark">UNVEILED FINEST</div><div class="load-rule"></div></div>
@@ -136,7 +136,7 @@
   </div>
   <div class="hero-product" id="heroProduct"><img src="rose-lune-smoked.png?v=spirits-1" id="heroImage" alt="Selected perfume bottle"></div>
  </div>
- <div class="product-drag" id="product-drag" role="button" tabindex="0" aria-label="Drag bottle to rotate, or activate to return to collection"></div>
+ <div class="product-drag" id="product-drag" role="button" tabindex="0" aria-label="Drag to rotate, or activate to switch the inspection light"></div>
 
  </div>
 </section>
@@ -192,6 +192,7 @@ let detailExitTimer;
 function setState(s){
  if(state===s)return;
  state=s;
+ delete stage.dataset.inspection;
  stage.dataset.state=s;
  const inGallery=s==='gallery';
  clearTimeout(detailExitTimer);
@@ -231,8 +232,24 @@ function go(s, spin=false){
  if(spin)window.Perfume3D?.spin(s);
  updateScroll();
 }
-window.addEventListener('perfume-collection-request',()=>go('gallery'));
-$('#heroProduct').addEventListener('click',()=>go('gallery'));
+let heldScrollY=0;
+function toggleInspection(){
+ if(state==='gallery')return;
+ if(stage.dataset.inspection==='off'){
+  delete stage.dataset.inspection;
+  window.Perfume3D?.spin(state);
+  return;
+ }
+ const order=collectionOrder();
+ const extent=Math.max(1,track.offsetHeight-stage.clientHeight);
+ const stop=(order.indexOf(state)+1)/order.length;
+ window.scrollTo({top:track.getBoundingClientRect().top+window.scrollY+extent*stop,behavior:'instant'});
+ heldScrollY=window.scrollY;
+ stage.dataset.inspection='off';
+ updateScroll();
+}
+window.addEventListener('perfume-light-toggle',toggleInspection);
+$('#heroProduct').addEventListener('click',toggleInspection);
 function orbitTo(key){
  const extent=Math.max(1,track.offsetHeight-stage.clientHeight);
  setState('gallery');
@@ -249,6 +266,7 @@ function step(delta){
  else go(list[i],true);
 }
 function updateScroll(){
+ if(stage.dataset.inspection==='off' && Math.abs(window.scrollY-heldScrollY)>2)setState('gallery');
  const extent=Math.max(1,track.offsetHeight-stage.clientHeight);
  const p=Math.max(0,Math.min(1,-track.getBoundingClientRect().top/extent));
  stage.dataset.progress=String(p);
@@ -279,6 +297,6 @@ setTimeout(()=>$('#loader').classList.add('out'),8000);
 })();
 </script>
 
-<script type="module" src="showroom-webgl.js?v=spirits-1"></script>
+<script type="module" src="showroom-webgl.js?v=spirits-light-2"></script>
 </body>
 </html>

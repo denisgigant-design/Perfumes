@@ -150,8 +150,8 @@ function beamTexture() {
   const pixels=context.createImageData(256,256);
   for(let y=0;y<256;y++)for(let x=0;x<256;x++){
     const t=y/255;
-    const halfWidth=10+t*89;
-    const lateral=Math.exp(-Math.pow((x-128)/halfWidth,2)*1.8);
+    const halfWidth=14+t*111;
+    const lateral=Math.exp(-Math.pow((x-128)/halfWidth,2)*1.55);
     const vertical=Math.exp(-t*3.4)*Math.min(1,t*110)*(1-t*t);
     const at=(y*256+x)*4;
     pixels.data[at]=pixels.data[at+1]=pixels.data[at+2]=255;
@@ -243,7 +243,7 @@ function createWall() {
   // One inspection light serves the selected recess. Keeping it in the light
   // set at zero intensity avoids recompiling every glass material on selection.
   const inspection=addSpot(wall,{color:'#fff8ef',intensity:0,
-    position:[0,0,.50],look:[0,0,-1.28],spread:.61});
+    position:[0,0,.50],look:[0,0,-1.28],spread:.69});
   inspection.penumbra=.94;
   wall.userData.inspection=inspection;
   for(const product of products){
@@ -261,7 +261,7 @@ function createWall() {
       rock([.12,BAY.height+.10,3.32],[cx+dir*sideOffset,bottom+BAY.height/2,-.37],
         [dir<0?tintedSides:outside,dir>0?tintedSides:outside,outside,outside,outside,outside],.07);
     }
-    // An angled, recessed round optic exposes its lens to the gallery camera.
+    // A flush downward-facing optic is visible only from below its ceiling.
     const disc=new PlaneGeometry(1,1,12,12);
     const vertices=disc.attributes.position;
     for(let i=0;i<vertices.count;i++){
@@ -270,7 +270,7 @@ function createWall() {
     }
     function downlight(x,diameter){
       const rim=new Mesh(disc,dark);
-      rim.position.set(x,topY-.15,.10);rim.rotation.x=-1.16;
+      rim.position.set(x,topY-.065,-.28);rim.rotation.x=Math.PI/2;
       rim.scale.setScalar(diameter);wall.add(rim);
       const lens=new Mesh(disc,new MeshBasicMaterial({color:'#fff4e4',toneMapped:false}));
       lens.scale.setScalar(.77);lens.position.z=.015;rim.add(lens);
@@ -279,17 +279,17 @@ function createWall() {
     const lens=downlight(cx,.41);
     const halo=new Mesh(new PlaneGeometry(1.15,.60),new MeshBasicMaterial({
       map:refractionMap,color:0xfff7ec,transparent:true,opacity:.30,
-      blending:additiveBlending,depthWrite:false,toneMapped:false,side:DoubleSide}));
-    halo.position.set(cx,topY-.158,.10);halo.rotation.x=-1.16;wall.add(halo);
+      blending:additiveBlending,depthWrite:false,toneMapped:false}));
+    halo.position.set(cx,topY-.082,-.28);halo.rotation.x=Math.PI/2;wall.add(halo);
     const beam=new Mesh(new PlaneGeometry(w*.90,BAY.height-.3),new MeshBasicMaterial({
       map:lightBeamMap,color:0xfffaf4,transparent:true,opacity:.018,
       blending:additiveBlending,depthWrite:false,toneMapped:false,side:DoubleSide}));
     beam.position.y=-(BAY.height-.3)/2;
-    const beamPivot=new Group();beamPivot.position.set(cx,topY-.16,.10);
+    const beamPivot=new Group();beamPivot.position.set(cx,topY-.09,-.28);
     beamPivot.add(beam);wall.add(beamPivot);
     const overhead=addSpot(wall,{color:'#fff8f0',intensity:150,
-      position:[cx,topY-.16,.10],look:[cx,bottom+1.20,-2.12],spread:.32});
-    overhead.penumbra=.89;overhead.distance=9;
+      position:[cx,topY-.09,-.28],look:[cx,bottom+product.height,.34],spread:.47});
+    overhead.penumbra=.97;overhead.distance=9;
     const spill=addSpot(wall,{color:product.tone,intensity:8,
       position:[cx,bottom+product.height*.40,-.24],look:[cx,bottom+product.height*.45,-2.10],spread:1.08});
     spill.distance=4.0;
@@ -483,7 +483,8 @@ function productFrame(product,aspect,yaw=0,focus=1){
   // On phones the camera frames the glass, with the overhead fixture above the crop.
   if(stacked){
     const coverage=product.height>3.5?.54:.44;
-    const radius=Math.max(product.height/((2*angle)*coverage),product.footprint.width/(2*angle*aspect)*1.42);
+    const framingScale = ['galet','nacre'].includes(product.key) ? 1 / .9 : 1;
+    const radius=framingScale*Math.max(product.height/((2*angle)*coverage),product.footprint.width/(2*angle*aspect)*1.42);
     return viewAround({x:product.x,y:product.y+radius*2*angle*.15,z:product.z},radius,yaw*.13,.16,focus);
   }
   const radius=aspect<.80 ? Math.max(8.2, product.footprint.width/(2*angle*aspect)*1.18) : 12.2;
@@ -509,7 +510,7 @@ function frame() {
   const selected = products.find(product => product.key === stage.dataset.state);
   if (selected) return productFrame(selected, camera.aspect, 0, 1);
   const progress = Number(stage.dataset.progress || 0);
-  return reducedMotion.matches ? galleryFrame(camera.aspect) : flyThrough(camera.aspect, progress);
+  return flyThrough(camera.aspect, reducedMotion.matches ? Math.round(progress * products.length) / products.length : progress);
 }
 
 function spin(key) {
@@ -612,19 +613,20 @@ function render(time) {
   lightingPointer.y = MathUtils.damp(lightingPointer.y, lightingPointer.targetY * reach, 3.8, dt);
   const selectedProduct=products.find(product=>current===product.key);
   const inspection=shelves?.userData.inspection;
+  const litProduct = stage.dataset.inspection === 'off' ? null : selectedProduct;
   if(inspection){
-    inspection.intensity=selectedProduct?MathUtils.clamp(shot.focus,0,1)*116:0;
-    inspection.userData.selected=selectedProduct?.key??null;
+    inspection.intensity=litProduct?MathUtils.clamp(shot.focus,0,1)*116:0;
+    inspection.userData.selected=litProduct?.key??null;
     if(selectedProduct){
       inspection.position.set(selectedProduct.x-.12,selectedProduct.y+BAY.height-.12,-.59);
       inspection.target.position.set(selectedProduct.x+lightingPointer.x*.18,
-        selectedProduct.y+selectedProduct.height*.65,.46+lightingPointer.y*.10);
+        selectedProduct.y+selectedProduct.height*.94,.46+lightingPointer.y*.14);
     }
   }
   for (const [index, product] of products.entries()) {
     const selected = current === product.key;
     product.group.visible = current === 'gallery' || selected || Boolean(transition);
-    const emphasis = selected ? MathUtils.clamp(shot.focus, 0, 1) : 0;
+    const emphasis = litProduct === product ? MathUtils.clamp(shot.focus, 0, 1) : 0;
     const orbitX = 0;
     const orbitZ = 0;
     const turn = spinAngle(product, time) + (selected ? manualTurn.y : 0);
@@ -645,7 +647,8 @@ function render(time) {
     product.fluidMotion.y=MathUtils.damp(product.fluidMotion.y,reach*foreAft,5,dt);
     product.fluidMotion.z=seconds;
     product.lastTurn=turn;product.lastPitch=pitch;
-    product.fluidLight.value = .48 + emphasis * .75;
+    const glint = Math.sin(turn * 2 + pitch + lightingPointer.x * .38);
+    product.fluidLight.value = .48 + emphasis * (1.02 + .28 * glint);
     product.shadow.position.x = orbitX + lightingPointer.x * -.06;
     product.shadow.position.z = orbitZ + .06;
     const contactScale = 1.03 + orbitY * .45;
@@ -656,17 +659,19 @@ function render(time) {
     const niche = shelves?.userData.lights.get(product.key);
     if (niche) {
       niche.overhead.intensity=(183+emphasis*23)*secondary;
-      niche.spill.intensity=(15+emphasis*6)*secondary;
+      niche.spill.intensity=(15+emphasis*(20+8*glint))*secondary;
       niche.overhead.target.position.x=product.x+lightingPointer.x*.30;
-      niche.overhead.target.position.z=-2.10+lightingPointer.y*.10;
+      niche.overhead.target.position.z=product.z-.18+lightingPointer.y*.13;
       niche.spill.target.position.x=product.x+Math.sin(turn)*.25+lightingPointer.x*.22;
       niche.spill.target.position.y=product.y+product.height*.42+lightingPointer.y*.12;
       niche.beamPivot.rotation.z=-lightingPointer.x*.065;
-      niche.beamPivot.rotation.x=.37+lightingPointer.y*.018;
+      niche.beamPivot.rotation.x=-.14+lightingPointer.y*.025;
       niche.beam.material.opacity=(.38+emphasis*.065)*secondary;
       niche.halo.material.opacity=(.28+emphasis*.12)*secondary;
       for (const [side, patch] of niche.caustics.entries()) {
-        patch.material.opacity=(.17+emphasis*.075)*secondary;
+        const direction=side===0?-1:1;
+        patch.material.opacity=(.17+emphasis*(.18+direction*.12*glint))*secondary;
+        patch.position.z=-.37+emphasis*direction*glint*.20;
         patch.position.y=product.y+product.height*.37+lightingPointer.y*.03;
       }
       niche.tintedSides.emissiveIntensity=(.008+emphasis*.009)*secondary;
@@ -696,9 +701,9 @@ function render(time) {
 
 function controls(element) {
   let ignoreReturnClick=false;
-  function returnToCollection(){
+  function toggleInspection(){
     for(const product of products)product.spin=null;
-    window.dispatchEvent(new Event('perfume-collection-request'));
+    window.dispatchEvent(new Event('perfume-light-toggle'));
   }
   // The compatibility click can be retargeted to a gallery bottle after the
   // drag surface disappears. Consume that one click before it can reopen it.
@@ -738,7 +743,7 @@ function controls(element) {
     pointerStates.delete(event.pointerId);
     if(event.type==='pointerup' && gesture && !gesture.moved && stage.dataset.state===gesture.key){
       ignoreReturnClick=true;
-      returnToCollection();
+      toggleInspection();
     }
   }
   for (const event of ['pointerup', 'pointercancel', 'lostpointercapture']) {
@@ -747,12 +752,12 @@ function controls(element) {
   element.addEventListener('keydown',event=>{
     if(event.key==='Enter'||event.key===' '){
       event.preventDefault();event.stopPropagation();
-      returnToCollection();
+      toggleInspection();
     }
   });
   element.addEventListener('wheel', event => {
     const product = products.find(item => item.key === stage.dataset.state);
-    if (!product) return;
+    if (!product || stage.dataset.inspection==='off') return;
     event.preventDefault();
     product.spin = null;
     for(const gesture of pointerStates.values())gesture.moved=true;
