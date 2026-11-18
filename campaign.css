@@ -450,7 +450,7 @@ html:not(.glb-live) .hero-product {pointer-events:auto;cursor:zoom-out}
   html.glb-live .gallery-bay .bay-caption{font-size:clamp(10px,2.8vw,17px)!important}
 }
 html:not(.glb-live) .stage[data-state]{
-  background:linear-gradient(0deg,#020406 2%,#06080988 36%,#10101475),url('basalt-cleft.jpg') center/cover!important;
+  background:linear-gradient(100deg,#08091299,#040409f0 95%),url('cleaved-rock-color.webp') center/cover!important;
 }
 html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay[data-go]{
   left:var(--slot);top:46%;width:16%;height:min(48vh,40vw);border:0;
@@ -514,7 +514,8 @@ html .stage .gallery-bay .bay-caption{display:none!important}
 }
 html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay[data-go]{
  background:
- radial-gradient(ellipse 4% 1.6% at 50% 4%,#fff9eb 74%,transparent 100%),
- radial-gradient(ellipse at 50% 6%,#c6bfb555,transparent 55%),
- linear-gradient(175deg,#101113,#252325 65%,var(--spill));
+ radial-gradient(ellipse 8% 1.6% at 50% 4%,#f5ede5 20%,transparent 95%),
+ conic-gradient(from 157deg at 50% 4%,transparent 0deg,#eaded314 12deg,#eee2d429 23deg,#eaded314 34deg,transparent 46deg),
+ radial-gradient(ellipse at 50% 68%,transparent,#030306e8 84%),
+ linear-gradient(175deg,#08080ca8,#0b0a10bd 50%,var(--spill)),url('cleaved-rock-color.webp') center/cover;
 }

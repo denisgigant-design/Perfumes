@@ -3,7 +3,7 @@ import {addLiquidRefraction, bindLiquidCamera} from './glass-volume.js?v=white-s
 import {
   ACESFilmicToneMapping, AmbientLight, Box3, BoxGeometry, CanvasTexture, Color, DoubleSide, GLTFLoader,
   Group, MathUtils, Mesh, MeshBasicMaterial, MeshStandardMaterial, PerspectiveCamera,
-  PlaneGeometry, PMREMGenerator, Reflector, RoomEnvironment, Scene, SpotLight, SRGBColorSpace, Vector3, WebGLRenderer
+  PlaneGeometry, PMREMGenerator, Reflector, Scene, SpotLight, SRGBColorSpace, Vector3, WebGLRenderer
 } from './three-showroom.js?v=2';
 
 const stage = document.querySelector('#stage');
@@ -120,33 +120,26 @@ function satinBump() {
   ctx.putImageData(tex,0,0);return new CanvasTexture(canvas);
 }
 
-// The generated basalt photograph supplies real fractured stone detail on every 3D face.
-let rockMap, rockHeightMap, stoneRoughnessMap;
-let stoneSample;
-async function loadStoneTexture() {
-  const image = new Image();
-  image.src = new URL('basalt-cleft.jpg', import.meta.url).href;
-  await image.decode();
-  const texture = new CanvasTexture(image);
-  texture.colorSpace = SRGBColorSpace;
-  texture.wrapS = texture.wrapT = 1000;
-  texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = 256;
-  const ctx = canvas.getContext('2d', {willReadFrequently:true});
-  ctx.drawImage(image,0,0,256,256);
-  stoneSample = ctx.getImageData(0,0,256,256).data;
-  rockHeightMap = texture.clone();
-  rockHeightMap.colorSpace = '';
-  const roughness = ctx.getImageData(0,0,256,256);
-  for(let i=0;i<roughness.data.length;i+=4){
-    const value=Math.min(250,175+roughness.data[i]*.65);
-    roughness.data[i]=roughness.data[i+1]=roughness.data[i+2]=value;
-  }
-  ctx.putImageData(roughness,0,0);
-  stoneRoughnessMap = new CanvasTexture(canvas);
-  stoneRoughnessMap.wrapS=stoneRoughnessMap.wrapT=1000;
-  return texture;
+// Colour, tangent normals, height (R) and roughness (G) share the scan's UVs.
+let rockMap,rockNormal,stoneRoughnessMap,stoneSample;
+async function loadStoneTexture(){
+  const [albedo,normal,relief]=await Promise.all(['color','normal','relief'].map(async channel=>{
+    const image=new Image();
+    image.src=new URL('cleaved-rock-'+channel+'.webp',import.meta.url).href;
+    await image.decode();
+    const map=new CanvasTexture(image);
+    map.wrapS=map.wrapT=1000;
+    map.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+    return map;
+  }));
+  albedo.colorSpace=SRGBColorSpace;
+  rockNormal=normal;stoneRoughnessMap=relief;
+  const canvas=document.createElement('canvas');
+  canvas.width=canvas.height=256;
+  const ctx=canvas.getContext('2d',{willReadFrequently:true});
+  ctx.drawImage(relief.image,0,0,256,256);
+  stoneSample=ctx.getImageData(0,0,256,256).data;
+  return albedo;
 }
 
 function beamTexture() {
@@ -157,9 +150,9 @@ function beamTexture() {
   const pixels=context.createImageData(256,256);
   for(let y=0;y<256;y++)for(let x=0;x<256;x++){
     const t=y/255;
-    const halfWidth=18+t*116;
-    const lateral=Math.exp(-Math.pow((x-128)/halfWidth,2)*3.0);
-    const vertical=Math.pow(1-t,1.8)*Math.min(1,t*18);
+    const halfWidth=10+t*89;
+    const lateral=Math.exp(-Math.pow((x-128)/halfWidth,2)*1.8);
+    const vertical=Math.exp(-t*3.4)*Math.min(1,t*110)*(1-t*t);
     const at=(y*256+x)*4;
     pixels.data[at]=pixels.data[at+1]=pixels.data[at+2]=255;
     pixels.data[at+3]=Math.round(255*lateral*vertical);
@@ -178,13 +171,14 @@ const satinMap = satinBump();
 // adjacent architectural pieces and the displacement fades out at their edges.
 function createWall() {
   const wall=new Group();
-  const outside = new MeshStandardMaterial({color:'#73777e',map:rockMap,
-    metalness:.04,roughness:.94,roughnessMap:stoneRoughnessMap,
-    bumpMap:rockHeightMap,bumpScale:.29,envMapIntensity:.34,
-    emissive:'#7a8089',emissiveMap:rockMap,emissiveIntensity:.006});
-  const inner=outside.clone(); inner.color.set('#7e8286');
-  const floorStone=inner.clone(); floorStone.roughness=.78; floorStone.bumpScale=.035;
-  const dark=new MeshStandardMaterial({color:'#101114',metalness:.7,roughness:.32});
+  const outside=new MeshStandardMaterial({color:'#676774',map:rockMap,
+    metalness:.05,roughness:.91,roughnessMap:stoneRoughnessMap,
+    normalMap:rockNormal,envMapIntensity:.12});
+  outside.normalScale.set(1.12,1.12);
+  const inner=outside.clone();inner.color.set('#acabb3');
+  const floorStone=inner.clone();floorStone.roughness=.70;floorStone.normalScale.set(.45,.45);
+  const ceiling=outside.clone();ceiling.color.set('#3b3940');ceiling.roughness=.95;
+  const dark=new MeshStandardMaterial({color:'#17151b',metalness:.67,roughness:.38});
   function rock(size,pos,mat=outside,amount=.008,seed=1){
     const sx=Math.max(1,Math.min(64,Math.ceil(size[0]*9)));
     const sy=Math.max(1,Math.min(96,Math.ceil(size[1]*12)));
@@ -196,21 +190,17 @@ function createWall() {
       const nx=normals.getX(i),ny=normals.getY(i),nz=normals.getZ(i);
       const faceX=Math.abs(nx)>.5,faceY=Math.abs(ny)>.5;
       const worldX=x+pos[0],worldY=y+pos[1],worldZ=z+pos[2];
-      const scale=4.2;
+      const scale=3.35;
       const u=(faceX?worldZ:worldX)/scale;
       const v=(faceY?worldZ:worldY)/scale;
       uv.setXY(i,u,v);
-      const tx=Math.floor(((u%1+1)%1)*255),ty=Math.floor(((v%1+1)%1)*255);
-      const sample=stoneSample[(ty*256+tx)*4]/255-.30;
+      const tx=Math.floor(((u%1+1)%1)*255),ty=255-Math.floor(((v%1+1)%1)*255);
+      const sample=stoneSample[(ty*256+tx)*4]/255-.575;
       const edgeA=faceX?Math.min(size[2]/2-Math.abs(z),size[1]/2-Math.abs(y)):
         faceY?Math.min(size[0]/2-Math.abs(x),size[2]/2-Math.abs(z)):
         Math.min(size[0]/2-Math.abs(x),size[1]/2-Math.abs(y));
       const fade=MathUtils.smoothstep(edgeA,0,.12);
-      // Broken strata cut across the photographic grain. The recess edges stay flush.
-      const grainX=faceX?worldZ:worldX,grainY=faceY?worldZ:worldY;
-      const strata=grainY*2.6+grainX*.95+1.15*Math.sin(grainX*1.6+grainY*.73)+.57*Math.sin(grainY*1.9-grainX*.83);
-      const fracture=Math.pow(1-Math.abs(Math.sin(strata)),3);
-      const relief=(sample*2.85-.29*fracture)*amount*fade;
+      const relief=sample*amount*fade;
       a.setXYZ(i,x+nx*relief,y+ny*relief,z+nz*relief);
     }
     g.computeVertexNormals();
@@ -230,7 +220,7 @@ function createWall() {
       }
       g.index.array.set(ordered);mat=unique;
     }
-    const mesh=new Mesh(g,mat);mesh.position.set(...pos);wall.add(mesh);return mesh;
+    const mesh=new Mesh(g,mat);mesh.castShadow=true;mesh.receiveShadow=true;mesh.position.set(...pos);wall.add(mesh);return mesh;
   }
   const w=BAY.width,base=-2.56;
   const rows=[...new Set(products.map(p=>p.y))];
@@ -265,7 +255,7 @@ function createWall() {
     rock([w+.12,.15,3.32],[cx,bottom-.075,-.37],
       [outside,outside,tintedFloor,outside,outside,outside],.006);
     rock([w+.12,.19,3.32],[cx,topY+.04,-.37],
-      [outside,outside,outside,inner,outside,outside],.006);
+      [outside,outside,outside,ceiling,outside,outside],.006);
     const sideOffset=w/2+.06;
     for(const dir of [-1,1]){
       rock([.12,BAY.height+.10,3.32],[cx+dir*sideOffset,bottom+BAY.height/2,-.37],
@@ -280,32 +270,29 @@ function createWall() {
     }
     function downlight(x,diameter){
       const rim=new Mesh(disc,dark);
-      rim.position.set(x,topY-.20,.77);rim.rotation.x=-.82;
+      rim.position.set(x,topY-.15,.10);rim.rotation.x=-1.16;
       rim.scale.setScalar(diameter);wall.add(rim);
-      const lens=new Mesh(disc,new MeshBasicMaterial({color:'#fff9ee',toneMapped:false}));
+      const lens=new Mesh(disc,new MeshBasicMaterial({color:'#fff4e4',toneMapped:false}));
       lens.scale.setScalar(.77);lens.position.z=.015;rim.add(lens);
       return lens;
     }
-    downlight(cx,.39);
-    const accentLens=downlight(cx+.34,.22);
-    accentLens.visible=false;
+    const lens=downlight(cx,.41);
     const halo=new Mesh(new PlaneGeometry(1.15,.60),new MeshBasicMaterial({
       map:refractionMap,color:0xfff7ec,transparent:true,opacity:.30,
       blending:additiveBlending,depthWrite:false,toneMapped:false,side:DoubleSide}));
-    halo.position.set(cx,topY-.32,.72);halo.rotation.x=-Math.PI/2;wall.add(halo);
+    halo.position.set(cx,topY-.158,.10);halo.rotation.x=-1.16;wall.add(halo);
     const beam=new Mesh(new PlaneGeometry(w*.90,BAY.height-.3),new MeshBasicMaterial({
       map:lightBeamMap,color:0xfffaf4,transparent:true,opacity:.018,
       blending:additiveBlending,depthWrite:false,toneMapped:false,side:DoubleSide}));
     beam.position.y=-(BAY.height-.3)/2;
-    const beamPivot=new Group();beamPivot.position.set(cx,topY-.32,.66);
+    const beamPivot=new Group();beamPivot.position.set(cx,topY-.16,.10);
     beamPivot.add(beam);wall.add(beamPivot);
     const overhead=addSpot(wall,{color:'#fff8f0',intensity:150,
-      position:[cx,topY-.33,.66],look:[cx,bottom+1.10,-2.10],spread:.70});
-    overhead.penumbra=.95;
-    const front=addSpot(wall,{color:'#fff5eb',intensity:105,
-      position:[cx-.80,bottom+2.8,2.8],look:[cx,bottom+1.28,-.72],spread:.52});
-    const spill=addSpot(wall,{color:product.liquid,intensity:5,
-      position:[cx,bottom+.72,.22],look:[cx,bottom+.52,-2.10],spread:1.23});
+      position:[cx,topY-.16,.10],look:[cx,bottom+1.20,-2.12],spread:.32});
+    overhead.penumbra=.89;overhead.distance=9;
+    const spill=addSpot(wall,{color:product.tone,intensity:8,
+      position:[cx,bottom+product.height*.40,-.24],look:[cx,bottom+product.height*.45,-2.10],spread:1.08});
+    spill.distance=4.0;
     spill.penumbra=.95;
     // Continuous wall-side transmission extends over the entire stone reveal.
     const caustics=[-1,1].map(dir=>{
@@ -315,8 +302,8 @@ function createWall() {
       patch.position.set(cx+dir*(sideOffset-.08),bottom+BAY.height*.5,-.37);
       patch.rotation.y=dir<0?Math.PI/2:-Math.PI/2;wall.add(patch);return patch;
     });
-    bayLights.set(product.key,{overhead,front,spill,caustics,halo,beam,beamPivot,
-      accentLens,
+    bayLights.set(product.key,{overhead,spill,caustics,halo,beam,beamPivot,
+      lens,
       tintedSides,tintedFloor,backWall});
   }
   rock([80,.16,3.1],[0,base-.19,-.20],floorStone,.006);
@@ -398,16 +385,16 @@ async function loadBottle(product, loader) {
       material.roughness = .028;
       material.envMapIntensity = 1.55;
     } else if (/crystal/i.test(material.name)) {
-      material.color.set(product.glass);
+      material.color.set(product.glass).lerp(new Color('#ffffff'),.54);
       material.attenuationColor = new Color(product.absorption);
-      material.attenuationDistance = product.distance;
+      material.attenuationDistance = product.distance*1.7;
       material.transmission = .986;
-      material.thickness = product.thickness;
-      material.ior = 1.47;
-      material.roughness = .033;
-      material.clearcoat = .70;
+      material.thickness = product.thickness*1.45;
+      material.ior = 1.512;
+      material.roughness = .018;
+      material.clearcoat = .35;
       material.clearcoatRoughness = .025;
-      material.envMapIntensity = 1.40;
+      material.envMapIntensity = 1.65;
       material.side = DoubleSide;
       if (!liquidBounds.isEmpty()){
         const cavity=liquidBounds.clone();
@@ -550,6 +537,7 @@ function resize() {
     stacked=phoneLayout.matches;
     placeProducts();
     shelves=layouts.get(stacked) || createWall();
+    renderer.shadowMap.needsUpdate=true;
     scene.add(shelves);
     transition=null;shot=null;
   }
@@ -622,12 +610,12 @@ function render(time) {
   const selectedProduct=products.find(product=>current===product.key);
   const inspection=shelves?.userData.inspection;
   if(inspection){
-    inspection.intensity=selectedProduct?MathUtils.clamp(shot.focus,0,1)*180:0;
+    inspection.intensity=selectedProduct?MathUtils.clamp(shot.focus,0,1)*58:0;
     inspection.userData.selected=selectedProduct?.key??null;
     if(selectedProduct){
-      inspection.position.set(selectedProduct.x+.34,selectedProduct.y+BAY.height-.33,.50);
+      inspection.position.set(selectedProduct.x-.12,selectedProduct.y+BAY.height-.12,-.59);
       inspection.target.position.set(selectedProduct.x+lightingPointer.x*.18,
-        selectedProduct.y+1.12,-1.28+lightingPointer.y*.10);
+        selectedProduct.y+selectedProduct.height*.65,.46+lightingPointer.y*.10);
     }
   }
   for (const [index, product] of products.entries()) {
@@ -664,24 +652,22 @@ function render(time) {
     const secondary = 1 - otherFocus * .81;
     const niche = shelves?.userData.lights.get(product.key);
     if (niche) {
-      niche.overhead.intensity=(125+emphasis*30)*secondary;
-      niche.front.intensity=(105+emphasis*25)*secondary;
-      niche.spill.intensity=(1.6+emphasis*1.2)*secondary;
+      niche.overhead.intensity=(183+emphasis*23)*secondary;
+      niche.spill.intensity=(15+emphasis*6)*secondary;
       niche.overhead.target.position.x=product.x+lightingPointer.x*.30;
       niche.overhead.target.position.z=-2.10+lightingPointer.y*.10;
-      niche.front.target.position.x=product.x+lightingPointer.x*.10;
       niche.spill.target.position.x=product.x+Math.sin(turn)*.25+lightingPointer.x*.22;
-      niche.spill.target.position.y=product.y+.58+lightingPointer.y*.12;
+      niche.spill.target.position.y=product.y+product.height*.42+lightingPointer.y*.12;
       niche.beamPivot.rotation.z=-lightingPointer.x*.065;
-      niche.beamPivot.rotation.x=lightingPointer.y*.035;
-      niche.beam.material.opacity=(.018+emphasis*.014)*secondary;
+      niche.beamPivot.rotation.x=.37+lightingPointer.y*.018;
+      niche.beam.material.opacity=(.38+emphasis*.065)*secondary;
       niche.halo.material.opacity=(.28+emphasis*.12)*secondary;
       for (const [side, patch] of niche.caustics.entries()) {
-        patch.material.opacity=(.11+emphasis*.06)*secondary;
+        patch.material.opacity=(.17+emphasis*.075)*secondary;
         patch.position.y=product.y+product.height*.37+lightingPointer.y*.03;
       }
-      niche.tintedSides.emissiveIntensity=(.004+emphasis*.004)*secondary;
-      niche.accentLens.visible=selected;
+      niche.tintedSides.emissiveIntensity=(.008+emphasis*.009)*secondary;
+      niche.lens.material.color.set(selected?'#fffaf3':'#e6dcd2');
     }
     product.refraction.rotation.z = turn * .91;
     product.refraction.position.x = Math.sin(turn) * .15 + lightingPointer.x * .085;
@@ -790,8 +776,8 @@ function fallback(error) {
 
 function reflectionPanels(environment) {
   const panels = [
-    {size: [1.45, 5.1], position: [-4.6, 1.4, 2.5], color: '#fff4e9', energy: 2.7},
-    {size: [.71, 4.1], position: [4.2, .65, 2.35], color: '#f2f4ff', energy: 2.2},
+    {size: [2.2, 5.1], position: [-3.3, 2.4, 2.9], color: '#fff4e9', energy: 5.4},
+    {size: [.71, 4.1], position: [4.2, .65, 2.35], color: '#f2f4ff', energy: 1.65},
     {size: [3.2, 1.0], position: [.25, 4.25, .6], color: '#fff5ec', energy: 2.75}
   ];
   for (const {size, position, color, energy} of panels) {
@@ -825,15 +811,26 @@ async function start() {
     renderer.toneMapping = ACESFilmicToneMapping;
     renderer.toneMappingExposure = .98;
     renderer.transmissionResolutionScale = innerWidth <= 700 ? .85 : 1;
-    const studio = new RoomEnvironment();
+    const studio = new Scene();
+    studio.background=new Color(.075,.070,.083);
     reflectionPanels(studio);
     const pmrem = new PMREMGenerator(renderer);
-    studioReflection = pmrem.fromScene(studio, .016);
+    studioReflection = pmrem.fromScene(studio, .035);
     pmrem.dispose();
-    studio.dispose();
+    studio.traverse(item=>{item.geometry?.dispose();item.material?.dispose();});
     scene.environment = studioReflection.texture;
-    scene.environmentIntensity = .55;
-    scene.add(new AmbientLight('#dde0e5', .12));
+    scene.environmentIntensity = .49;
+    scene.add(new AmbientLight('#d4d7ed',.026));
+    // Grazing incidence exposes the left flanks of fractures across the facade.
+    const key=addSpot(scene,{color:'#e4e2f3',intensity:1500,
+      position:[-15,11,5.6],look:[-5,2,.9],spread:.77});
+    key.penumbra=.95;key.castShadow=true;
+    key.shadow.mapSize.set(1024,1024);
+    key.shadow.camera.near=1;key.shadow.camera.far=46;
+    key.shadow.bias=-.00035;key.shadow.normalBias=.025;
+    renderer.shadowMap.enabled=true;
+    renderer.shadowMap.autoUpdate=false;
+    renderer.shadowMap.needsUpdate=true;
     rockMap = await loadStoneTexture();
     shelves=createWall();
 

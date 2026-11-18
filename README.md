@@ -4,7 +4,8 @@ Five tall basalt recesses display Galet, Rose Lune, Iris Noir, Terre Fumée and 
 
 The glass shader uses a 95% fill target calibrated for each body profile. Dragging or rotating tilts the liquid surface, which settles when movement stops. The water shader creates darker planar reflections with layered ripples around the moving highlights beneath the overhead spotlights. A soft local shade behind the collection title keeps the white lettering readable. Mobile rendering gives the main canvas a higher pixel budget than the water reflection pass.
 
-The WebGL scene generates the stone surround and lights it with overhead spots and coloured spill. The stone surfaces use the generated cleft basalt texture in `basalt-cleft.jpg`, with continuous world-space UVs, shallow surface relief, and a separate roughness response. Each recess has one cut-stone opening with uninterrupted reveals. The surrounding stone is darker than the illuminated interiors. Each recess uses the same stone on its rear and side walls, a round white downlight and a second white inspection lamp on selection, coloured spill on both sides, and a refracted light pool beneath the bottle. Each bottle has an equally positioned front light and consistent matte printed labels. The wall extends to the top of the viewport, with fragrance names shown on selection. The glass uses richer product colours and polished highlights above a higher-resolution rippling water reflection. Each GLB includes a sharp lossless label sized for its physical print surface. Browsers without WebGL 2 display generated stone environments and bottle previews.
+The facade receives a grazing key from the far upper left. Its static shadow map updates on layout changes. A recessed downlight in each niche combines a feathered spot on the relief with a soft shaft of haze. A low bounce light uses the perfume colour. Selecting a bottle adds white inspection light through the same aperture. The glass uses transmission, colour absorption and asymmetric strip reflections.
+
 
 ## Run locally
 
@@ -16,8 +17,8 @@ The bag is a local demo. It saves quantities on the device and does not process 
 
 - Galet and Rose Lune retain their original glass, liquid, cap and printed label assets.
 - Three original GLBs add fluted Iris Noir with a banded stopper, the tall tobacco-glass Terre Fumée with a brushed gun-gold cap, and Nacre with its polished open ring. Each contains a dedicated reservoir and an embedded printed label.
-- The bundled renderer uses Three.js r170, its GLTFLoader, and RoomEnvironment. Its MIT license is included in `LICENSE-three.txt`.
+- The bundled renderer uses Three.js r170, its GLTFLoader, and a locally generated studio reflection map. Its MIT license is included in `LICENSE-three.txt`.
 
 ## Stone material
 
-`basalt-cleft.jpg` was generated with the built-in image-generation tool for this project. Prompt: seamless orthographic macro photograph of freshly cleaved dark anthracite basalt and slate, small mineral facets, irregular fractures and fine grain, neutral charcoal, flat diffuse lighting, edge-to-edge stone, no objects, text, large boulders, lighting gradients or repeated pattern.
+The local `cleaved-rock-*.webp` assets derive from [Rock Face 03](https://polyhaven.com/a/rock_face_03), photographed by Dario Barresi and processed by Rico Cilliers, CC0. The charcoal colour map, tangent-space normal map and packed height/roughness map share UV coordinates. Height displaces the mesh while the normal map retains finer cracks under moving light.
