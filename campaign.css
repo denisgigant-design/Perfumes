@@ -545,6 +545,6 @@ html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay[data-go]{
 #deskSave{margin:10px 15px 0 0;padding:8px 0;text-decoration:underline;text-underline-offset:4px}
 #presetStatus{display:block;font-size:12px;color:#d7cdc2}
 @media(min-width:900px) and (hover:hover) and (pointer:fine){
- .nav #homeBtn{font:400 clamp(25px,2.65vw,44px)/1 Italiana,Georgia,serif;letter-spacing:.045em;transform:rotate(-4deg);transform-origin:left center}
+ .nav #homeBtn{font:400 clamp(37.5px,3.975vw,66px)/1 Italiana,Georgia,serif;letter-spacing:.045em;transform:rotate(-4deg);transform-origin:left center}
  .nav #homeBtn i{font:italic 1em Italiana,Georgia,serif;letter-spacing:-.025em}
 }
