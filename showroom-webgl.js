@@ -1,5 +1,5 @@
-import {makeWater} from './water.js?v=five-cuts-1';
-import {addLiquidRefraction, bindLiquidCamera} from './glass-volume.js?v=dark-stone-1';
+import {makeWater} from './water.js?v=white-studio-1';
+import {addLiquidRefraction, bindLiquidCamera} from './glass-volume.js?v=white-studio-1';
 import {
   ACESFilmicToneMapping, AmbientLight, Box3, BoxGeometry, CanvasTexture, Color, DoubleSide, GLTFLoader,
   Group, MathUtils, Mesh, MeshBasicMaterial, MeshStandardMaterial, PerspectiveCamera,
@@ -49,7 +49,7 @@ const manualTurn = {x: 0, y: 0};
 const projected = new Vector3();
 const worldPoint = new Vector3();
 const hoverGap = .016;
-const flightOrder = entries.map(entry=>entry.key);
+
 let renderer, studioReflection, water, shelves;
 let width = 0, height = 0, previousTime = 0;
 let presented = false;
@@ -71,7 +71,6 @@ function contactTexture() {
 }
 
 const shadowMap = contactTexture();
-const inspectionWhite = new Color('#fff8ef');
 
 function refractionTexture() {
   const canvas = document.createElement('canvas');
@@ -141,7 +140,7 @@ async function loadStoneTexture() {
   rockHeightMap.colorSpace = '';
   const roughness = ctx.getImageData(0,0,256,256);
   for(let i=0;i<roughness.data.length;i+=4){
-    const value=210+Math.round(roughness.data[i]*.15);
+    const value=Math.min(250,175+roughness.data[i]*.65);
     roughness.data[i]=roughness.data[i+1]=roughness.data[i+2]=value;
   }
   ctx.putImageData(roughness,0,0);
@@ -181,9 +180,9 @@ function createWall() {
   const wall=new Group();
   const outside = new MeshStandardMaterial({color:'#73777e',map:rockMap,
     metalness:.04,roughness:.94,roughnessMap:stoneRoughnessMap,
-    bumpMap:rockHeightMap,bumpScale:.16,envMapIntensity:.34,
+    bumpMap:rockHeightMap,bumpScale:.29,envMapIntensity:.34,
     emissive:'#7a8089',emissiveMap:rockMap,emissiveIntensity:.006});
-  const inner=outside.clone(); inner.color.set('#999ca2');
+  const inner=outside.clone(); inner.color.set('#7e8286');
   const floorStone=inner.clone(); floorStone.roughness=.78; floorStone.bumpScale=.035;
   const dark=new MeshStandardMaterial({color:'#101114',metalness:.7,roughness:.32});
   function rock(size,pos,mat=outside,amount=.008,seed=1){
@@ -197,7 +196,7 @@ function createWall() {
       const nx=normals.getX(i),ny=normals.getY(i),nz=normals.getZ(i);
       const faceX=Math.abs(nx)>.5,faceY=Math.abs(ny)>.5;
       const worldX=x+pos[0],worldY=y+pos[1],worldZ=z+pos[2];
-      const scale=5.3;
+      const scale=4.2;
       const u=(faceX?worldZ:worldX)/scale;
       const v=(faceY?worldZ:worldY)/scale;
       uv.setXY(i,u,v);
@@ -207,7 +206,11 @@ function createWall() {
         faceY?Math.min(size[0]/2-Math.abs(x),size[2]/2-Math.abs(z)):
         Math.min(size[0]/2-Math.abs(x),size[1]/2-Math.abs(y));
       const fade=MathUtils.smoothstep(edgeA,0,.12);
-      const relief=sample*amount*fade;
+      // Broken strata cut across the photographic grain. The recess edges stay flush.
+      const grainX=faceX?worldZ:worldX,grainY=faceY?worldZ:worldY;
+      const strata=grainY*2.6+grainX*.95+1.15*Math.sin(grainX*1.6+grainY*.73)+.57*Math.sin(grainY*1.9-grainX*.83);
+      const fracture=Math.pow(1-Math.abs(Math.sin(strata)),3);
+      const relief=(sample*2.85-.29*fracture)*amount*fade;
       a.setXYZ(i,x+nx*relief,y+ny*relief,z+nz*relief);
     }
     g.computeVertexNormals();
@@ -236,16 +239,16 @@ function createWall() {
     const left=xs[0]-w/2,right=xs.at(-1)+w/2;
     const centreY=bottom+BAY.height/2;
     for(let c=1;c<xs.length;c++){
-      rock([xs[c]-xs[c-1]-w,BAY.height+.12,3.06],[(xs[c]+xs[c-1])/2,centreY,-.27],outside,.025);
+      rock([xs[c]-xs[c-1]-w,BAY.height+.12,3.06],[(xs[c]+xs[c-1])/2,centreY,-.27],outside,.075);
     }
     for(const [edge,limit] of [[left,-40],[right,40]]){
-      rock([Math.abs(limit-edge),BAY.height+.12,3.06],[(edge+limit)/2,centreY,-.27],outside,.025);
+      rock([Math.abs(limit-edge),BAY.height+.12,3.06],[(edge+limit)/2,centreY,-.27],outside,.075);
     }
-    rock([80,.56,3.06],[0,bottom+BAY.height+.24,-.25],outside,.015);
-    rock([80,.52,3.08],[0,bottom-.25,-.26],outside,.015);
+    rock([80,.56,3.06],[0,bottom+BAY.height+.24,-.25],outside,.052);
+    rock([80,.52,3.08],[0,bottom-.25,-.26],outside,.052);
   }
   const highestCeiling=Math.max(...products.map(p=>p.y+BAY.height));
-  rock([80,60,3.06],[0,highestCeiling+.50+30,-.25],outside,.015);
+  rock([80,60,3.06],[0,highestCeiling+.50+30,-.25],outside,.052);
   const bayLights=new Map();
   // One inspection light serves the selected recess. Keeping it in the light
   // set at zero intensity avoids recompiling every glass material on selection.
@@ -258,7 +261,7 @@ function createWall() {
     const tintedSides=inner.clone();
     tintedSides.emissive.set(product.tone);
     const tintedFloor=floorStone.clone();
-    const backWall=rock([w+.16,BAY.height+.14,.14],[cx,bottom+BAY.height/2,-2.10],inner,.04);
+    const backWall=rock([w+.16,BAY.height+.14,.14],[cx,bottom+BAY.height/2,-2.10],inner,.15);
     rock([w+.12,.15,3.32],[cx,bottom-.075,-.37],
       [outside,outside,tintedFloor,outside,outside,outside],.006);
     rock([w+.12,.19,3.32],[cx,topY+.04,-.37],
@@ -266,44 +269,54 @@ function createWall() {
     const sideOffset=w/2+.06;
     for(const dir of [-1,1]){
       rock([.12,BAY.height+.10,3.32],[cx+dir*sideOffset,bottom+BAY.height/2,-.37],
-        [dir<0?tintedSides:outside,dir>0?tintedSides:outside,outside,outside,outside,outside],.009);
+        [dir<0?tintedSides:outside,dir>0?tintedSides:outside,outside,outside,outside,outside],.07);
     }
-    // The recessed LED aperture, soft haze and actual wall wash share the fragrance hue.
-    rock([.74,.06,.34],[cx,topY-.28,.66],dark,0);
-    const luminousColor=new Color(product.tone).lerp(new Color('#ffffff'),.22);
-    const lightSource=new Mesh(new PlaneGeometry(.62,.19),new MeshBasicMaterial({
-      color:luminousColor,transparent:true,opacity:.96,toneMapped:false,side:DoubleSide}));
-    lightSource.position.set(cx,topY-.315,.72);lightSource.rotation.x=-Math.PI/2;wall.add(lightSource);
-    const visibleDiffuser=new Mesh(new PlaneGeometry(.62,.026),lightSource.material);
-    visibleDiffuser.position.set(cx,topY-.288,.835);wall.add(visibleDiffuser);
+    // An angled, recessed round optic exposes its lens to the gallery camera.
+    const disc=new PlaneGeometry(1,1,12,12);
+    const vertices=disc.attributes.position;
+    for(let i=0;i<vertices.count;i++){
+      const x=vertices.getX(i)*2,y=vertices.getY(i)*2;
+      vertices.setXY(i,.5*x*Math.sqrt(1-y*y*.5),.5*y*Math.sqrt(1-x*x*.5));
+    }
+    function downlight(x,diameter){
+      const rim=new Mesh(disc,dark);
+      rim.position.set(x,topY-.20,.77);rim.rotation.x=-.82;
+      rim.scale.setScalar(diameter);wall.add(rim);
+      const lens=new Mesh(disc,new MeshBasicMaterial({color:'#fff9ee',toneMapped:false}));
+      lens.scale.setScalar(.77);lens.position.z=.015;rim.add(lens);
+      return lens;
+    }
+    downlight(cx,.39);
+    const accentLens=downlight(cx+.34,.22);
+    accentLens.visible=false;
     const halo=new Mesh(new PlaneGeometry(1.15,.60),new MeshBasicMaterial({
-      map:refractionMap,color:product.tone,transparent:true,opacity:.64,
+      map:refractionMap,color:0xfff7ec,transparent:true,opacity:.30,
       blending:additiveBlending,depthWrite:false,toneMapped:false,side:DoubleSide}));
     halo.position.set(cx,topY-.32,.72);halo.rotation.x=-Math.PI/2;wall.add(halo);
     const beam=new Mesh(new PlaneGeometry(w*.90,BAY.height-.3),new MeshBasicMaterial({
-      map:lightBeamMap,color:product.tone,transparent:true,opacity:.018,
+      map:lightBeamMap,color:0xfffaf4,transparent:true,opacity:.018,
       blending:additiveBlending,depthWrite:false,toneMapped:false,side:DoubleSide}));
     beam.position.y=-(BAY.height-.3)/2;
     const beamPivot=new Group();beamPivot.position.set(cx,topY-.32,.66);
     beamPivot.add(beam);wall.add(beamPivot);
-    const overhead=addSpot(wall,{color:product.tone,intensity:150,
+    const overhead=addSpot(wall,{color:'#fff8f0',intensity:150,
       position:[cx,topY-.33,.66],look:[cx,bottom+1.10,-2.10],spread:.70});
     overhead.penumbra=.95;
     const front=addSpot(wall,{color:'#fff5eb',intensity:105,
       position:[cx-.80,bottom+2.8,2.8],look:[cx,bottom+1.28,-.72],spread:.52});
-    const spill=addSpot(wall,{color:new Color(product.tone).lerp(new Color('#ffffff'),.28),intensity:70,
-      position:[cx,topY-.34,-1.10],look:[cx,topY-.65,-2.10],spread:1.17});
+    const spill=addSpot(wall,{color:product.liquid,intensity:5,
+      position:[cx,bottom+.72,.22],look:[cx,bottom+.52,-2.10],spread:1.23});
     spill.penumbra=.95;
     // Continuous wall-side transmission extends over the entire stone reveal.
     const caustics=[-1,1].map(dir=>{
-      const patch=new Mesh(new PlaneGeometry(3.24,BAY.height-.20),new MeshBasicMaterial({
+      const patch=new Mesh(new PlaneGeometry(3.24,product.height*.94),new MeshBasicMaterial({
         map:refractionMap,color:product.tone,transparent:true,opacity:.17,
         blending:additiveBlending,depthWrite:false,toneMapped:false}));
       patch.position.set(cx+dir*(sideOffset-.08),bottom+BAY.height*.5,-.37);
       patch.rotation.y=dir<0?Math.PI/2:-Math.PI/2;wall.add(patch);return patch;
     });
-    bayLights.set(product.key,{overhead,front,spill,caustics,lightSource,halo,beam,beamPivot,
-      baseEmitterColor:luminousColor.clone(),
+    bayLights.set(product.key,{overhead,front,spill,caustics,halo,beam,beamPivot,
+      accentLens,
       tintedSides,tintedFloor,backWall});
   }
   rock([80,.16,3.1],[0,base-.19,-.20],floorStone,.006);
@@ -363,6 +376,8 @@ async function loadBottle(product, loader) {
   const center = bounds.getCenter(new Vector3());
   product.footprint = {width: (bounds.max.x - bounds.min.x) * scale, depth: (bounds.max.z - bounds.min.z) * scale};
   product.fluidMotion = new Vector3();
+  product.lastTurn=0;
+  product.lastPitch=0;
   product.fluidLight = {value: .56};
   bottle.traverse(mesh => {
     if (mesh.isMesh && /eau de parfum/i.test(mesh.material.name)) liquidBounds.expandByObject(mesh);
@@ -394,7 +409,13 @@ async function loadBottle(product, loader) {
       material.clearcoatRoughness = .025;
       material.envMapIntensity = 1.40;
       material.side = DoubleSide;
-      if (!liquidBounds.isEmpty()) addLiquidRefraction(mesh, liquidBounds, product);
+      if (!liquidBounds.isEmpty()){
+        const cavity=liquidBounds.clone();
+        cavity.max.y=new Box3().setFromObject(mesh).max.y;
+        // Heights enclosing 95% of each flacon, integrated from 160 horizontal body sections.
+        const levels={galet:.88661,rose:.94172,iris:.90881,terre:.92150,nacre:.84475};
+        addLiquidRefraction(mesh,cavity,product,levels[product.key]);
+      }
     } else if (/(print|label)/i.test(material.name) && material.map) {
       material.map.anisotropy = Math.min(16, renderer.capabilities.getMaxAnisotropy());
       material.map.colorSpace = SRGBColorSpace;
@@ -463,7 +484,7 @@ function galleryFrame(aspect) {
     return viewAround({x:0,y:3.65,z:.15},radius,0,.40);
   }
   const radius=Math.max(18.7,16.4/(2*angle*aspect));
-  const aimY = aspect<.80 ? -.35 : .22 - radius * 2 * angle * .068;
+  const aimY = .22 - radius * 2 * angle * (aspect<.80?.095:.12);
   const cameraY = aspect<.80 ? 1.1 : 1.65;
   return viewAround({x:0,y:aimY,z:-.60},radius,0,cameraY-aimY);
 }
@@ -481,6 +502,7 @@ function productFrame(product,aspect,yaw=0,focus=1){
 }
 
 function flyThrough(aspect, progress) {
+  const flightOrder=Array.from(stage.querySelectorAll('.gallery-bay'),button=>button.dataset.go);
   const shots=[galleryFrame(aspect),...flightOrder.map(key=>
     productFrame(products.find(p=>p.key===key),aspect,0,.34))];
   const p=MathUtils.clamp(progress,0,1)*flightOrder.length;
@@ -504,7 +526,7 @@ function spin(key) {
   const product = products.find(item => item.key === key);
   if (!product || reducedMotion.matches) return;
   if (product.spin && performance.now() - product.spin.started < spinDuration) return;
-  product.spin = {started: performance.now() + 400};
+  product.spin = {started: performance.now()};
 }
 
 function spinAngle(product, time) {
@@ -578,16 +600,14 @@ function render(time) {
   if (current !== lastProduct) {
     manualTurn.x = manualTurn.y = 0;
     pointerStates.clear();
-    transition=stacked && shot && !reducedMotion.matches?{from:{...shot},started:time}:null;
+    transition=shot && !reducedMotion.matches?{from:{...shot},started:time}:null;
     lastProduct = current;
   }
   const next = frame();
   shot ??= {...next};
   if(transition){
     const t=Math.min(1,(time-transition.started)/1450);
-    // Two smooth movements with a short deceleration in the middle.
-    const phase=t<.5 ? .58*MathUtils.smoothstep(t*2,0,1)
-      : .58+.42*MathUtils.smoothstep(t*2-1,0,1);
+    const phase=t*t*(3-2*t);
     for(const key of Object.keys(shot))shot[key]=MathUtils.lerp(transition.from[key],next[key],phase);
     if(t===1)transition=null;
   }else{
@@ -605,14 +625,14 @@ function render(time) {
     inspection.intensity=selectedProduct?MathUtils.clamp(shot.focus,0,1)*180:0;
     inspection.userData.selected=selectedProduct?.key??null;
     if(selectedProduct){
-      inspection.position.set(selectedProduct.x,selectedProduct.y+BAY.height-.33,.50);
+      inspection.position.set(selectedProduct.x+.34,selectedProduct.y+BAY.height-.33,.50);
       inspection.target.position.set(selectedProduct.x+lightingPointer.x*.18,
         selectedProduct.y+1.12,-1.28+lightingPointer.y*.10);
     }
   }
   for (const [index, product] of products.entries()) {
     const selected = current === product.key;
-    product.group.visible = current === 'gallery' || selected;
+    product.group.visible = current === 'gallery' || selected || Boolean(transition);
     const emphasis = selected ? MathUtils.clamp(shot.focus, 0, 1) : 0;
     const orbitX = 0;
     const orbitZ = 0;
@@ -625,9 +645,15 @@ function render(time) {
       + Math.abs(Math.sin(pitch)) * rotatedDepth / 2);
     product.pivot.position.set(orbitX, product.height / 2 + hoverGap + orbitY, orbitZ);
     product.pivot.rotation.set(pitch, turn, roll);
-    product.fluidMotion.x = MathUtils.damp(product.fluidMotion.x, roll * .84, 5.2, dt);
-    product.fluidMotion.y = MathUtils.damp(product.fluidMotion.y, -pitch * .84, 5.2, dt);
-    product.fluidMotion.z = reducedMotion.matches ? 0 : seconds;
+    const deltaYaw=turn-product.lastTurn;
+    const yawSpeed=Math.atan2(Math.sin(deltaYaw),Math.cos(deltaYaw))/Math.max(.008,dt);
+    const pitchSpeed=(pitch-product.lastPitch)/Math.max(.008,dt);
+    const lateral=MathUtils.clamp(-yawSpeed*.026,-.15,.15);
+    const foreAft=MathUtils.clamp(-pitch*.60-pitchSpeed*.035,-.32,.32);
+    product.fluidMotion.x=MathUtils.damp(product.fluidMotion.x,reach*lateral,5,dt);
+    product.fluidMotion.y=MathUtils.damp(product.fluidMotion.y,reach*foreAft,5,dt);
+    product.fluidMotion.z=seconds;
+    product.lastTurn=turn;product.lastPitch=pitch;
     product.fluidLight.value = .48 + emphasis * .75;
     product.shadow.position.x = orbitX + lightingPointer.x * -.06;
     product.shadow.position.z = orbitZ + .06;
@@ -640,28 +666,27 @@ function render(time) {
     if (niche) {
       niche.overhead.intensity=(125+emphasis*30)*secondary;
       niche.front.intensity=(105+emphasis*25)*secondary;
-      niche.spill.intensity=(14+emphasis*9)*secondary;
+      niche.spill.intensity=(1.6+emphasis*1.2)*secondary;
       niche.overhead.target.position.x=product.x+lightingPointer.x*.30;
       niche.overhead.target.position.z=-2.10+lightingPointer.y*.10;
       niche.front.target.position.x=product.x+lightingPointer.x*.10;
       niche.spill.target.position.x=product.x+Math.sin(turn)*.25+lightingPointer.x*.22;
-      niche.spill.target.position.y=product.y+BAY.height-.65+lightingPointer.y*.12;
+      niche.spill.target.position.y=product.y+.58+lightingPointer.y*.12;
       niche.beamPivot.rotation.z=-lightingPointer.x*.065;
       niche.beamPivot.rotation.x=lightingPointer.y*.035;
       niche.beam.material.opacity=(.018+emphasis*.014)*secondary;
-      niche.halo.material.opacity=(.65+emphasis*.25)*secondary;
+      niche.halo.material.opacity=(.28+emphasis*.12)*secondary;
       for (const [side, patch] of niche.caustics.entries()) {
-        patch.material.opacity=(.17+emphasis*.12)*secondary;
-        patch.position.y=product.y+BAY.height*.5+lightingPointer.y*.03;
+        patch.material.opacity=(.11+emphasis*.06)*secondary;
+        patch.position.y=product.y+product.height*.37+lightingPointer.y*.03;
       }
-      niche.tintedSides.emissiveIntensity=(.065+emphasis*.065)*secondary;
-      niche.lightSource.material.opacity=.90+emphasis*.10;
-      niche.lightSource.material.color.copy(niche.baseEmitterColor).lerp(inspectionWhite,emphasis);
+      niche.tintedSides.emissiveIntensity=(.004+emphasis*.004)*secondary;
+      niche.accentLens.visible=selected;
     }
     product.refraction.rotation.z = turn * .91;
     product.refraction.position.x = Math.sin(turn) * .15 + lightingPointer.x * .085;
     product.refraction.position.z = .26 + Math.cos(turn * 2) * .08;
-    product.refraction.material.opacity = (.51 + emphasis * .29) * secondary * (.88 + .12 * Math.cos(turn * 2));
+    product.refraction.material.opacity = (.23 + emphasis * .15) * secondary * (.88 + .12 * Math.cos(turn * 2));
     if (water) {
       const {pools, poolColors} = water.material.uniforms;
       pools.value[index].set(product.x + lightingPointer.x * .12,

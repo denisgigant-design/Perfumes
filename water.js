@@ -50,8 +50,9 @@ const waterShader = {
         glints += mix(poolColors[i],vec3(1.0),.18) * drop * pools[i].z
           * (0.014 + 0.035 * shine * slope + specular * .24);
       }
-      float fade = 1.0 - smoothstep(14.0, 34.0, length(p));
-      vec3 surface = vec3(0.0009, 0.0015, 0.0022) + glints * .60;
+      float fade = 1.0 - .65*smoothstep(18.0, 72.0, length(p));
+      float skyRipple=.5+.5*dot(normal,normalize(vec3(-.4,.25,.7)));
+      vec3 surface = vec3(.0019,.0028,.0038)*(.68+skyRipple*.8) + glints*.46;
       surface += mirrored * (0.56 + 0.12 * grazing);
       gl_FragColor = vec4(surface * fade, 1.0);
       #include <tonemapping_fragment>
@@ -62,7 +63,7 @@ const waterShader = {
 
 export function makeWater(renderer, compact) {
   const size = compact ? 512 : 1024;
-  const surface = new Reflector(new PlaneGeometry(72, 62), {
+  const surface = new Reflector(new PlaneGeometry(170, 180), {
     textureWidth: size, textureHeight: size, multisample: 0, clipBias: 0.002, shader: waterShader
   });
   // UnsignedByteType keeps the reflection framebuffer available on mobile GPUs without float colour targets.

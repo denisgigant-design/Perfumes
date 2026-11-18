@@ -8,13 +8,14 @@ uniform vec3 fluidMax;
 uniform vec3 fluidColor;
 uniform vec3 fluidMotion;
 uniform float fluidLight;
+uniform float fillHeight;
 
 void refractThroughLiquid(inout vec3 diffuseLight) {
   vec3 ray = normalize(glassPoint - bottleEye);
   vec3 safeRay = sign(ray + 0.000001) * max(abs(ray), vec3(0.0001));
   float height = max(fluidMax.y - fluidMin.y, 0.0001);
   vec3 nearPlane = (fluidMin - glassPoint) / safeRay;
-  vec3 farPlane = (fluidMax + vec3(0.0, height * 0.15, 0.0) - glassPoint) / safeRay;
+  vec3 farPlane = (fluidMax - glassPoint) / safeRay;
   vec3 a = min(nearPlane, farPlane);
   vec3 b = max(nearPlane, farPlane);
   float start = max(0.0, max(max(a.x, a.y), a.z));
@@ -25,7 +26,7 @@ void refractThroughLiquid(inout vec3 diffuseLight) {
   vec3 entry = glassPoint + ray * start;
   vec2 slope = fluidMotion.xy;
   float surfaceRipple = sin((entry.x - center.x) / height * 10.0 + fluidMotion.z * 2.9);
-  float level = fluidMax.y + height * 0.012 * surfaceRipple;
+  float level = mix(fluidMin.y,fluidMax.y,fillHeight) + height * min(length(slope),0.22) * 0.012 * surfaceRipple;
   float vertical = ray.y - dot(slope, ray.xz);
   float crossPlane = level - glassPoint.y + dot(slope, glassPoint.xz - center.xz);
   float planeHit = crossPlane / (abs(vertical) < 0.0001 ? 0.0001 : vertical);
@@ -38,16 +39,17 @@ void refractThroughLiquid(inout vec3 diffuseLight) {
     * (distanceThroughLiquid * 2.05));
   float wet = 1.0 - exp(-distanceThroughLiquid * 2.2);
   float deviation = abs(entry.y - level - dot(slope, entry.xz - center.xz));
-  float meniscus = 1.0 - smoothstep(height * 0.005, height * 0.036, deviation);
+  float meniscus = 1.0 - smoothstep(height * 0.005, height * 0.012, deviation);
   diffuseLight = diffuseLight * absorption
     + fluidColor * wet * fluidLight * 0.083
-    + mix(vec3(0.92), fluidColor, 0.22) * meniscus * fluidLight * 0.031;
+    + mix(vec3(0.92), fluidColor, 0.22) * meniscus * fluidLight * 0.012;
 }
 `;
 
-export function addLiquidRefraction(mesh, bounds, product) {
+export function addLiquidRefraction(mesh, bounds, product, fillHeight) {
   const uniforms = {
     bottleEye: {value: new Vector3()},
+    fillHeight: {value:fillHeight},
     fluidMin: {value: bounds.min},
     fluidMax: {value: bounds.max},
     fluidColor: {value: new Color(product.liquid)},

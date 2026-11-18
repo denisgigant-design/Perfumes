@@ -106,7 +106,7 @@
   }
 }
 </style>
-<link rel="stylesheet" href="campaign.css?v=atelier-stacked-1">
+<link rel="stylesheet" href="campaign.css?v=white-studio-1">
 </head>
 <body>
 <div class="intro-loader" id="loader" aria-hidden="true"><div class="loader-mark">ATELIER</div><div class="load-rule"></div></div>
@@ -165,9 +165,19 @@ const DATA = {
   nacre: {name:'Nacre', html:'Nacre', desc:'Sea salt, white iris and sandalwood.', price:190, img:'nacre.png?v=atelier-stacked-1', num:'05 / 05'}
 };
 const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
-const positions=Object.fromEntries(Object.keys(DATA).map((key,i,keys)=>[key,(i+1)/keys.length]));
-const orbitOrder=Object.keys(positions);
-const productOrder=Object.keys(DATA);
+const phoneLayout=matchMedia('(max-width:679px) and (orientation:portrait)');
+function collectionOrder(){
+ return phoneLayout.matches?['terre','rose','galet','iris','nacre']:Object.keys(DATA);
+}
+function syncCollectionOrder(){
+ const order=collectionOrder();
+ for(const key of order){
+  $('#gallery').append($('[data-go="'+key+'"].gallery-bay'));
+  $('.progresstrack').append($('[data-checkpoint="'+key+'"]'));
+ }
+ updateScroll();
+}
+function numberFor(key){return String(collectionOrder().indexOf(key)+1).padStart(2,'0')+' / 05';}
 const stage=$('#stage'), track=$('#experience'), motion=matchMedia('(prefers-reduced-motion: reduce)');
 let state='gallery', selected='galet', checkpoint='galet';
 
@@ -220,7 +230,7 @@ function setState(s){
   $('#heroImage').alt=d.name+' bottle';
   $('#heroProduct').className='hero-product '+s;
  }
- $('#numberText').textContent=DATA[inGallery?checkpoint:s].num;
+ $('#numberText').textContent=numberFor(inGallery?checkpoint:s);
  $('#scrollText').textContent=inGallery?'Scroll to explore':'Drag to rotate · '+(matchMedia('(pointer:coarse)').matches?'Tap':'Click')+' to return';
  $('#collectionBtn').classList.toggle('active',inGallery);
  $('#discoverBtn').classList.toggle('active',!inGallery);
@@ -241,13 +251,14 @@ $('#heroProduct').addEventListener('click',()=>go('gallery'));
 function orbitTo(key){
  const extent=Math.max(1,track.offsetHeight-stage.clientHeight);
  setState('gallery');
- const progress=positions[key];
+ const order=collectionOrder();
+ const progress=(order.indexOf(key)+1)/order.length;
  const top=track.getBoundingClientRect().top+window.scrollY+extent*progress;
  window.scrollTo({top,behavior:motion.matches?'instant':'smooth'});
  if(motion.matches)updateScroll();
 }
 function step(delta){
- const list=state==='gallery'?orbitOrder:productOrder;
+ const list=collectionOrder();
  const i=(list.indexOf(state==='gallery'?checkpoint:state)+delta+list.length)%list.length;
  if(state==='gallery')orbitTo(list[i]);
  else go(list[i],true);
@@ -257,10 +268,11 @@ function updateScroll(){
  const p=Math.max(0,Math.min(1,-track.getBoundingClientRect().top/extent));
  stage.dataset.progress=String(p);
  // The last sector returns the camera to its starting angle.
+ const orbitOrder=collectionOrder();
  checkpoint=orbitOrder[Math.max(0,Math.round(p*orbitOrder.length)-1)];
  stage.dataset.checkpoint=checkpoint;
  const active=state==='gallery'?checkpoint:state;
- $('#numberText').textContent=DATA[active].num;
+ $('#numberText').textContent=numberFor(active);
  $$('[data-checkpoint]').forEach(node=>node.setAttribute('aria-pressed',String(node.dataset.checkpoint===active)));
  window.dispatchEvent(new Event('perfume-progress'));
 }
@@ -280,12 +292,12 @@ function syncFilm(){if(!film.paused)film.pause();}
 window.addEventListener('perfume-progress',syncFilm);
 document.addEventListener('visibilitychange',syncFilm);
 motion.addEventListener('change',syncFilm);
-renderBag();updateScroll();
+renderBag();syncCollectionOrder();phoneLayout.addEventListener('change',syncCollectionOrder);
 window.addEventListener('perfume-ready',()=>$('#loader').classList.add('out'),{once:true});
 setTimeout(()=>$('#loader').classList.add('out'),8000);
 })();
 </script>
 
-<script type="module" src="showroom-webgl.js?v=atelier-stacked-1"></script>
+<script type="module" src="showroom-webgl.js?v=white-studio-1"></script>
 </body>
 </html>
