@@ -106,7 +106,7 @@
   }
 }
 </style>
-<link rel="stylesheet" href="campaign.css?v=penumbra-5">
+<link rel="stylesheet" href="campaign.css?v=light-desk-1">
 </head>
 <body>
 <div class="intro-loader" id="loader" aria-hidden="true"><div class="loader-mark">UNVEILED FINEST</div><div class="load-rule"></div></div>
@@ -114,6 +114,29 @@
  <button class="logo" id="homeBtn" aria-label="Unveiled Finest, return to collection">UNVEILED <i>Finest</i></button>
  <div class="nav-right"><button id="bagBtn" aria-label="Open basket"><svg width="26" height="26" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 12 5-8m7 8-5-8M3 12h22l-2 3H5zm2.6 3 2 8h12.8l2-8M11 17l.6 3m5.4-3-.6 3"/></svg></button></div>
 </header>
+<aside id="lightDesk" aria-labelledby="lightTitle" hidden>
+ <div class="desk-head"><h2 id="lightTitle">Lighting</h2><button type="button" id="deskClose" aria-label="Close lighting settings">×</button></div>
+ <p class="desk-status">Live lighting requires the 3D view.</p>
+ <details name="light-section"><summary>Spotlight angle</summary>
+  <label for="light-aim">Tilt toward back wall<output for="light-aim">0°</output></label>
+  <input id="light-aim" data-light="aim" data-unit="°" type="range" min="-20" max="30" value="0">
+ </details>
+ <details name="light-section"><summary>Spotlight intensity</summary>
+  <label for="light-shelf">Shelf light<output for="light-shelf">100%</output></label>
+  <input id="light-shelf" data-light="shelf" data-unit="%" type="range" min="0" max="200" value="100">
+ </details>
+ <details name="light-section"><summary>Second light</summary>
+  <label for="light-selection">Selected bottle light<output for="light-selection">100%</output></label>
+  <input id="light-selection" data-light="selection" data-unit="%" type="range" min="0" max="200" value="100">
+ </details>
+ <details name="light-section"><summary>Far-left light</summary>
+  <label for="light-key">Intensity<output for="light-key">100%</output></label>
+  <input id="light-key" data-light="key" data-unit="%" type="range" min="0" max="200" value="100">
+  <label for="light-distance">Distance from wall<output for="light-distance">100%</output></label>
+  <input id="light-distance" data-light="distance" data-unit="%" type="range" min="65" max="160" value="100">
+ </details>
+ <button id="deskReset" type="button">Restore defaults</button>
+</aside>
 <main>
 <section class="experience" id="experience" aria-label="Interactive perfume showroom">
  <div class="stage" id="stage" data-state="gallery">
@@ -259,8 +282,50 @@ function updateScroll(){
  window.dispatchEvent(new Event('perfume-progress'));
 }
 let ticking=false;window.addEventListener('scroll',()=>{if(ticking)return;ticking=true;requestAnimationFrame(()=>{ticking=false;updateScroll()})},{passive:true});window.addEventListener('resize',updateScroll);
-$$('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go,b.classList.contains('gallery-bay'))));$('#homeBtn').onclick=()=>go('gallery');$('#returnBtn').onclick=()=>go('gallery');$('#addBtn').onclick=()=>{bag[selected]++;saveBag();renderBag();$('#bagShade').classList.add('show')};$('#bagBtn').onclick=()=>{$('#bagShade').classList.add('show');renderBag()};$('#closeBag').onclick=()=>$('#bagShade').classList.remove('show');$('#bagShade').onclick=e=>{if(e.target===$('#bagShade'))$('#bagShade').classList.remove('show')};
+$$('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go,b.classList.contains('gallery-bay'))));$('#returnBtn').onclick=()=>go('gallery');$('#addBtn').onclick=()=>{bag[selected]++;saveBag();renderBag();$('#bagShade').classList.add('show')};$('#bagBtn').onclick=()=>{$('#bagShade').classList.add('show');renderBag()};$('#closeBag').onclick=()=>$('#bagShade').classList.remove('show');$('#bagShade').onclick=e=>{if(e.target===$('#bagShade'))$('#bagShade').classList.remove('show')};
+const desk=$('#lightDesk');
+const wordmark=$('#homeBtn');
+const sliders=[...desk.querySelectorAll('input[type=range]')];
+const settingsKey='unveiled-finest-lighting-v1';
+let savedSettings={};
+try{savedSettings=JSON.parse(localStorage.getItem(settingsKey))||{}}catch{}
+function syncLighting(){
+ const values={};
+ for(const input of sliders){
+  values[input.dataset.light]=input.valueAsNumber;
+  input.previousElementSibling.querySelector('output').value=input.value+input.dataset.unit;
+  input.setAttribute('aria-valuetext',input.value+input.dataset.unit);
+ }
+ window.Perfume3D?.setLighting(values);
+ return values;
+}
+for(const input of sliders){
+ const value=savedSettings[input.dataset.light];
+ if(Number.isFinite(value))input.value=value;
+}
+syncLighting();
+window.addEventListener('perfume-ready',syncLighting);
+desk.addEventListener('input',()=>{const values=syncLighting();try{localStorage.setItem(settingsKey,JSON.stringify(values))}catch{}});
+$('#deskReset').onclick=()=>{
+ for(const input of sliders)input.value=input.defaultValue;
+ syncLighting();try{localStorage.removeItem(settingsKey)}catch{}
+};
+function closeDesk(){desk.hidden=true;wordmark.focus({preventScroll:true})}
+$('#deskClose').onclick=closeDesk;
+let taps=0, tapTimer;
+wordmark.onclick=()=>{
+ clearTimeout(tapTimer);
+ if(!desk.hidden){taps=0;closeDesk();return}
+ if(++taps===3){
+  taps=0;desk.hidden=false;$('#deskClose').focus({preventScroll:true});return;
+ }
+ tapTimer=setTimeout(()=>{taps=0;go('gallery')},450);
+};
 window.addEventListener('keydown',event=>{
+ if(!desk.hidden && (desk.contains(event.target)||event.key==='Escape')){
+  if(event.key==='Escape'){event.preventDefault();closeDesk()}
+  return;
+ }
  if(event.key==='Escape'){
   $('#bagShade').classList.remove('show');
   go('gallery');
@@ -279,6 +344,6 @@ setTimeout(()=>$('#loader').classList.add('out'),8000);
 })();
 </script>
 
-<script type="module" src="showroom-webgl.js?v=penumbra-5"></script>
+<script type="module" src="showroom-webgl.js?v=light-desk-1"></script>
 </body>
 </html>

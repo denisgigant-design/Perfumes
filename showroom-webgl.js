@@ -13,6 +13,7 @@ const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const scene = new Scene();
 const camera = new PerspectiveCamera(34, 1, .07, 65);
 // Five tall slots share one continuous facade at every viewport size.
+const lighting={aim:0,shelf:100,selection:100,key:100,distance:100};
 const whiteShelfGain = .75;
 const colourBounceGain = 1.15;
 const BAY = {width:2.40, height:5.80, columns:5, step:2.96};
@@ -634,7 +635,7 @@ function render(time) {
   const selectedProduct=products.find(product=>current===product.key);
   const inspection=shelves?.userData.inspection;
   if(inspection){
-    inspection.intensity=selectedProduct?MathUtils.clamp(shot.focus,0,1)*116*whiteShelfGain:0;
+    inspection.intensity=selectedProduct?MathUtils.clamp(shot.focus,0,1)*116*whiteShelfGain*(lighting.selection/100):0;
     inspection.userData.selected=selectedProduct?.key??null;
     if(selectedProduct){
       inspection.position.set(selectedProduct.x-.12,selectedProduct.y+BAY.height-.12,-.59);
@@ -677,16 +678,18 @@ function render(time) {
     const secondary = 1 - otherFocus * .81;
     const niche = shelves?.userData.lights.get(product.key);
     if (niche) {
-      niche.overhead.intensity=(210+emphasis*134)*secondary*whiteShelfGain;
+      niche.overhead.intensity=(210+emphasis*134)*secondary*whiteShelfGain*(lighting.shelf/100);
       niche.spill.intensity=(15+emphasis*(20+8*glint))*secondary*colourBounceGain;
       niche.overhead.target.position.x=product.x+lightingPointer.x*.30;
-      niche.overhead.target.position.z=-1.52+lightingPointer.y*.10;
+      const drop=niche.overhead.position.y-niche.overhead.target.position.y;
+      const tilt=Math.atan2(1.24,drop)+MathUtils.degToRad(lighting.aim);
+      niche.overhead.target.position.z=niche.overhead.position.z-drop*Math.tan(tilt)+lightingPointer.y*.10;
       niche.spill.target.position.x=product.x+Math.sin(turn)*.25+lightingPointer.x*.22;
       niche.spill.target.position.y=product.y+product.height*.42+lightingPointer.y*.12;
       niche.beamPivot.rotation.z=-lightingPointer.x*.065;
-      niche.beamPivot.rotation.x=.24+lightingPointer.y*.025;
-      niche.beam.material.opacity=(.38+emphasis*.065)*secondary*whiteShelfGain;
-      niche.halo.material.opacity=(.28+emphasis*.12)*secondary*whiteShelfGain;
+      niche.beamPivot.rotation.x= .24+MathUtils.degToRad(lighting.aim)+lightingPointer.y*.025;
+      niche.beam.material.opacity=(.38+emphasis*.065)*secondary*whiteShelfGain*(lighting.shelf/100);
+      niche.halo.material.opacity=(.28+emphasis*.12)*secondary*whiteShelfGain*(lighting.shelf/100);
       for (const [side, patch] of niche.caustics.entries()) {
         const direction=side===0?-1:1;
         patch.material.opacity=(.17+emphasis*(.18+direction*.12*glint))*secondary*colourBounceGain;
@@ -878,7 +881,18 @@ async function start() {
     stage.addEventListener('pointerup', releaseLighting);
     stage.addEventListener('pointerleave', centerLighting);
     stage.addEventListener('pointercancel', centerLighting);
-    window.Perfume3D = {spin};
+    window.Perfume3D = {spin, setLighting(values){
+      const moved=lighting.distance!==values.distance;
+      Object.assign(lighting,values);
+      key.intensity=1500*lighting.key/100;
+      if(moved){
+        const scale=lighting.distance/100;
+        key.position.set(-5-16*scale,2+11.5*scale,.9+5.6*scale);
+        key.shadow.camera.far=46*Math.max(1,scale);
+        key.shadow.camera.updateProjectionMatrix();
+        renderer.shadowMap.needsUpdate=true;
+      }
+    }};
     renderer.setAnimationLoop(time => {
       try {
         render(time);
