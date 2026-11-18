@@ -1,4 +1,4 @@
-import {makeWater} from './water.js?v=night-focus-1';
+import {makeWater} from './water.js?v=five-cuts-1';
 import {addLiquidRefraction, bindLiquidCamera} from './glass-volume.js?v=dark-stone-1';
 import {
   ACESFilmicToneMapping, AmbientLight, Box3, BoxGeometry, CanvasTexture, Color, DoubleSide, GLTFLoader,
@@ -6,30 +6,29 @@ import {
   PlaneGeometry, PMREMGenerator, Reflector, RoomEnvironment, Scene, SpotLight, SRGBColorSpace, Vector3, WebGLRenderer
 } from './three-showroom.js?v=2';
 
-const compactLayout = innerWidth < 680;
 const stage = document.querySelector('#stage');
 const mount = document.querySelector('#showroom3d');
 const dragArea = document.querySelector('#product-drag');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const scene = new Scene();
 const camera = new PerspectiveCamera(34, 1, .07, 65);
-// One continuous wall of raw black rock. Desktop = four narrow vertical niches;
-// portrait phones = two rows so the display remains legible without horizontal scrolling.
-const BAY = compactLayout ? { width: 2.75, height: 4.53, columns: 2, step: 3.30, top: 5.20, bottom: -5.22, floor: -5.75, left: -1.65 }
-  : { width: 2.82, height: 4.72, columns: 4, step: 3.38, top: 3.47, bottom: -2.35, floor: -2.93, left: -5.07 };
+// Five tall slots share one continuous facade at every viewport size.
+const BAY = {width:2.40, height:5.80, columns:5, step:2.96};
 const entries = [
   {key:'galet', file:'galet-crystal.glb', height:2.58,
     tone:'#21db75', glass:'#d8f8e1', absorption:'#56ba78', liquid:'#079c41', distance:1.18, thickness:.012, rest:-.10, shape:[1.1,.95,2.0]},
   {key:'rose', file:'rose-lune-smoked.glb', height:2.57,
     tone:'#ff408c', glass:'#ffe0ed', absorption:'#d45b8a', liquid:'#c91862', distance:1.16, thickness:.016, rest:.08, shape:[1.02,.89,2.65]},
-  {key:'bleu', file:'sillage-bleu.glb', height:2.93,
-    tone:'#3475ff', glass:'#d8e7ff', absorption:'#5184d4', liquid:'#1c4ada', distance:1.15, thickness:.011, rest:-.12, shape:[.94,1.13,2.4]},
-  {key:'ambre', file:'ambre-dore.glb', height:2.71,
-    tone:'#ffb12d', glass:'#fff0c7', absorption:'#e6a437', liquid:'#e68a0e', distance:1.32, thickness:.014, rest:.08, shape:[1.0,1.04,3.05]}
+  {key:'iris', file:'iris.glb', height:2.95,
+    tone:'#ac76ff', glass:'#efe4ff', absorption:'#9962ce', liquid:'#813eca', distance:1.2, thickness:.035, rest:.05, shape:[.89,.86,2.1]},
+  {key:'grenat', file:'grenat.glb', height:2.49,
+    tone:'#ed425d', glass:'#ffe3e6', absorption:'#c84256', liquid:'#a51537', distance:1.2, thickness:.035, rest:.05, shape:[.89,.86,2.1]},
+  {key:'nacre', file:'nacre.glb', height:2.67,
+    tone:'#72dfd3', glass:'#e1faf6', absorption:'#56b8ad', liquid:'#21b6a5', distance:1.2, thickness:.035, rest:.05, shape:[.89,.86,2.1]}
 ];
 const products = entries.map((d,i)=>{
-  const x = compactLayout ? (i%2===0 ? -1.65 : 1.65) : (-5.07 + i*3.38);
-  const y = compactLayout ? (i<2 ? .30 : -4.63) : -2.14;
+  const x = (i - (entries.length-1)/2) * BAY.step;
+  const y = -2.14;
   return {...d, x, y, z:-.74};
 });
 
@@ -40,7 +39,7 @@ const manualTurn = {x: 0, y: 0};
 const projected = new Vector3();
 const worldPoint = new Vector3();
 const hoverGap = .016;
-const flightOrder = ['galet', 'rose', 'bleu', 'ambre'];
+const flightOrder = entries.map(entry=>entry.key);
 let renderer, studioReflection, water, shelves;
 let width = 0, height = 0, previousTime = 0;
 let presented = false;
@@ -221,11 +220,11 @@ function createWall() {
     const mesh=new Mesh(g,mat);mesh.position.set(...pos);wall.add(mesh);return mesh;
   }
   const w=BAY.width,step=BAY.step,cols=BAY.columns;
-  const xs=compactLayout?[-1.65,1.65]:products.map(p=>p.x);
+  const xs=products.map(p=>p.x);
   const leftEdge=xs[0]-w/2,rightEdge=xs[xs.length-1]+w/2;
   const totalWidth=rightEdge-leftEdge+1.25;
-  const base=compactLayout?-5.15:-2.56;
-  const eachBottom=compactLayout?[-4.63,.30]:[-2.14];
+  const base=-2.56;
+  const eachBottom=[-2.14];
   for(let row=0;row<eachBottom.length;row++){
     const bottom=eachBottom[row],ceiling=bottom+BAY.height;
     for(let c=0;c<=cols;c++){
@@ -445,26 +444,24 @@ function viewAround({x, y, z}, radius, yaw, elevation, amount = 0) {
 
 function galleryFrame(aspect) {
   // Preserve the complete rock wall and a strip of nearly still reflection below.
-  const radius=compactLayout?Math.max(23.5,7.0/(2*angle*aspect))
-    :Math.max(16.5,15.0/(2*angle*aspect));
-  const aimY = compactLayout ? -.55 : .22 - radius * 2 * angle * .14;
-  const cameraY = compactLayout ? .95 : 1.65;
+  const radius=Math.max(16.5,15.9/(2*angle*aspect));
+  const aimY = aspect<.80 ? -.35 : .22 - radius * 2 * angle * .12;
+  const cameraY = aspect<.80 ? 1.1 : 1.65;
   return viewAround({x:0,y:aimY,z:-.60},radius,0,cameraY-aimY);
 }
 
 function productFrame(product,aspect,yaw=0,focus=1){
-  // The whole selected recess, including its rough sides and roof, stays visible.
-  // Previous zoom cropped the shelf edges and felt too close.
-  const radius=aspect<.80?Math.max(12.6,BAY.width/(2*angle*aspect)*1.22):12.2;
-  const aimY=product.y+BAY.height*.40;
+  // On phones the camera frames the glass, with the overhead fixture above the crop.
+  const radius=aspect<.80 ? Math.max(8.2, product.footprint.width/(2*angle*aspect)*1.18) : 12.2;
+  const aimY=product.y+(aspect<.80?product.height*.44:BAY.height*.40);
   return viewAround({x:product.x,y:aimY,z:-.72},radius, yaw*.13,.21,focus);
 }
 
 function flyThrough(aspect, progress) {
   const shots=[galleryFrame(aspect),...flightOrder.map(key=>
     productFrame(products.find(p=>p.key===key),aspect,0,.34))];
-  const p=MathUtils.clamp(progress,0,1)*4;
-  const index=Math.min(3,Math.floor(p));
+  const p=MathUtils.clamp(progress,0,1)*flightOrder.length;
+  const index=Math.min(flightOrder.length-1,Math.floor(p));
   const t=MathUtils.smoothstep(p-index,0,1);
   const from=shots[index], to=shots[index+1];
   return Object.fromEntries(Object.keys(from).map(key=>[
@@ -522,7 +519,7 @@ function updateHits() {
     projected.copy(worldPoint).project(camera);
     product.button.style.left = ((projected.x + 1) * 50) + '%';
     product.button.style.top = ((1 - projected.y) * 50) + '%';
-    const halfWidth = product.key === 'bleu' ? .66 : .93;
+    const halfWidth = Math.min(BAY.width*.48, product.footprint.width*.60);
     const hitWidth = Math.min(camera.aspect < .82 ? width * .31 : 245,
       width * halfWidth / (distance * angle * camera.aspect));
     product.button.style.width = hitWidth + 'px';
@@ -532,7 +529,7 @@ function updateHits() {
     const buttonCenterX = (projected.x + 1) * width / 2;
     const buttonCenterY = (1 - projected.y) * height / 2;
     const hitHeight = height * (product.height + .18) / (2 * angle * distance);
-    const captionDrop = compactLayout && product.y > 0 ? .16 : .37;
+    const captionDrop = .37;
     worldPoint.set(product.x,product.y-captionDrop,1.32).project(camera);
     product.button.style.setProperty('--caption-left',
       ((worldPoint.x+1)*width/2-buttonCenterX+hitWidth/2)+'px');

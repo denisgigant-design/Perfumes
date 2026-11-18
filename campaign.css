@@ -53,7 +53,7 @@
   left: 18%; width: 64%; height: 38%; cursor: grab; touch-action: pan-y;
 }
 .product-drag:active { cursor: grabbing !important; }
-.stage:not([data-state="gallery"]) .detail-panel {
+.stage[data-detail-open] .detail-panel {
   bottom: max(72px, 9.5svh);
 }
 .stage:not([data-state="gallery"]) .hero-product { top: 12%; bottom: 46%; }
@@ -77,7 +77,7 @@
   .gallery-bay .bay-caption, .glb-live .gallery-bay .bay-caption { bottom: -7%; font-size: 8px; }
   .gallery-intro h1, .glb-live .gallery-intro h1 { font-size: clamp(45px, 12vw, 74px); }
   .studio-film { width: 135%; left: -17.5%; object-fit: fill; }
-  .stage:not([data-state="gallery"]) .detail-panel { bottom: max(77px, 10svh); }
+  .stage[data-detail-open] .detail-panel { bottom: max(77px, 10svh); }
   .stage:not([data-state="gallery"]) .hero-product { top: 16%; bottom: 48%; }
   .glb-live .stage:not([data-state="gallery"]) .product-drag { left: 13%; width: 74%; top: 16%; height: 39%; }
   .viewer-head h2 { font-size: 39px; }
@@ -89,7 +89,7 @@
 }
 
 @media (max-width: 660px) and (max-height: 690px) {
-  .glb-live .stage:not([data-state="gallery"]) .detail-panel { bottom: max(58px, 8svh); }
+  .glb-live .stage[data-detail-open] .detail-panel { bottom: max(58px, 8svh); }
   .detail-panel h2 { font-size: clamp(34px, 10vw, 49px); }
   .glb-live #detail .drag-note { margin-bottom: 8px; }
 }
@@ -144,27 +144,27 @@
   background: linear-gradient(180deg,#0b0909a6,transparent 17%,transparent 54%,#0b090a 97%);
 }
 @media (min-width: 661px) {
-  .stage:not([data-state="gallery"]) .detail-panel {
+  .stage[data-detail-open] .detail-panel {
     bottom: max(57px, 6.2svh);
     width: min(85%, 550px);
   }
-  .stage:not([data-state="gallery"]) .detail-panel h2 {
+  .stage[data-detail-open] .detail-panel h2 {
     font-size: clamp(36px, 4.8vw, 65px);
     margin-bottom: 8px;
   }
-  .stage:not([data-state="gallery"]) .detail-panel .catalogue { margin-bottom: 5px; }
-  .stage:not([data-state="gallery"]) .detail-panel .notes { margin-top: 6px; }
-  .stage:not([data-state="gallery"]) .detail-panel .price { margin: 6px 0; }
-  .stage:not([data-state="gallery"]) .detail-panel .details-sub { margin-top: 6px; }
+  .stage[data-detail-open] .detail-panel .catalogue { margin-bottom: 5px; }
+  .stage[data-detail-open] .detail-panel .notes { margin-top: 6px; }
+  .stage[data-detail-open] .detail-panel .price { margin: 6px 0; }
+  .stage[data-detail-open] .detail-panel .details-sub { margin-top: 6px; }
   .stage:not([data-state="gallery"]) #spinBottle { margin-bottom: 4px; }
   .stage:not([data-state="gallery"]) .stage-footer { bottom: 12px; }
   .viewer-caption { left: auto; right: 33px; bottom: 22px; }
   .viewer-close { top: auto; bottom: 51px; }
 }
 @media (min-width: 661px) and (max-height: 740px) {
-  .stage:not([data-state="gallery"]) .detail-panel .notes { display: none; }
-  .stage:not([data-state="gallery"]) .detail-panel { bottom: 49px; }
-  .stage:not([data-state="gallery"]) .detail-panel h2 { font-size: clamp(33px, 4.2vw, 50px); }
+  .stage[data-detail-open] .detail-panel .notes { display: none; }
+  .stage[data-detail-open] .detail-panel { bottom: 49px; }
+  .stage[data-detail-open] .detail-panel h2 { font-size: clamp(33px, 4.2vw, 50px); }
 }
 
 /* The black studio plate sits above the water horizon. */
@@ -205,12 +205,12 @@
 }
 
 /* The selected fragrance has one clear block of details. */
-.stage[data-state]:not([data-state="gallery"]) .detail-panel {
+.stage[data-detail-open] .detail-panel {
   width: min(90%, 640px);
   max-width: 640px;
   bottom: max(66px, 8.5svh);
 }
-.stage[data-state]:not([data-state="gallery"]) .detail-panel h2 {
+.stage[data-detail-open] .detail-panel h2 {
   font-size: clamp(37px, 7.5vw, 86px);
   font-weight: 600;
   letter-spacing: -.025em;
@@ -237,18 +237,18 @@
 .stage[data-state="gallery"] .detail-inspect { visibility: hidden; }
 .glb-live .stage:not([data-state="gallery"]) .product-drag { top: 11%; height: 50%; }
 @media (max-width: 660px) {
-  .stage[data-state]:not([data-state="gallery"]) .detail-panel {
+  .stage[data-detail-open] .detail-panel {
     bottom: max(69px, 10svh); width: 92%;
   }
-  .stage[data-state]:not([data-state="gallery"]) .detail-panel h2 {
+  .stage[data-detail-open] .detail-panel h2 {
     font-size: clamp(36px, 9.4vw, 61px);
   }
   .detail-inspect { top: max(108px, 16svh); }
   .glb-live .stage:not([data-state="gallery"]) .product-drag { top: 16%; height: 44%; }
 }
 @media (max-height: 610px) {
-  .stage[data-state]:not([data-state="gallery"]) .detail-panel { bottom: 51px; }
-  .stage[data-state]:not([data-state="gallery"]) .detail-panel h2 {
+  .stage[data-detail-open] .detail-panel { bottom: 51px; }
+  .stage[data-detail-open] .detail-panel h2 {
     font-size: clamp(33px, 7vw, 54px);
   }
 }
@@ -268,17 +268,17 @@
   bottom:-21px;text-shadow:0 2px 7px #000,0 1px 18px #000;pointer-events:none}
 .glb-live .stage::after{background:linear-gradient(180deg,rgba(0,0,0,.51),transparent 14%,transparent 75%,rgba(0,0,0,.61))}
 .glb-live .stage:not([data-state="gallery"])::after{background:linear-gradient(0deg,rgba(0,0,0,.95),rgba(0,0,0,.80) 18%,transparent 42%),linear-gradient(180deg,rgba(0,0,0,.55),transparent 15%)}
-.stage:not([data-state="gallery"]) .detail-panel,.glb-live .stage:not([data-state="gallery"]) .detail-panel{bottom:max(55px,7svh)}
-.glb-live .stage:not([data-state="gallery"]) .detail-panel h2{text-transform:uppercase;letter-spacing:.055em}
-.glb-live .stage:not([data-state="gallery"]) .detail-panel .scent-desc{display:block;text-transform:uppercase;letter-spacing:.11em;font-size:10px;line-height:1.6}
+.stage[data-detail-open] .detail-panel,.glb-live .stage[data-detail-open] .detail-panel{bottom:max(55px,7svh)}
+.glb-live .stage[data-detail-open] .detail-panel h2{text-transform:uppercase;letter-spacing:.055em}
+.glb-live .stage[data-detail-open] .detail-panel .scent-desc{display:block;text-transform:uppercase;letter-spacing:.11em;font-size:10px;line-height:1.6}
 .glb-live .gallery-bay::before{display:none}
 @media(max-width:660px){
  .glb-live .gallery-intro{top:118px;bottom:auto;left:8%;right:8%}
  .glb-live .gallery-intro h1{font-size:clamp(23px,6vw,36px);letter-spacing:.12em}
  .glb-live .gallery-bay .bay-caption{font-size:7px;letter-spacing:.09em;bottom:-17px}
- .glb-live .stage:not([data-state="gallery"]) .detail-panel{bottom:max(64px,10svh);width:92%}
- .glb-live .stage:not([data-state="gallery"]) .detail-panel h2{font-size:clamp(31px,8.6vw,48px);margin-bottom:3px}
- .glb-live .stage:not([data-state="gallery"]) .detail-panel .scent-desc{font-size:8px;letter-spacing:.06em;margin:0 auto 6px}
+ .glb-live .stage[data-detail-open] .detail-panel{bottom:max(64px,10svh);width:92%}
+ .glb-live .stage[data-detail-open] .detail-panel h2{font-size:clamp(31px,8.6vw,48px);margin-bottom:3px}
+ .glb-live .stage[data-detail-open] .detail-panel .scent-desc{font-size:8px;letter-spacing:.06em;margin:0 auto 6px}
  .glb-live .stage:not([data-state="gallery"]) .product-drag{top:13%;height:47%;left:3%;width:94%}
 }
 
@@ -293,13 +293,13 @@ html.glb-live .gallery-intro{left:3%!important;right:auto!important;top:auto!imp
 html.glb-live .gallery-intro h1{font-family:Italiana,Georgia,serif!important;font-size:clamp(28px,3.2vw,48px)!important;letter-spacing:-.015em!important;text-transform:none!important}
 html.glb-live .gallery-bay{background:transparent!important;box-shadow:none!important;border:0!important;outline-offset:6px!important}
 html.glb-live .gallery-bay .bay-caption{font-size:9px!important;letter-spacing:.095em!important;bottom:-18px!important;max-width:150px}
-html.glb-live .stage:not([data-state="gallery"]) .detail-panel{bottom:max(34px,5svh)!important}
-html.glb-live .stage:not([data-state="gallery"]) .detail-panel h2{font-weight:400!important;font-family:Italiana,Georgia,serif!important;text-transform:none!important;letter-spacing:.005em!important;font-size:clamp(36px,4vw,65px)!important}
+html.glb-live .stage[data-detail-open] .detail-panel{bottom:max(34px,5svh)!important}
+html.glb-live .stage[data-detail-open] .detail-panel h2{font-weight:400!important;font-family:Italiana,Georgia,serif!important;text-transform:none!important;letter-spacing:.005em!important;font-size:clamp(36px,4vw,65px)!important}
 @media(max-width:660px){
  html.glb-live .gallery-intro{left:6%!important;bottom:9%!important;max-width:85%!important}
  html.glb-live .gallery-intro h1{font-size:clamp(28px,7vw,42px)!important}
- html.glb-live .stage:not([data-state="gallery"]) .detail-panel{bottom:max(54px,8svh)!important}
- html.glb-live .stage:not([data-state="gallery"]) .detail-panel h2{font-size:clamp(37px,9vw,53px)!important}
+ html.glb-live .stage[data-detail-open] .detail-panel{bottom:max(54px,8svh)!important}
+ html.glb-live .stage[data-detail-open] .detail-panel h2{font-size:clamp(37px,9vw,53px)!important}
 }
 
 body::before {display:none}
@@ -363,7 +363,7 @@ html:not(.glb-live) .gallery-intro h1 {
 }
 html:not(.glb-live) .gallery-intro p,
 html:not(.glb-live) .gallery-intro > button {display:none}
-html:not(.glb-live) .stage:not([data-state="gallery"]) .detail-panel {
+html:not(.glb-live) .stage[data-detail-open] .detail-panel {
   left:50%;top:auto;bottom:max(56px,8svh);width:92%;max-width:600px;
   transform:translateX(-50%);text-align:center;
 }
@@ -399,7 +399,7 @@ html:not(.glb-live) .detail-panel .product-actions {justify-content:center}
   html:not(.glb-live) .stage[data-state="gallery"] .gallery-intro {left:5%;bottom:10%;max-width:88%}
   html:not(.glb-live) .gallery-intro h1 {font-size:clamp(26px,7vw,40px)}
   html:not(.glb-live) .stage:not([data-state="gallery"]) .hero-product {inset:19% 14% 35%}
-  html:not(.glb-live) .stage:not([data-state="gallery"]) .detail-panel {bottom:max(62px,9svh)}
+  html:not(.glb-live) .stage[data-detail-open] .detail-panel {bottom:max(62px,9svh)}
 }
 
 /* Direct manipulation stays inside the selected stone recess. */
@@ -444,3 +444,27 @@ html.glb-live .gallery-intro::before {
 }
 html.glb-live .gallery-intro h1 {text-shadow:0 2px 6px #000,0 0 20px #000}
 html:not(.glb-live) .hero-product {pointer-events:auto;cursor:zoom-out}
+
+/* The five apertures share a single baseline from phone to widescreen. */
+@media(max-width:679px){
+  html.glb-live .gallery-bay .bay-caption{font-size:clamp(10px,2.8vw,17px)!important}
+}
+html:not(.glb-live) .stage[data-state]{
+  background:linear-gradient(0deg,#020406 2%,#06080988 36%,#10101475),url('basalt-cleft.jpg') center/cover!important;
+}
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay[data-go]{
+  left:var(--slot);top:46%;width:16%;height:min(48vh,40vw);border:0;
+  background:linear-gradient(155deg,#050506 0%,#121216 28%,var(--spill) 85%,#242222 100%);
+  box-shadow:inset 3px 0 12px #000c,inset -3px 0 8px #0009;
+}
+.gallery-bay.galet{--slot:12%;--spill:#173526}
+.gallery-bay.rose{--slot:31%;--spill:#452532}
+.gallery-bay.iris{--slot:50%;--spill:#342642}
+.gallery-bay.grenat{--slot:69%;--spill:#451722}
+.gallery-bay.nacre{--slot:88%;--spill:#183a38}
+html:not(.glb-live) .stage[data-state="gallery"] .gallery-bay .bay-caption{
+  font:400 clamp(10px,2.6vw,23px)/1 Italiana,Georgia,serif;letter-spacing:0;text-transform:none
+}
+.stage[data-state="gallery"] .detail-panel{pointer-events:none}
+@media(prefers-reduced-motion:reduce){.detail,.detail-panel{transition-duration:0s!important}}
+.stage[data-state="gallery"][data-detail-open] .detail{pointer-events:none}

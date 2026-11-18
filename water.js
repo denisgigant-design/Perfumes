@@ -6,8 +6,8 @@ const waterShader = {
   uniforms: {
     ...source.uniforms,
     clock: {value: 0},
-    pools: {value: Array.from({length: 4}, () => new Vector3())},
-    poolColors: {value: Array.from({length: 4}, () => new Color())}
+    pools: {value: Array.from({length: 5}, () => new Vector3())},
+    poolColors: {value: Array.from({length: 5}, () => new Color())}
   },
   vertexShader: source.vertexShader
     .replace('varying vec4 vUv;', 'varying vec4 vUv; varying vec3 vSurface;')
@@ -15,8 +15,8 @@ const waterShader = {
   fragmentShader: `
     uniform sampler2D tDiffuse;
     uniform float clock;
-    uniform vec3 pools[4];
-    uniform vec3 poolColors[4];
+    uniform vec3 pools[5];
+    uniform vec3 poolColors[5];
     varying vec4 vUv;
     varying vec3 vSurface;
     #include <logdepthbuf_pars_fragment>
@@ -39,7 +39,7 @@ const waterShader = {
       mirrored = max(vec3(0.0), (mirrored - .009) * .82);
       vec3 glints = vec3(0.0);
       float slope = smoothstep(0.66, 1.12, a * b * 0.66 + c * 0.24);
-      for (int i = 0; i < 4; ++i) {
+      for (int i = 0; i < 5; ++i) {
         vec2 q = p - pools[i].xy;
         vec2 streak = vec2(q.x * 0.62, q.y * 0.92);
         float drop = exp(-dot(streak, streak) * 0.24);
@@ -70,7 +70,7 @@ export function makeWater(renderer, compact) {
     surface.getRenderTarget().texture.type = 1009;
   }
   surface.rotation.x = -Math.PI / 2;
-  surface.position.y = compact ? -5.75 : -2.93;
+  surface.position.y = -2.93;
   const renderReflection = surface.onBeforeRender.bind(surface);
   let last = -Infinity;
   surface.onBeforeRender = (activeRenderer, scene, camera, ...rest) => {
