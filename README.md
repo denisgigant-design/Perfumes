@@ -1,10 +1,10 @@
 # ATELIER — 3D perfume showroom
 
-Five tall basalt recesses display Galet, Rose Lune, Iris Noir, Grenat and Nacre on phones and desktop. Select a fragrance to move into its recess, turn on its white inspection light and play one opening spin. Drag or use the trackpad to rotate it. Activate the bottle again to return. On portrait screens the close-up frames the product below the niche ceiling.
+Five tall basalt recesses display Galet, Rose Lune, Iris Noir, Terre Fumée and Nacre. Portrait phones display two above three. Desktop displays a single row. Select a fragrance to move into its recess, turn on its white inspection light and play one opening spin. Drag or use the trackpad to rotate it. Activate the bottle again to return. On portrait screens the close-up frames the product below the niche ceiling.
 
 The browser shader uses the liquid mesh to estimate an optical volume with colour absorption and a moving liquid line. The water shader creates darker planar reflections with layered ripples around the moving highlights beneath the overhead spotlights. A soft local shade behind the collection title keeps the white lettering readable. Mobile rendering gives the main canvas a higher pixel budget than the water reflection pass.
 
-The WebGL scene generates the stone surround and lights it with overhead spots and coloured spill. The stone surfaces use the generated cleft basalt texture in `basalt-cleft.jpg`, with continuous world-space UVs, shallow surface relief, and a separate roughness response. Each recess has one cut-stone opening with uninterrupted reveals. The surrounding stone is darker than the illuminated interiors. Each recess uses the same stone on its rear and side walls, a colour-matched ceiling fixture with a broad, feathered wall wash that follows pointer movement, coloured spill on both sides, and a refracted light pool beneath the bottle. Each bottle has an equally positioned front light and consistent matte printed labels. The wall extends to the top of the viewport, with larger serif captions beneath the shelves. The glass uses richer product colours and polished highlights above a higher-resolution rippling water reflection. Each GLB includes a sharp lossless label sized for its physical print surface. Browsers without WebGL 2 display generated stone environments and bottle previews.
+The WebGL scene generates the stone surround and lights it with overhead spots and coloured spill. The stone surfaces use the generated cleft basalt texture in `basalt-cleft.jpg`, with continuous world-space UVs, shallow surface relief, and a separate roughness response. Each recess has one cut-stone opening with uninterrupted reveals. The surrounding stone is darker than the illuminated interiors. Each recess uses the same stone on its rear and side walls, a colour-matched ceiling fixture with a broad, feathered wall wash that follows pointer movement, coloured spill on both sides, and a refracted light pool beneath the bottle. Each bottle has an equally positioned front light and consistent matte printed labels. The wall extends to the top of the viewport, with fragrance names shown on selection. The glass uses richer product colours and polished highlights above a higher-resolution rippling water reflection. Each GLB includes a sharp lossless label sized for its physical print surface. Browsers without WebGL 2 display generated stone environments and bottle previews.
 
 ## Run locally
 
@@ -15,7 +15,7 @@ The bag is a local demo. It saves quantities on the device and does not process 
 ## Models and renderer
 
 - Galet and Rose Lune retain their original glass, liquid, cap and printed label assets.
-- Three original GLBs add fluted Iris Noir with a banded stopper, the facet-cut Grenat decanter, and Nacre with its polished open ring. Each contains a dedicated reservoir and an embedded printed label.
+- Three original GLBs add fluted Iris Noir with a banded stopper, the tall tobacco-glass Terre Fumée with a brushed gun-gold cap, and Nacre with its polished open ring. Each contains a dedicated reservoir and an embedded printed label.
 - The bundled renderer uses Three.js r170, its GLTFLoader, and RoomEnvironment. Its MIT license is included in `LICENSE-three.txt`.
 
 ## Stone material

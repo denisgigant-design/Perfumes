@@ -21,16 +21,26 @@ const entries = [
     tone:'#ff408c', glass:'#ffe0ed', absorption:'#d45b8a', liquid:'#c91862', distance:1.16, thickness:.016, rest:.08, shape:[1.02,.89,2.65]},
   {key:'iris', file:'iris.glb', height:2.95,
     tone:'#ac76ff', glass:'#efe4ff', absorption:'#9962ce', liquid:'#813eca', distance:1.2, thickness:.035, rest:.05, shape:[.89,.86,2.1]},
-  {key:'grenat', file:'grenat.glb', height:2.49,
-    tone:'#ed425d', glass:'#ffe3e6', absorption:'#c84256', liquid:'#a51537', distance:1.2, thickness:.035, rest:.05, shape:[.89,.86,2.1]},
+  {key:'terre', file:'grenat.glb', height:4.02,
+    tone:'#d1a05e', glass:'#ffe7b9', absorption:'#985c2b', liquid:'#a36521', distance:1.2, thickness:.035, rest:.05, shape:[.89,.86,2.1]},
   {key:'nacre', file:'nacre.glb', height:2.67,
     tone:'#72dfd3', glass:'#e1faf6', absorption:'#56b8ad', liquid:'#21b6a5', distance:1.2, thickness:.035, rest:.05, shape:[.89,.86,2.1]}
 ];
-const products = entries.map((d,i)=>{
-  const x = (i - (entries.length-1)/2) * BAY.step;
-  const y = -2.14;
-  return {...d, x, y, z:.52};
-});
+const products = entries.map(d=>({...d,z:.52}));
+const phoneLayout=matchMedia('(max-width:679px) and (orientation:portrait)');
+let stacked=phoneLayout.matches;
+const phoneSlots={terre:[-.5,1],rose:[.5,1],galet:[-1,0],iris:[0,0],nacre:[1,0]};
+function placeProducts(){
+  products.forEach((p,index)=>{
+    const [column,row]=stacked?phoneSlots[p.key]:[index-2,0];
+    p.x=column*BAY.step;
+    p.y=-2.14+row*(BAY.height+.52);
+    p.group?.position.set(p.x,p.y,p.z);
+  });
+}
+placeProducts();
+const layouts=new Map();
+let transition=null;
 
 const angle = Math.tan(MathUtils.degToRad(camera.fov / 2));
 const pointerStates = new Map();
@@ -219,28 +229,23 @@ function createWall() {
     }
     const mesh=new Mesh(g,mat);mesh.position.set(...pos);wall.add(mesh);return mesh;
   }
-  const w=BAY.width,step=BAY.step,cols=BAY.columns;
-  const xs=products.map(p=>p.x);
-  const leftEdge=xs[0]-w/2,rightEdge=xs[xs.length-1]+w/2;
-  const totalWidth=rightEdge-leftEdge+1.25;
-  const base=-2.56;
-  const eachBottom=[-2.14];
-  for(let row=0;row<eachBottom.length;row++){
-    const bottom=eachBottom[row],ceiling=bottom+BAY.height;
-    for(let c=0;c<=cols;c++){
-      const x=c===0?leftEdge-.4:c===cols?rightEdge+.4:(xs[c-1]+xs[c])/2;
-      const bw=c===0||c===cols?.8:step-w;
-      rock([bw,BAY.height+.48,3.06],[x,bottom+BAY.height/2,-.27],outside,.025);
+  const w=BAY.width,base=-2.56;
+  const rows=[...new Set(products.map(p=>p.y))];
+  for(const bottom of rows){
+    const xs=products.filter(p=>p.y===bottom).map(p=>p.x).sort((a,b)=>a-b);
+    const left=xs[0]-w/2,right=xs.at(-1)+w/2;
+    const centreY=bottom+BAY.height/2;
+    for(let c=1;c<xs.length;c++){
+      rock([xs[c]-xs[c-1]-w,BAY.height+.12,3.06],[(xs[c]+xs[c-1])/2,centreY,-.27],outside,.025);
     }
-    rock([totalWidth,.57,3.06],[(leftEdge+rightEdge)/2,ceiling+.23,-.25],outside,.015);
-    rock([totalWidth,.49,3.08],[(leftEdge+rightEdge)/2,bottom-.24,-.26],outside,.015);
+    for(const [edge,limit] of [[left,-40],[right,40]]){
+      rock([Math.abs(limit-edge),BAY.height+.12,3.06],[(edge+limit)/2,centreY,-.27],outside,.025);
+    }
+    rock([80,.56,3.06],[0,bottom+BAY.height+.24,-.25],outside,.015);
+    rock([80,.52,3.08],[0,bottom-.25,-.26],outside,.015);
   }
   const highestCeiling=Math.max(...products.map(p=>p.y+BAY.height));
-  const surroundBottom=base-.48,surroundTop=highestCeiling+.50;
-  rock([72,60,3.06],[0,surroundTop+30,-.25],outside,.015);
-  const sideWidth=40-totalWidth/2;
-  for(const dir of [-1,1])rock([sideWidth,surroundTop-surroundBottom,3.06],
-    [dir*(totalWidth/2+sideWidth/2-.10),(surroundTop+surroundBottom)/2,-.25],outside,.015);
+  rock([80,60,3.06],[0,highestCeiling+.50+30,-.25],outside,.015);
   const bayLights=new Map();
   // One inspection light serves the selected recess. Keeping it in the light
   // set at zero intensity avoids recompiling every glass material on selection.
@@ -301,7 +306,7 @@ function createWall() {
       baseEmitterColor:luminousColor.clone(),
       tintedSides,tintedFloor,backWall});
   }
-  rock([totalWidth,.16,3.1],[(leftEdge+rightEdge)/2,base-.19,-.20],floorStone,.006);
+  rock([80,.16,3.1],[0,base-.19,-.20],floorStone,.006);
   wall.userData.lights=bayLights;scene.add(wall);return wall;
 }
 
@@ -347,7 +352,7 @@ function mergeCapFlutes(model) {
 
 async function loadBottle(product, loader) {
   const url = new URL(product.file, import.meta.url);
-  url.searchParams.set('v', 'dark-stone-1');
+  url.searchParams.set('v', 'atelier-stacked-1');
   const {scene: model} = await loader.loadAsync(url.href);
   mergeCapFlutes(model);
   const bottle = new Group();
@@ -398,6 +403,15 @@ async function loadBottle(product, loader) {
         name: material.name, map: material.map, color: '#fffef9', toneMapped: false,
         polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1
       });
+    } else if (/brushed champagne/i.test(material.name) && ['terre','iris'].includes(product.key)){
+      material.roughness=product.key==='iris'?.22:.39;
+      material.metalness=.98;
+      material.envMapIntensity=1.48;
+      material.onBeforeCompile=shader=>{
+        shader.vertexShader='varying vec2 machiningUv;\n'+shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\n machiningUv=uv;');
+        shader.fragmentShader='varying vec2 machiningUv;\n'+shader.fragmentShader.replace('#include <roughnessmap_fragment>',
+          '#include <roughnessmap_fragment>\n float grain=sin(machiningUv.y*290.0+sin(machiningUv.x*38.0)*.6); roughnessFactor+=.07*grain*(1.0-smoothstep(.3,2.0,fwidth(machiningUv.y)*290.0));');
+      };
     } else if (/atomizer tube/i.test(material.name)) {
       // Leave a muted highlight on the dip tube in the solid pass refracted by the shell.
       material.transmission = 0;
@@ -444,6 +458,10 @@ function viewAround({x, y, z}, radius, yaw, elevation, amount = 0) {
 
 function galleryFrame(aspect) {
   // Preserve the complete rock wall and a strip of nearly still reflection below.
+  if(stacked){
+    const radius=Math.max(16.9/(2*angle),9.6/(2*angle*aspect));
+    return viewAround({x:0,y:3.65,z:.15},radius,0,.40);
+  }
   const radius=Math.max(18.7,16.4/(2*angle*aspect));
   const aimY = aspect<.80 ? -.35 : .22 - radius * 2 * angle * .068;
   const cameraY = aspect<.80 ? 1.1 : 1.65;
@@ -452,6 +470,11 @@ function galleryFrame(aspect) {
 
 function productFrame(product,aspect,yaw=0,focus=1){
   // On phones the camera frames the glass, with the overhead fixture above the crop.
+  if(stacked){
+    const coverage=product.height>3.5?.54:.44;
+    const radius=Math.max(product.height/((2*angle)*coverage),product.footprint.width/(2*angle*aspect)*1.42);
+    return viewAround({x:product.x,y:product.y+radius*2*angle*.15,z:product.z},radius,yaw*.13,.16,focus);
+  }
   const radius=aspect<.80 ? Math.max(8.2, product.footprint.width/(2*angle*aspect)*1.18) : 12.2;
   const aimY=product.y+(aspect<.80?product.height*.44:BAY.height*.40);
   return viewAround({x:product.x,y:aimY,z:product.z},radius, yaw*.13,.21,focus);
@@ -499,6 +522,15 @@ function resize() {
   const nextWidth = container.clientWidth;
   const nextHeight = container.clientHeight;
   if (!nextWidth || !nextHeight || (width === nextWidth && height === nextHeight)) return;
+  if(stacked!==phoneLayout.matches){
+    layouts.set(stacked,shelves);
+    scene.remove(shelves);
+    stacked=phoneLayout.matches;
+    placeProducts();
+    shelves=layouts.get(stacked) || createWall();
+    scene.add(shelves);
+    transition=null;shot=null;
+  }
   width = nextWidth;
   height = nextHeight;
   camera.aspect = width / height;
@@ -526,15 +558,6 @@ function updateHits() {
     product.button.style.height = (height * (product.height + .18) / (2 * angle * distance)) + 'px';
     product.button.style.zIndex = String(Math.max(0, Math.round(105 - distance * 3)));
     product.button.hidden = Math.abs(projected.x) > 1.18 || Math.abs(projected.y) > 1.18 || projected.z > 1;
-    const buttonCenterX = (projected.x + 1) * width / 2;
-    const buttonCenterY = (1 - projected.y) * height / 2;
-    const hitHeight = height * (product.height + .18) / (2 * angle * distance);
-    const captionDrop = .37;
-    worldPoint.set(product.x,product.y-captionDrop,1.32).project(camera);
-    product.button.style.setProperty('--caption-left',
-      ((worldPoint.x+1)*width/2-buttonCenterX+hitWidth/2)+'px');
-    product.button.style.setProperty('--caption-top',
-      ((1-worldPoint.y)*height/2-buttonCenterY+hitHeight/2)+'px');
     if (stage.dataset.state === product.key) {
       dragArea.style.setProperty('--drag-left', ((projected.x + 1) * 50) + '%');
       dragArea.style.setProperty('--drag-top', ((1 - projected.y) * 50) + '%');
@@ -555,12 +578,20 @@ function render(time) {
   if (current !== lastProduct) {
     manualTurn.x = manualTurn.y = 0;
     pointerStates.clear();
+    transition=stacked && shot && !reducedMotion.matches?{from:{...shot},started:time}:null;
     lastProduct = current;
   }
   const next = frame();
   shot ??= {...next};
-  for (const key of Object.keys(shot)) {
-    shot[key] = reducedMotion.matches ? next[key] : MathUtils.damp(shot[key], next[key], 6.5, dt);
+  if(transition){
+    const t=Math.min(1,(time-transition.started)/1450);
+    // Two smooth movements with a short deceleration in the middle.
+    const phase=t<.5 ? .58*MathUtils.smoothstep(t*2,0,1)
+      : .58+.42*MathUtils.smoothstep(t*2-1,0,1);
+    for(const key of Object.keys(shot))shot[key]=MathUtils.lerp(transition.from[key],next[key],phase);
+    if(t===1)transition=null;
+  }else{
+    for(const key of Object.keys(shot))shot[key]=reducedMotion.matches?next[key]:MathUtils.damp(shot[key],next[key],6.5,dt);
   }
   camera.position.set(shot.x, shot.y, shot.z);
   camera.lookAt(shot.aimX, shot.aimY, shot.aimZ);

@@ -106,7 +106,7 @@
   }
 }
 </style>
-<link rel="stylesheet" href="campaign.css?v=five-cuts-1">
+<link rel="stylesheet" href="campaign.css?v=atelier-stacked-1">
 </head>
 <body>
 <div class="intro-loader" id="loader" aria-hidden="true"><div class="loader-mark">ATELIER</div><div class="load-rule"></div></div>
@@ -118,11 +118,11 @@
  <canvas class="studio-rays" id="side-rays" aria-hidden="true"></canvas>
  <div id="showroom3d" aria-hidden="true"></div>
  <div class="gallery" id="gallery">
-  <button class="gallery-bay rose" data-go="rose" aria-label="Discover Rose Lune perfume"><span class="image-plinth" aria-hidden="true"></span><img src="rose-lune-smoked.png?v=dark-stone-1" alt="Rose Lune smoked plum glass bottle with champagne atomizer"><span class="bay-caption">Rose Lune</span></button>
-  <button class="gallery-bay galet" data-go="galet" aria-label="Discover Galet perfume"><span class="image-plinth" aria-hidden="true"></span><img src="galet-smoked.png?v=dark-stone-1" alt="Galet green-tinted rectangular perfume bottle"><span class="bay-caption">Galet</span></button>
-  <button class="gallery-bay iris" data-go="iris" aria-label="Discover Iris Noir perfume"><img src="iris.png" alt="Iris Noir perfume bottle"><span class="bay-caption">Iris Noir</span></button>
-  <button class="gallery-bay grenat" data-go="grenat" aria-label="Discover Grenat perfume"><img src="grenat.png" alt="Grenat perfume bottle"><span class="bay-caption">Grenat</span></button>
-  <button class="gallery-bay nacre" data-go="nacre" aria-label="Discover Nacre perfume"><img src="nacre.png" alt="Nacre perfume bottle"><span class="bay-caption">Nacre</span></button>
+  <button class="gallery-bay rose" data-go="rose" aria-label="Discover Rose Lune perfume"><span class="image-plinth" aria-hidden="true"></span><img src="rose-lune-smoked.png?v=atelier-stacked-1" alt="Rose Lune smoked plum glass bottle with champagne atomizer"><span class="bay-caption">Rose Lune</span></button>
+  <button class="gallery-bay galet" data-go="galet" aria-label="Discover Galet perfume"><span class="image-plinth" aria-hidden="true"></span><img src="galet-smoked.png?v=atelier-stacked-1" alt="Galet green-tinted rectangular perfume bottle"><span class="bay-caption">Galet</span></button>
+  <button class="gallery-bay iris" data-go="iris" aria-label="Discover Iris Noir perfume"><img src="iris.png?v=atelier-stacked-1" alt="Iris Noir perfume bottle"><span class="bay-caption">Iris Noir</span></button>
+  <button class="gallery-bay terre" data-go="terre" aria-label="Discover Terre Fumée perfume"><img src="grenat.png?v=atelier-stacked-1" alt="Terre Fumée perfume bottle"><span class="bay-caption">Terre Fumée</span></button>
+  <button class="gallery-bay nacre" data-go="nacre" aria-label="Discover Nacre perfume"><img src="nacre.png?v=atelier-stacked-1" alt="Nacre perfume bottle"><span class="bay-caption">Nacre</span></button>
  </div>
  <div class="gallery-intro"><h1>The <em>night</em> collection.</h1></div>
  <div class="detail" id="detail" inert aria-live="polite">
@@ -131,7 +131,7 @@
    <p class="scent-desc" id="desc">Pink pepper, velvet rose and cashmere wood.</p>
    <button class="price detail-price" id="addBtn" type="button"><span id="price">€185</span><span aria-hidden="true">+</span></button>
   </div>
-  <div class="hero-product" id="heroProduct"><img src="rose-lune-smoked.png?v=dark-stone-1" id="heroImage" alt="Selected perfume bottle"></div>
+  <div class="hero-product" id="heroProduct"><img src="rose-lune-smoked.png?v=atelier-stacked-1" id="heroImage" alt="Selected perfume bottle"></div>
  </div>
  <div class="product-drag" id="product-drag" role="button" tabindex="0" aria-label="Drag bottle to rotate, or activate to return to collection"></div>
  <div class="stage-footer">
@@ -141,7 +141,7 @@
     <button type="button" data-checkpoint="galet" aria-label="Fly to Galet"></button>
     <button type="button" data-checkpoint="rose" aria-label="Fly to Rose Lune"></button>
     <button type="button" data-checkpoint="iris" aria-label="Fly to Iris Noir"></button>
-    <button type="button" data-checkpoint="grenat" aria-label="Fly to Grenat"></button>
+    <button type="button" data-checkpoint="terre" aria-label="Fly to Terre Fumée"></button>
     <button type="button" data-checkpoint="nacre" aria-label="Fly to Nacre"></button>
    </div>
    <button id="prevBtn" aria-label="Previous fragrance">←</button><span class="number" id="numberText">01 / 05</span><button id="nextBtn" aria-label="Next fragrance">→</button>
@@ -157,12 +157,12 @@
 'use strict';
 const DATA = {
   galet: {name:'Galet', html:'Galet', desc:'Fig leaf, green tea and white woods.',
-    price:175, img:'galet-smoked.png?v=dark-stone-1', num:'01 / 05'},
+    price:175, img:'galet-smoked.png?v=atelier-stacked-1', num:'01 / 05'},
   rose: {name:'Rose Lune', html:'Rose <em>Lune</em>', desc:'Pink pepper, velvet rose and cashmere wood.',
-    price:185, img:'rose-lune-smoked.png?v=dark-stone-1', num:'02 / 05'},
-  iris: {name:'Iris Noir', html:'Iris Noir', desc:'Orris butter, violet leaf and black tea.', price:195, img:'iris.png', num:'03 / 05'},
-  grenat: {name:'Grenat', html:'Grenat', desc:'Black cherry, damask rose and smoked vetiver.', price:205, img:'grenat.png', num:'04 / 05'},
-  nacre: {name:'Nacre', html:'Nacre', desc:'Sea salt, white iris and sandalwood.', price:190, img:'nacre.png', num:'05 / 05'}
+    price:185, img:'rose-lune-smoked.png?v=atelier-stacked-1', num:'02 / 05'},
+  iris: {name:'Iris Noir', html:'Iris <em>Noir</em>', desc:'Orris butter, violet leaf and black tea.', price:195, img:'iris.png?v=atelier-stacked-1', num:'03 / 05'},
+  terre: {name:'Terre Fumée', html:'Terre <em>Fumée</em>', desc:'Tobacco leaf, dry cedar and smoked vetiver.', price:205, img:'grenat.png?v=atelier-stacked-1', num:'04 / 05'},
+  nacre: {name:'Nacre', html:'Nacre', desc:'Sea salt, white iris and sandalwood.', price:190, img:'nacre.png?v=atelier-stacked-1', num:'05 / 05'}
 };
 const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
 const positions=Object.fromEntries(Object.keys(DATA).map((key,i,keys)=>[key,(i+1)/keys.length]));
@@ -286,6 +286,6 @@ setTimeout(()=>$('#loader').classList.add('out'),8000);
 })();
 </script>
 
-<script type="module" src="showroom-webgl.js?v=five-cuts-2"></script>
+<script type="module" src="showroom-webgl.js?v=atelier-stacked-1"></script>
 </body>
 </html>
