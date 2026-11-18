@@ -106,7 +106,7 @@
   }
 }
 </style>
-<link rel="stylesheet" href="campaign.css?v=light-desk-1">
+<link rel="stylesheet" href="campaign.css?v=finest-preset-1">
 </head>
 <body>
 <div class="intro-loader" id="loader" aria-hidden="true"><div class="loader-mark">UNVEILED FINEST</div><div class="load-rule"></div></div>
@@ -135,7 +135,9 @@
   <label for="light-distance">Distance from wall<output for="light-distance">100%</output></label>
   <input id="light-distance" data-light="distance" data-unit="%" type="range" min="65" max="160" value="100">
  </details>
- <button id="deskReset" type="button">Restore defaults</button>
+ <button id="deskSave" type="button">Save preset</button>
+ <button id="deskReset" type="button">Restore preset</button>
+ <output id="presetStatus" aria-live="polite"></output>
 </aside>
 <main>
 <section class="experience" id="experience" aria-label="Interactive perfume showroom">
@@ -289,6 +291,13 @@ const sliders=[...desk.querySelectorAll('input[type=range]')];
 const settingsKey='unveiled-finest-lighting-v1';
 let savedSettings={};
 try{savedSettings=JSON.parse(localStorage.getItem(settingsKey))||{}}catch{}
+const presetKey='unveiled-finest-lighting-preset-v1';
+let lightingPreset;
+try{lightingPreset=JSON.parse(localStorage.getItem(presetKey))}catch{}
+function storePreset(values){
+ lightingPreset={...values};
+ try{localStorage.setItem(presetKey,JSON.stringify(values));return true}catch{return false}
+}
 function syncLighting(){
  const values={};
  for(const input of sliders){
@@ -300,14 +309,20 @@ function syncLighting(){
  return values;
 }
 for(const input of sliders){
- const value=savedSettings[input.dataset.light];
+ const value=savedSettings[input.dataset.light] ?? lightingPreset?.[input.dataset.light];
  if(Number.isFinite(value))input.value=value;
 }
-syncLighting();
+const initialLighting=syncLighting();
+if(!lightingPreset)storePreset(initialLighting);
 window.addEventListener('perfume-ready',syncLighting);
 desk.addEventListener('input',()=>{const values=syncLighting();try{localStorage.setItem(settingsKey,JSON.stringify(values))}catch{}});
+$('#deskSave').onclick=()=>{
+ const persistent=storePreset(syncLighting());
+ $('#presetStatus').value=persistent?'Preset saved on this device.':'Preset saved for this visit.';
+};
 $('#deskReset').onclick=()=>{
- for(const input of sliders)input.value=input.defaultValue;
+ for(const input of sliders)input.value=lightingPreset?.[input.dataset.light] ?? input.defaultValue;
+ $('#presetStatus').value='Preset restored.';
  syncLighting();try{localStorage.removeItem(settingsKey)}catch{}
 };
 function closeDesk(){desk.hidden=true;wordmark.focus({preventScroll:true})}
