@@ -152,9 +152,10 @@ function beamTexture() {
   const pixels=context.createImageData(256,256);
   for(let y=0;y<256;y++)for(let x=0;x<256;x++){
     const t=y/255;
-    const halfWidth=14+t*111;
-    const lateral=Math.exp(-Math.pow((x-128)/halfWidth,2)*1.55);
-    const vertical=Math.exp(-t*3.4)*Math.min(1,t*110)*(1-t*t);
+    const halfWidth=13+97*Math.pow(t,.85);
+    const centre=128+3.5*t*Math.sin(5*t);
+    const lateral=Math.exp(-Math.pow((x-centre)/halfWidth,2)*1.55);
+    const vertical=Math.exp(-t*2.7)*Math.min(1,t*110)*(1-t*t);
     const at=(y*256+x)*4;
     pixels.data[at]=pixels.data[at+1]=pixels.data[at+2]=255;
     pixels.data[at+3]=Math.round(255*lateral*vertical);
@@ -173,11 +174,14 @@ const satinMap = satinBump();
 // adjacent architectural pieces and the displacement fades out at their edges.
 function createWall() {
   const wall=new Group();
-  const outside=new MeshStandardMaterial({color:'#676774',map:rockMap,
+  const outside=new MeshStandardMaterial({color:'#555560',map:rockMap,
     metalness:.05,roughness:.91,roughnessMap:stoneRoughnessMap,
     normalMap:rockNormal,envMapIntensity:.12});
   outside.normalScale.set(1.12,1.12);
   const inner=outside.clone();inner.color.set('#acabb3');
+  const backStone=inner.clone();
+  backStone.color.set('#8e8c97');
+  backStone.vertexColors=true;
   const floorStone=inner.clone();floorStone.roughness=.70;floorStone.normalScale.set(.45,.45);
   const ceiling=outside.clone();ceiling.color.set('#3b3940');ceiling.roughness=.95;
   const dark=new MeshStandardMaterial({color:'#17151b',metalness:.67,roughness:.38});
@@ -186,6 +190,7 @@ function createWall() {
     const sy=Math.max(1,Math.min(96,Math.ceil(size[1]*12)));
     const sz=Math.max(1,Math.min(32,Math.ceil(size[2]*9)));
     const g=new BoxGeometry(...size,sx,sy,sz);
+    const occlusion=mat===backStone?g.attributes.normal.clone():null;
     const a=g.attributes.position, normals=g.attributes.normal, uv=g.attributes.uv;
     for(let i=0;i<a.count;i++){
       const x=a.getX(i),y=a.getY(i),z=a.getZ(i);
@@ -202,9 +207,18 @@ function createWall() {
         faceY?Math.min(size[0]/2-Math.abs(x),size[2]/2-Math.abs(z)):
         Math.min(size[0]/2-Math.abs(x),size[1]/2-Math.abs(y));
       const fade=MathUtils.smoothstep(edgeA,0,.12);
+      if(occlusion){
+        // Recessed upper corners receive progressively less bounced light.
+        const down=MathUtils.clamp(.5-y/size[1],0,1);
+        const radius=.15+down*1.12;
+        const offset=(x/size[0]+sample*.035)/radius;
+        const gain=.07+.93*(1-Math.exp(-down*5))*Math.exp(-offset*offset*1.35);
+        occlusion.setXYZ(i,gain,gain,gain);
+      }
       const relief=sample*amount*fade;
       a.setXYZ(i,x+nx*relief,y+ny*relief,z+nz*relief);
     }
+    if(occlusion)g.setAttribute('color',occlusion);
     g.computeVertexNormals();
     if(Array.isArray(mat)){
       // Keep all exterior faces in one draw call and the lit reveal in a second.
@@ -253,7 +267,7 @@ function createWall() {
     const tintedSides=inner.clone();
     tintedSides.emissive.set(product.tone);
     const tintedFloor=floorStone.clone();
-    const backWall=rock([w+.16,BAY.height+.14,.14],[cx,bottom+BAY.height/2,-2.10],inner,.15);
+    const backWall=rock([w+.16,BAY.height+.14,.14],[cx,bottom+BAY.height/2,-2.10],backStone,.15);
     rock([w+.12,.15,3.32],[cx,bottom-.075,-.37],
       [outside,outside,tintedFloor,outside,outside,outside],.006);
     rock([w+.12,.19,3.32],[cx,topY+.04,-.37],
@@ -290,8 +304,8 @@ function createWall() {
     const beamPivot=new Group();beamPivot.position.set(cx,topY-.09,-.28);
     beamPivot.add(beam);wall.add(beamPivot);
     const overhead=addSpot(wall,{color:'#fff8f0',intensity:150,
-      position:[cx,topY-.09,-.28],look:[cx,bottom+product.height+.35,-1.93],spread:.58});
-    overhead.penumbra=.97;overhead.distance=9;
+      position:[cx,topY-.09,-.28],look:[cx,bottom+product.height*.62,-1.52],spread:.55});
+    overhead.penumbra=1;overhead.distance=9;
     const spill=addSpot(wall,{color:product.tone,intensity:8,
       position:[cx,bottom+product.height*.40,-.24],look:[cx,bottom+product.height*.45,-2.10],spread:1.08});
     spill.distance=4.0;
@@ -666,7 +680,7 @@ function render(time) {
       niche.overhead.intensity=(210+emphasis*134)*secondary*whiteShelfGain;
       niche.spill.intensity=(15+emphasis*(20+8*glint))*secondary*colourBounceGain;
       niche.overhead.target.position.x=product.x+lightingPointer.x*.30;
-      niche.overhead.target.position.z=-1.93+lightingPointer.y*.10;
+      niche.overhead.target.position.z=-1.52+lightingPointer.y*.10;
       niche.spill.target.position.x=product.x+Math.sin(turn)*.25+lightingPointer.x*.22;
       niche.spill.target.position.y=product.y+product.height*.42+lightingPointer.y*.12;
       niche.beamPivot.rotation.z=-lightingPointer.x*.065;
